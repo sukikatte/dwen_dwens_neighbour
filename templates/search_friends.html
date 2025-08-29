@@ -1,0 +1,437 @@
+{% extends "base.html" %}
+
+{% block title %}Search Friends - Dwen Dwen's Neighbour{% endblock %}
+
+{% set nav_section = 'community' %}
+
+{% block request_path %}/community{% endblock %}
+
+{% set current_page = 'community' %}
+
+{% block nav_active %}community{% endblock %}
+
+{% block head %}
+<style>
+  body {
+    font-family: 'Poppins', sans-serif;
+    background-color: #F8F9FF;
+    color: #333333;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Background Decoration */
+  .bg-decoration {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    overflow: hidden;
+  }
+
+  .bg-pattern {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url("data:image/svg+xml,%3Csvg width='52' height='26' viewBox='0 0 52 26' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ff6b6b' fill-opacity='0.05'%3E%3Cpath d='M10 10c0-2.21-1.79-4-4-4-3.314 0-6-2.686-6-6h2c0 2.21 1.79 4 4 4 3.314 0 6 2.686 6 6 0 2.21 1.79 4 4 4 3.314 0 6 2.686 6 6 0 2.21 1.79 4 4 4v2c-3.314 0-6-2.686-6-6 0-2.21-1.79-4-4-4-3.314 0-6-2.686-6-6zm25.464-1.95l8.486 8.486-1.414 1.414-8.486-8.486 1.414-1.414z' /%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    opacity: 0.8;
+  }
+
+  .bg-gradient {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background:
+      radial-gradient(circle at 20% 20%, rgba(255, 107, 107, 0.08) 0%, transparent 40%),
+      radial-gradient(circle at 80% 80%, rgba(130, 205, 255, 0.08) 0%, transparent 40%),
+      radial-gradient(circle at 10% 90%, rgba(255, 193, 107, 0.06) 0%, transparent 30%);
+  }
+
+  /* Decoration Elements */
+  .decoration {
+    position: fixed;
+    pointer-events: none;
+    z-index: -1;
+  }
+
+  .decoration-1 {
+    top: 10%;
+    right: 5%;
+    font-size: 100px;
+    opacity: 0.07;
+    transform: rotate(15deg);
+  }
+
+  .decoration-2 {
+    bottom: 10%;
+    left: 25%;
+    font-size: 120px;
+    opacity: 0.05;
+    transform: rotate(-10deg);
+  }
+
+  .decoration-3 {
+    top: 30%;
+    left: 8%;
+    font-size: 80px;
+    opacity: 0.07;
+    transform: rotate(5deg);
+  }
+
+  /* Left Sidebar Style */
+  .sidebar {
+    position: fixed;
+    left: 20px;
+    top: 90px;
+    width: 200px;
+    background: transparent;
+    padding: 0;
+    z-index: 40;
+  }
+
+  .sidebar-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+    padding: 15px 20px;
+    color: #555;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    border-radius: 16px;
+    background: white;
+    border: 3px solid #333;
+    box-shadow: 5px 5px 0 rgba(0,0,0,0.15);
+    position: relative;
+    overflow: hidden;
+    text-decoration: none;
+  }
+
+  .sidebar-item:hover {
+    transform: translateY(-3px) translateX(-2px);
+    box-shadow: 7px 7px 0 rgba(0,0,0,0.12);
+    color: #FF6B6B;
+  }
+
+  .sidebar-item.active {
+    background: #FF6B6B;
+    color: white;
+    transform: translateY(-2px);
+  }
+
+  .sidebar-item i {
+    margin-right: 12px;
+    font-size: 1.3rem;
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .sidebar-item:hover i {
+    transform: rotate(20deg) scale(1.2);
+  }
+
+  /* Main Content Area */
+  .main-content {
+    margin-left: 240px;
+    padding: 20px;
+    position: relative;
+    z-index: 10;
+    width: calc(100% - 260px);
+  }
+
+  /* Search Container Style */
+  .search-container {
+    background: white;
+    border-radius: 15px;
+    padding: 20px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    border: 3px solid #333;
+    margin-bottom: 20px;
+  }
+
+  .search-box {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+
+  .search-input {
+    flex: 1;
+    padding: 12px;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    font-size: 16px;
+    transition: all 0.3s;
+  }
+
+  .search-input:focus {
+    border-color: #FF6B6B;
+    outline: none;
+  }
+
+  .search-button {
+    padding: 12px 24px;
+    background: #FF6B6B;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 600;
+    transition: all 0.3s;
+  }
+
+  .search-button:hover {
+    background: #ff5252;
+    transform: translateY(-2px);
+  }
+
+  /* Search Results Style */
+  .search-results {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .user-item {
+    display: flex;
+    align-items: center;
+    padding: 15px;
+    background: #f9f9f9;
+    border-radius: 12px;
+    border: 2px solid #eee;
+    transition: all 0.3s;
+  }
+
+  .user-item:hover {
+    border-color: #FF6B6B;
+    transform: translateX(5px);
+  }
+
+  .user-avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    margin-right: 15px;
+    object-fit: cover;
+    border: 2px solid #FF6B6B;
+  }
+
+  .user-info {
+    flex: 1;
+  }
+
+  .user-name {
+    font-size: 18px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 5px;
+  }
+
+  .add-friend-btn {
+    padding: 8px 16px;
+    background: #FF6B6B;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s;
+  }
+
+  .add-friend-btn:hover {
+    background: #ff5252;
+    transform: translateY(-2px);
+  }
+
+  .add-friend-btn:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  .message {
+    text-align: center;
+    padding: 10px;
+    margin-top: 10px;
+    border-radius: 8px;
+  }
+
+  .error-message {
+    color: #f44336;
+    background: rgba(244, 67, 54, 0.1);
+  }
+
+  .success-message {
+    color: #4CAF50;
+    background: rgba(76, 175, 80, 0.1);
+  }
+
+  .no-results {
+    text-align: center;
+    padding: 40px 20px;
+    color: #666;
+  }
+
+  .no-results i {
+    font-size: 48px;
+    color: #ddd;
+    margin-bottom: 15px;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Background Decoration -->
+<div class="bg-decoration">
+  <div class="bg-pattern"></div>
+  <div class="bg-gradient"></div>
+</div>
+
+<!-- Decoration Elements -->
+<div class="decoration decoration-1">🐼</div>
+<div class="decoration decoration-2">🦊</div>
+<div class="decoration decoration-3">🐯</div>
+
+<!-- Left Sidebar -->
+<div class="sidebar">
+  <a href="/community" class="sidebar-item">
+    <i class="fas fa-compass"></i>
+    <span>Discover</span>
+  </a>
+  <a href="/create_post" class="sidebar-item">
+    <i class="fas fa-plus-circle"></i>
+    <span>Post</span>
+  </a>
+  <a href="/manage_posts" class="sidebar-item">
+    <i class="fas fa-tasks"></i>
+    <span>Manage</span>
+  </a>
+  <a href="/chat_list" class="sidebar-item active">
+    <i class="fas fa-comments"></i>
+    <span>Chat</span>
+  </a>
+</div>
+
+<!-- Main Content Area -->
+<div class="main-content">
+  <div class="search-container">
+    <div class="search-box">
+      <input type="text" id="searchInput" class="search-input" placeholder="Enter username to search">
+      <button onclick="searchUsers()" class="search-button">Search</button>
+    </div>
+    <div id="searchResults" class="search-results"></div>
+    <div id="message" class="message"></div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  function searchUsers() {
+    const searchInput = document.getElementById('searchInput');
+    const searchResults = document.getElementById('searchResults');
+    const message = document.getElementById('message');
+    const username = searchInput.value.trim();
+
+    if (!username) {
+      message.className = 'message error-message';
+      message.textContent = 'Please enter a username';
+      return;
+    }
+
+    message.textContent = '';
+    searchResults.innerHTML = '<div style="text-align: center">Searching...</div>';
+
+    fetch('/search_user', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ username: username })
+    })
+    .then(response => response.json())
+    .then(data => {
+      searchResults.innerHTML = '';
+      if (data.status === 'error') {
+        message.className = 'message error-message';
+        message.textContent = data.message;
+        return;
+      }
+
+      if (!data.user) {
+        searchResults.innerHTML = `
+          <div class="no-results">
+            <i class="fas fa-search"></i>
+            <p>No matching users found</p>
+          </div>
+        `;
+        return;
+      }
+
+      const user = data.user;
+      const userItem = document.createElement('div');
+      userItem.className = 'user-item';
+      userItem.innerHTML = `
+        <img src="${user.avatar || '/static/images/default-avatar.jpeg'}" alt="Avatar" class="user-avatar">
+        <div class="user-info">
+          <div class="user-name">${user.username}</div>
+        </div>
+        <button onclick="sendFriendRequest('${user.id}')" class="add-friend-btn">
+          Add Friend
+        </button>
+      `;
+      searchResults.appendChild(userItem);
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      message.className = 'message error-message';
+      message.textContent = 'Search failed, please try again later';
+    });
+  }
+
+  function sendFriendRequest(receiverId) {
+    const message = document.getElementById('message');
+    
+    fetch('/send_friend_request', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ receiver_id: receiverId })
+    })
+    .then(response => response.json())
+    .then(data => {
+      message.textContent = data.message;
+      message.className = data.status === 'success' ? 'message success-message' : 'message error-message';
+      
+      if (data.status === 'success') {
+        const buttons = document.querySelectorAll('.add-friend-btn');
+        buttons.forEach(button => {
+          if (button.onclick.toString().includes(receiverId)) {
+            button.disabled = true;
+            button.textContent = 'Request Sent';
+          }
+        });
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      message.className = 'message error-message';
+      message.textContent = 'Failed to send friend request, please try again later';
+    });
+  }
+
+  // Add Enter key search functionality
+  document.getElementById('searchInput').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+      searchUsers();
+    }
+  });
+</script>
+{% endblock %} 

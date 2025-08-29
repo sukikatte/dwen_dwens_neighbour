@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Room</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<style>
+/* 页面背景及基础字体 */
+body {
+    background: linear-gradient(to right, #fbc2eb, #a6c1ee);
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    color: #333;
+    margin: 0;
+    padding: 0;
+}
+
+/* 主容器样式 */
+.container {
+    background-color: rgba(255, 255, 255, 0.95);
+    padding: 2rem;
+    margin-top: 3rem;
+    border-radius: 10px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+    max-width: 600px;
+}
+
+/* 标题样式 */
+h1, h3 {
+    color: #2c3e50;
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1);
+    margin-bottom: 1rem;
+}
+
+/* 玩家列表样式 */
+ul#playerList {
+    list-style: none;
+    padding: 0;
+    margin-bottom: 2rem;
+}
+
+ul#playerList li {
+    padding: 10px;
+    margin-bottom: 10px;
+    background-color: #f7f7f7;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    transition: background-color 0.3s ease;
+}
+
+ul#playerList li:hover {
+    background-color: #e0e0e0;
+}
+
+ul#playerList li img {
+    margin-right: 15px;
+    border: 2px solid #ddd;
+}
+
+/* 按钮样式优化 */
+.btn {
+    border-radius: 25px;
+    padding: 10px 20px;
+    font-weight: bold;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.25);
+}
+
+/* 响应式设计：中小屏幕下容器宽度自适应 */
+@media (max-width: 768px) {
+    .container {
+        margin: 1rem;
+        padding: 1.5rem;
+    }
+}
+</style>
+<body>
+    <div class="container mt-5">
+        <h1>Room: {{ room_data['room_name'] }}</h1>
+        <p>Room ID: {{ room_id }}</p>
+        <p>Privacy: {{ 'Public' if room_data['is_public'] else 'Private' }}</p>
+        <p>Password: {{ room_data['password'] if room_data['password'] else 'None' }}</p>
+
+        <h3>Players:</h3>
+        <ul id="playerList">
+            {% for player_id, player in room_data['players'].items() %}
+                <li>
+                    <img src="{{ player['avatar'] }}" width="30" class="rounded-circle">
+                    <strong>{{ player['username'] }}</strong>
+                    {% if player['ready'] %}
+                        <span class="badge badge-success">Ready</span>
+                    {% else %}
+                        <span class="badge badge-secondary">Waiting</span>
+                    {% endif %}
+                </li>
+            {% endfor %}
+        </ul>
+
+        <button class="btn btn-danger" onclick="leaveRoom('{{ room_id }}')">Leave Room</button>
+        <button id="readyButton" class="btn {% if session['user']['display_name'] in room_data['players'] and room_data['players'][session['user']['display_name']]['ready'] %}btn-warning{% else %}btn-success{% endif %}"
+                onclick="setReady('{{ room_id }}')">
+            {% if session['user']['display_name'] in room_data['players'] and room_data['players'][session['user']['display_name']]['ready'] %}
+                Cancel Ready
+            {% else %}
+                I'm Ready
+            {% endif %}
+        </button>
+
+        <!-- Start Game button is disabled until all players are ready -->
+        <button id="startGameButton" class="btn btn-secondary" onclick="startGame('{{ room_id }}')" disabled>
+            Start Game
+        </button>
+    </div>
+
+    <script>
+        function leaveRoom(roomId) {
+            fetch('/leave_room', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ room_id: roomId })
+            }).then(response => response.json()).then(() => {
+                window.location.href = "/qna";
+            });
+        }
+
+        function setReady(roomId) {
+            fetch('/set_ready', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ room_id: roomId })
+            }).then(response => response.json()).then(data => {
+                if (data.status === "success") {
+                    const btn = document.getElementById('readyButton');
+                    if (data.new_ready_status) {
+                        btn.textContent = "Cancel Ready";
+                        btn.classList.remove("btn-success");
+                        btn.classList.add("btn-warning");
+                    } else {
+                        btn.textContent = "I'm Ready";
+                        btn.classList.remove("btn-warning");
+                        btn.classList.add("btn-success");
+                    }
+                    // Update players list
+                    fetchRoomDetails(roomId);
+                } else {
+                    alert("Error: " + data.message);
+                }
+            });
+        }
+
+        function fetchRoomDetails(roomId) {
+            fetch(`/get_room/${roomId}`).then(response => response.json()).then(data => {
+                if (data.status === "success") {
+                    const playerList = document.getElementById('playerList');
+                    let updatedHTML = '';
+                    Object.values(data.room_data.players).forEach(player => {
+                        updatedHTML += `
+                    <li>
+                        <img src="${player.avatar}" width="30" class="rounded-circle">
+                        <strong>${player.username}</strong>
+                        ${player.ready ? '<span class="badge badge-success">Ready</span>' : '<span class="badge badge-secondary">Waiting</span>'}
+                    </li>
+                `;
+                    });
+                    playerList.innerHTML = updatedHTML;
+                    // Update global roomData (for later use)
+                    roomData = data.room_data;
+                    updateStartButton();
+                }
+            });
+        }
+
+        // Update the Start Game button: enable only if all players are ready.
+        function updateStartButton() {
+            const players = roomData.players;
+            let allReady = true;
+            for (let key in players) {
+                if (!players[key].ready) {
+                    allReady = false;
+                    break;
+                }
+            }
+            const startBtn = document.getElementById("startGameButton");
+            if (allReady) {
+                startBtn.disabled = false;
+                startBtn.classList.remove("btn-secondary");
+                startBtn.classList.add("btn-primary");
+            } else {
+                startBtn.disabled = true;
+                startBtn.classList.remove("btn-primary");
+                startBtn.classList.add("btn-secondary");
+            }
+        }
+
+        // Update room details every 3 seconds
+        setInterval(() => fetchRoomDetails('{{ room_id }}'), 3000);
+
+        function startGame(roomId) {
+            // Once all players are ready, the game can start.
+            fetch('/start_game', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ room_id: roomId })
+            }).then(response => response.json()).then(data => {
+                if (data.status === "success") {
+                    window.location.href = `/gamestart/${roomId}`;
+                } else {
+                    alert("Error: " + data.message);
+                }
+            });
+        }
+    </script>
+</body>
+</html>

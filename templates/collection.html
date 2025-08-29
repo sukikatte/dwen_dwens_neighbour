@@ -1,0 +1,909 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Collection - Dwen Dwen's Neighbour</title>
+
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Font Awesome -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
+  
+  <!-- jQuery -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#2E8B57',
+            secondary: '#4CAF50'
+          },
+          borderRadius: {
+            'none': '0px',
+            'sm': '2px',
+            DEFAULT: '4px',
+            'md': '8px',
+            'lg': '12px',
+            'xl': '16px',
+            '2xl': '20px',
+            '3xl': '24px',
+            'full': '9999px',
+            'button': '4px'
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* 导航栏下划线动画相关样式 */
+    .nav-link {
+      position: relative;
+    }
+    .nav-link::after {
+      content: '';
+      position: absolute;
+      width: 0;
+      height: 2px;
+      bottom: -4px;
+      left: 50%;
+      background-color: #2E8B57;
+      transition: all 0.3s ease;
+      transform: translateX(-50%);
+    }
+    .nav-link:hover::after {
+      width: 100%;
+    }
+    .nav-link.active {
+      color: #2E8B57;
+    }
+    .nav-link.active::after {
+      width: 100%;
+    }
+
+.card {
+  width: 360px;  /* 固定卡片宽度 */
+  height: 180px; /* 固定卡片高度 */
+  margin-bottom: 20px;
+  border: none;
+  border-radius: 15px;
+  background: white;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  transition: all 0.3s ease;
+  overflow: hidden;
+  display: flex;
+  flex-direction: row;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+
+.card img {
+  width: 120px;
+  height: 180px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.card-body {
+  flex: 1;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+/* 宠物信息区域 */
+.pet-info {
+  flex-grow: 1;
+}
+
+.card-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #2E8B57;
+  margin-bottom: 8px;
+  cursor: pointer;
+  transition: color 0.3s ease;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.card-title:hover {
+  color: #1a5c3a;
+}
+
+.card-text {
+  font-size: 0.9rem;
+  color: #666;
+  margin-bottom: 4px;
+  line-height: 1.2;
+}
+
+/* 饥饿值样式 */
+.hunger-value {
+  display: flex;
+  align-items: center;
+  font-size: 0.9rem;
+  font-weight: 500;
+  margin-bottom: 8px;
+}
+
+.hunger-value[style*="color: red"] {
+  color: #dc3545 !important;
+  font-weight: 600;
+}
+
+/* 按钮容器 */
+.card-body .d-flex {
+  display: flex;
+  gap: 8px;
+  margin-top: auto;
+}
+
+/* 按钮样式 */
+.card-body .btn {
+  padding: 6px 12px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  border-radius: 6px;
+  flex: 1;
+  white-space: nowrap;
+}
+
+.btn-primary {
+  background: #2E8B57;
+  border-color: #2E8B57;
+}
+
+.btn-primary:hover {
+  background: #1a5c3a;
+  border-color: #1a5c3a;
+}
+
+.btn-warning {
+  background: #ffc107;
+  border-color: #ffc107;
+  color: #000;
+}
+
+.btn-warning:hover {
+  background: #e0a800;
+  border-color: #e0a800;
+  color: #000;
+}
+
+/* 输入框样式 */
+.form-control {
+  font-size: 0.9rem;
+  padding: 4px 8px;
+  height: 30px;
+}
+
+.form-control:focus {
+  border-color: #2E8B57;
+  box-shadow: 0 0 0 0.2rem rgba(46, 139, 87, 0.25);
+}
+
+/* 禁用状态的按钮样式 */
+.btn:disabled {
+  background-color: #e9ecef;
+  border-color: #e9ecef;
+  color: #6c757d;
+  cursor: not-allowed;
+}
+
+    /* 更新宠物容器的宽度和其他样式 */
+#pet-container {
+  position: fixed;
+  bottom: 10px;
+  left: 0;
+  width: 100%;
+  height: auto; /* 保持自适应 */
+  max-height: 150px; /* 你可以设置一个最大高度 */
+  z-index: 9999;
+  display: flex;
+  gap: 10px;
+
+}
+
+
+  /* 单个宠物项的样式调整 */
+  #pet-container div {
+    display: flex;
+    flex-direction: column; /* 保持宠物的横向排列 */
+    align-items: center;
+    margin-bottom: 0; /* 移除纵向间距 */
+  }
+
+  /* 调整图片和名字的显示样式 */
+  #pet-container img {
+    width: 100px;
+    height: auto;
+  }
+
+  /* 随机移动的动画 */
+  @keyframes movePet {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(var(--random-x));
+  }
+  }
+
+  /* 宠物图片的基础样式 */
+  #pet-container div img {
+    animation: movePet 2s ease-out forwards;
+  }
+
+  #grass-container {
+      position: fixed;   /* 固定在页面底部 */
+      bottom: 0px;        /* 距离底部为0 */
+      left: 0;          /* 距离左侧为0 */
+      width: 100%;      /* 宽度为100% */
+      height: 150px;    /* 根据草丛图像的高度调整 */
+      background-image: url('/static/images/grass.jpg'); /* 设置草丛图为背景 */
+      background-repeat: no-repeat;  /* 背景不重复 */
+      background-size: cover; /* 背景图覆盖整个区域 */
+      opacity: 0.6;
+      z-index: -1;       /* 确保它在所有内容的下方 */
+    }
+
+/* 导航栏样式 */
+.nav-container {
+  background: white;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+/* LOGO与标题样式 */
+.nav-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  color: #000000;
+  font-size: 1.5rem;
+  font-weight: 600;
+  font-family: 'Pacifico', cursive;
+}
+
+.nav-brand span {
+  font-family: 'Pacifico', cursive;
+  font-weight: 400;
+}
+
+.nav-brand i {
+  font-size: 1.8rem;
+  color: #2E8B57;
+}
+
+/* 导航菜单样式 */
+.nav-menu {
+  display: flex;
+  gap: 20px;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  color: #666;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  border-radius: 8px;
+}
+
+.nav-item:hover {
+  background: #f5f5f5;
+  color: #2E8B57;
+}
+
+.nav-item.active {
+  background: #2E8B57;
+  color: white;
+}
+
+.nav-item i {
+  font-size: 1.2rem;
+}
+
+/* 移动端样式 */
+@media (max-width: 768px) {
+  .nav-menu {
+    display: none;
+  }
+}
+
+/* 媒体查询 - 小屏幕 */
+@media (max-width: 576px) {
+  .col-md-3 {
+    display: flex;
+    justify-content: center;
+  }
+  
+  .card {
+    width: 300px;
+    margin: 0 auto 20px;
+  }
+}
+
+/* 媒体查询 - 中等屏幕 */
+@media (min-width: 577px) and (max-width: 992px) {
+  .card {
+    flex-direction: row;
+  }
+  
+  .card img {
+    width: 35%;
+    height: auto;
+    max-height: none;
+  }
+}
+
+/* 媒体查询 - 大屏幕 */
+@media (min-width: 993px) {
+  .card {
+    flex-direction: row;
+  }
+  
+  .card img {
+    width: 30%;
+    height: auto;
+    max-height: none;
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.fade-in-card {
+  animation: fadeIn 0.8s ease-out forwards;
+  opacity: 0;
+}
+
+/* 为不同的卡片设置不同的延迟时间 */
+.card-delay-1 { animation-delay: 0.1s; }
+.card-delay-2 { animation-delay: 0.2s; }
+.card-delay-3 { animation-delay: 0.3s; }
+.card-delay-4 { animation-delay: 0.4s; }
+.card-delay-5 { animation-delay: 0.5s; }
+.card-delay-6 { animation-delay: 0.6s; }
+.card-delay-7 { animation-delay: 0.7s; }
+.card-delay-8 { animation-delay: 0.8s; }
+
+/* 背景装饰 */
+.bg-decoration {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  overflow: hidden;
+}
+
+.bg-pattern {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%232E8B57' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+}
+
+.bg-gradient {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle at 20% 20%, rgba(46, 139, 87, 0.1) 0%, transparent 50%),
+              radial-gradient(circle at 80% 80%, rgba(76, 175, 80, 0.1) 0%, transparent 50%);
+}
+
+/* 页面标题增强样式 */
+.pet-page-title {
+  font-family: 'Montserrat', sans-serif;
+  color: #2E8B57;
+  text-align: center;
+  margin-bottom: 1.5rem;
+  position: relative;
+  display: inline-block;
+  font-weight: 700;
+  opacity: 0;
+  animation: fadeIn 1s ease-in-out forwards;
+}
+
+.pet-page-title::after {
+  content: '';
+  position: absolute;
+  bottom: -5px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 50%;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, #2E8B57, transparent);
+}
+
+  </style>
+</head>
+<body>
+  <!-- 背景装饰 -->
+  <div class="bg-decoration">
+    <div class="bg-pattern"></div>
+    <div class="bg-gradient"></div>
+  </div>
+
+  <!-- 导航栏 -->
+  <nav class="nav-container">
+    <div class="max-w-[1440px] mx-auto px-10 h-[70px] flex items-center justify-between">
+      <!-- 左侧：LOGO与标题 -->
+      <a href="/" class="nav-brand">
+        <i class="fas fa-paw"></i>
+        <span>Dwen Dwen's Neighbor</span>
+      </a>
+
+      <!-- 右侧：导航菜单 (大屏显示) -->
+      <div class="hidden md:flex nav-menu">
+        <a href="/knowledge" class="nav-item">
+          <i class="fa-solid fa-book"></i>
+          <span>Encyclopedia</span>
+        </a>
+        <a href="/qna" class="nav-item">
+          <i class="fas fa-gamepad"></i>
+          <span>Games</span>
+        </a>
+        <a href="/collection" class="nav-item active">
+          <i class="fas fa-heart"></i>
+          <span>Caring</span>
+        </a>
+        <a href="/community" class="nav-item">
+          <i class="fas fa-users"></i>
+          <span>Community</span>
+        </a>
+        <a href="/donation" class="nav-item">
+          <i class="fas fa-hand-holding-heart"></i>
+          <span>Donation</span>
+        </a>
+        <a href="/profile" class="nav-item">
+          <i class="fas fa-user"></i>
+          <span>Profile</span>
+        </a>
+      </div>
+
+      <!-- 移动端折叠按钮 (小屏显示) -->
+      <button class="md:hidden flex items-center justify-center w-10 h-10 text-gray-800">
+        <i class="fas fa-bars text-xl"></i>
+      </button>
+    </div>
+  </nav>
+
+  <!-- 页面主体内容 -->
+  <div class="container mt-5">
+    <p style="font-size: 1.5rem; font-weight: bold;">User: <strong>{{ user_data.name or user_info.display_name }}</strong></p>
+    <p style="font-size: 1.2rem; color: #2E8B57;">Score: <span id="scoreDisplay">{{ user_data.score }}</span></p>
+    <button id="addScoreBtn" class="btn btn-primary" style="display: none;">Click to earn points</button>
+    <button id="goToShopBtn" class="btn btn-success mt-3">go to shop</button>
+
+    <h2 class="mt-4 pet-page-title">Your Pets</h2>
+    <div class="row">
+      {% if pets %}
+        {% for pet_id, pet in pets.items() %}
+          <div class="col-md-3 mb-4">
+            <div class="card d-flex flex-row fade-in-card card-delay-{{ loop.index }}" id="pet-{{ pet_id }}">
+              <img src="{{ url_for('static', filename='images/' + pet['image']) }}" class="card-img-left" alt="{{ pet['name'] }}" style="width: auto; height: 150px;">
+              <div class="card-body">
+                <div class="pet-info">
+                  <h4 class="card-title" id="pet-name-{{ pet_id }}" onclick="editPetName('{{ pet_id }}')">
+                    {{ pet.name }}
+                  </h4>
+                  <input type="text" id="edit-name-input-{{ pet_id }}"
+                         class="form-control"
+                         value="{{ pet.name }}"
+                         style="display: none;"
+                         onkeydown="savePetName(event, '{{ pet_id }}')" />
+                  <p class="card-text">Type: {{ pet.type }}</p>
+                  <p class="card-text hunger-value" id="hunger-{{ pet_id }}"
+                     {% if pet.hunger == 0 %} style="color: red;" {% endif %}>
+                     Hunger: {{ pet.hunger }}
+                     {% if pet.hunger == 0 %}(Pet needs food){% endif %}
+                  </p>
+                </div>
+                <div class="d-flex justify-content-between align-items-center">
+                  <button class="btn btn-primary" id="toggle-button-{{ pet_id }}"
+                          {% if pet.hunger == 0 %} disabled {% endif %}
+                          onclick="togglePet('{{ pet_id }}', this)">
+                      Placing
+                  </button>
+                  <button class="btn btn-warning" id="feed-button-{{ pet_id }}" onclick="feedPet('{{ pet_id }}')">Feed</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      {% else %}
+        <p>You don't have a pet yet, go to the store and buy one!</p>
+      {% endif %}
+    </div>
+
+    <!-- 宠物展示区域 -->
+    <div id="pet-container" style="position: fixed; bottom: 30px; left: 40%; z-index: 9999;"></div>
+
+    <!-- 草丛图像容器 -->
+  <div id="grass-container"></div>
+
+  </div>
+
+  <script>
+    // 跳转至商店
+    document.getElementById('goToShopBtn').addEventListener('click', function() {
+      window.location.href = "/shop";
+    });
+
+    // 点击按钮增加积分
+    document.getElementById('addScoreBtn').addEventListener('click', function() {
+      fetch('/add_score', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.status === "success") {
+          document.getElementById('scoreDisplay').innerText = data.score;
+          localStorage.setItem("userCoins", data.score);
+        } else {
+          alert("Error: " + data.message);
+        }
+      })
+      .catch(error => {
+        console.error("Error adding score:", error);
+      });
+    });
+
+
+    // 页面加载时获取并展示用户宠物
+    window.onload = function() {
+      fetch('/get_user_pets', {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.status === "success" && data.pets) {
+          // 遍历所有用户的宠物
+          data.pets.forEach(pet => {
+            const petDiv = document.createElement('div');
+            petDiv.style.marginBottom = '10px';
+            petDiv.setAttribute('data-pet-id', pet.pet_id);
+
+
+            const button = document.getElementById(`toggle-button-${pet.pet_id}`);
+
+            // 收起所有宠物
+            if (!pet.in_storage) {
+              // 如果宠物不在存储中，则立即收起
+              button.textContent = "Placing"; // 更新按钮文本
+              togglePet(pet.pet_id, button); // 收起宠物
+            } else {
+              button.textContent = "Placing"; // 如果在存储中，按钮内容更新为"放置宠物"
+            }
+          });
+        }
+      });
+    };
+
+    let petMovementInterval = {}; // 用来存储每个宠物的定时器ID，以便在停止时清除
+
+    const petMovementSettings = {
+      "bear": {
+        speed: 8000, // 每8秒移动一次
+        range: 500 // 随机范围较小，设置为50
+      },
+      "antelope": {
+        speed: 2000, // 每2秒移动一次
+        range: 1000 // 随机范围较大，设置为200
+      },
+      "ibis": {
+        speed: 1000, // 每1秒移动一次
+        range: 1000 // 随机范围较大，设置为200
+      }
+    };
+
+    // 放置/收起宠物函数
+    function togglePet(petId, button) {
+      const isPlacing = button.textContent === "Placing";
+      const petContainer = document.getElementById('pet-container');
+
+      if (isPlacing) {
+        // 放置宠物时，开始随机移动
+        fetch('/update_pet_storage', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ petId: petId })
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.status === "success") {
+            const petData = data.petData;
+            const petDiv = document.createElement('div');
+            petDiv.style.marginBottom = '10px';
+            petDiv.setAttribute('data-pet-id', petId);
+             // 仅显示宠物的图像，不显示名字
+            petDiv.innerHTML =
+              `<img src="/static/images/${petData.image}" alt="${petData.name}" style="width: 100px; height: auto;">`;
+
+            petContainer.appendChild(petDiv);
+
+            // 更新按钮文本
+            button.textContent = "Put away";
+
+// 在此处调试，检查petType是否正确传递
+        console.log("Starting pet movement for petId:", petId, "petType:", petData.type);
+            // 启动宠物随机移动
+            startPetMovement(petId, petDiv, button, petData.type);
+          } else {
+            alert(data.message);
+          }
+        });
+      } else {
+        // 收起宠物时，停止随机移动并移除宠物
+        stopPetMovement(petId); // 停止宠物移动
+        fetch('/set_pet_in_storage', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ petId: petId })
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.status === "success") {
+            const petDivs = petContainer.querySelectorAll('div[data-pet-id]');
+            petDivs.forEach(petDiv => {
+              if (petDiv.getAttribute('data-pet-id') === petId) {
+                petDiv.remove();
+              }
+            });
+            button.textContent = "Placing";
+          } else {
+            alert(data.message);
+          }
+        });
+      }
+    }
+
+    function startPetMovement(petId, petDiv, button, petType) {
+      const pageWidth = window.innerWidth;
+      const pageHeight = window.innerHeight;
+
+      // 获取当前宠物的移动设置
+      const { range } = petMovementSettings[petType];
+
+      petMovementInterval[petId] = setInterval(() => {
+        // 计算随机的X和Y移动，确保不超出边界
+        let randomX = (Math.random() * range) - (range / 2); // 水平移动范围
+        let randomY = (Math.random() * range) - (range / 2); // 垂直移动范围
+
+        if (petType === "bear") {
+          const imgElement = petDiv.querySelector('img'); // 获取图像元素
+          if (randomX < 0) {
+            // 向左移动，使用原图
+            imgElement.src = '/static/images/panda.jpg'; // 使用原始熊猫图片
+          } else {
+            // 向右移动，使用翻转图
+            imgElement.src = '/static/images/panda_2.jpg'; // 使用翻转后的熊猫图片
+          }
+
+          let petRect = petDiv.getBoundingClientRect(); // 获取宠物的边界信息
+          let newX = petRect.left + randomX;
+
+          // 确保熊猫不会超出页面边界
+          if (newX < 0 || newX + petRect.width > pageWidth) {
+            return; // 如果新位置超出边界，不移动
+          }
+
+          petDiv.style.transition = `transform 1s ease-in-out`;
+          petDiv.style.transform = `translate(${randomX}px, 0px)`; // 水平移动
+
+        } else if (petType === "antelope") {
+          const imgElement = petDiv.querySelector('img'); // 获取图像元素
+          if (randomX < 0) {
+            // 向左移动，使用原图
+            imgElement.src = '/static/images/antelope.jpg'; // 使用原始藏羚羊图片
+          } else {
+            // 向右移动，使用翻转图
+            imgElement.src = '/static/images/antelope_2.jpg'; // 使用翻转后的藏羚羊图片
+          }
+
+          let petRect = petDiv.getBoundingClientRect(); // 获取宠物的边界信息
+          let newX = petRect.left + randomX;
+
+          // 确保藏羚羊不会超出页面边界
+          if (newX < 0 || newX + petRect.width > pageWidth) {
+            return; // 如果新位置超出边界，不移动
+          }
+
+          petDiv.style.transition = `transform 1s ease-in-out`;
+          petDiv.style.transform = `translate(${randomX}px, 0px)`; // 水平移动
+
+        } else if (petType === "ibis") {
+          let petRect = petDiv.getBoundingClientRect(); // 获取宠物的边界信息
+
+          // 计算新的位置
+          let newX = petRect.left + randomX;
+          let newY = petRect.top + randomY;
+
+          // 确保朱鹮不会超出页面边界
+          if (newX < 0 || newX + petRect.width > pageWidth || newY < 500 || newY + petRect.height > pageHeight) {
+            return; // 如果新位置超出边界，不移动
+          }
+
+          // 切换图像为 Ibis_2.jpg
+          const imgElement = petDiv.querySelector('img'); // 选择宠物的图像元素
+          if (randomX < 0) {
+            // 向左移动，使用原图
+            imgElement.src = '/static/images/ibis_2.jpg'; // 使用原始熊猫图片
+          } else {
+            // 向右移动，使用翻转图
+            imgElement.src = '/static/images/ibis_3.jpg'; // 使用翻转后的熊猫图片
+          }
+
+
+          petDiv.style.transition = `transform 1s ease-in-out`;
+          petDiv.style.transform = `translate(${randomX}px, ${randomY}px)`; // 移动朱鹮
+        }
+
+        // 随机生成停止的时间
+        let stopTime = petMovementSettings[petType].speed; // 使用指定的移动速度
+
+        // 设定停止几秒后继续移动
+        setTimeout(() => {
+          if (!petDiv.hasAttribute('data-pet-id')) {
+            clearInterval(petMovementInterval[petId]); // 停止定时器
+          }
+        }, stopTime);
+      }, petMovementSettings[petType].speed); // 使用指定的移动速度
+    }
+
+
+
+    // 停止宠物的随机移动
+    function stopPetMovement(petId) {
+      // 清除当前宠物的定时器，停止移动
+      if (petMovementInterval[petId]) {
+        clearInterval(petMovementInterval[petId]);
+        delete petMovementInterval[petId];
+      }
+    }
+
+    // 隐藏宠物辅助函数
+    function hidePet(petId, button) {
+      const petContainer = document.getElementById('pet-container');
+      const petDivs = petContainer.querySelectorAll('div[data-pet-id]');
+      petDivs.forEach(petDiv => {
+        if (petDiv.getAttribute('data-pet-id') === petId) {
+          petDiv.remove();
+        }
+      });
+      fetch('/set_pet_in_storage', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ petId: petId })
+      });
+    }
+
+    function feedPet(petId) {
+    // 发送请求到后端，更新宠物的饥饿值
+    fetch('/feed_pet', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ petId: petId })
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.status === "success") {
+        // 获取饥饿值元素和按钮
+        const hungerElement = document.getElementById(`hunger-${petId}`);
+        const button = document.getElementById(`toggle-button-${petId}`);
+        const newHunger = data.pet_hunger;
+
+        // 更新饥饿值文本
+        hungerElement.innerText = `Hunger: ${newHunger}`;
+
+        // 如果饥饿值为0，禁用按钮并将宠物放入仓库
+        if (newHunger === 0) {
+          hungerElement.style.color = 'red';
+          hungerElement.innerText += " (Pet needs food)";
+          button.disabled = true;  // 禁用放置按钮
+        } else {
+          // 如果饥饿值大于0，恢复黑色并启用按钮
+          hungerElement.style.color = 'black';
+          hungerElement.innerText = `Hunger: ${newHunger}`; // 移除提示
+          button.disabled = false;  // 启用放置按钮
+        }
+
+        // 更新分数
+            const scoreDisplay = document.getElementById('scoreDisplay');
+            scoreDisplay.innerText = data.score; // 更新分数显示
+
+      } else {
+        alert("Error: " + data.message);
+      }
+    })
+    .catch(error => {
+      console.error("Error feeding pet:", error);
+    });
+  }
+
+  function editPetName(petId) {
+    // 隐藏显示的宠物名称
+    const petNameElement = document.getElementById(`pet-name-${petId}`);
+    petNameElement.style.display = 'none';
+
+    // 显示输入框
+    const inputElement = document.getElementById(`edit-name-input-${petId}`);
+    inputElement.style.display = 'block';
+    inputElement.focus();  // 聚焦输入框
+  }
+
+  function savePetName(event, petId) {
+    if (event.key === "Enter") {
+      const inputElement = document.getElementById(`edit-name-input-${petId}`);
+      const newName = inputElement.value.trim();
+
+      if (newName !== "") {
+        // 发送 AJAX 请求到后端保存新名称
+        fetch('/update_pet_name', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ petId: petId, newName: newName })
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.status === "success") {
+            // 更新显示的宠物名称
+            const petNameElement = document.getElementById(`pet-name-${petId}`);
+            petNameElement.textContent = newName;
+            petNameElement.style.display = 'block';  // 显示宠物名称
+
+            // 隐藏输入框
+            inputElement.style.display = 'none';
+          } else {
+            alert('Error: ' + data.message);
+          }
+        })
+        .catch(error => {
+          console.error('Error saving pet name:', error);
+          alert('Error saving pet name');
+        });
+      }
+    }
+  }
+
+  </script>
+
+  <!-- 若需要 Bootstrap JS，请保留 -->
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

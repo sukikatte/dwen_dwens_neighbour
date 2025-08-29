@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat - Dwen Dwen's Neighbour</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* 全局样式 */
+        body {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            background-color: #f9f9f9;
+            color: #333;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* 统一导航栏样式（复制自 profile 页面） */
+        .nav-link {
+            position: relative;
+        }
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: -4px;
+            left: 50%;
+            background-color: #2E8B57;
+            transition: all 0.3s ease;
+            transform: translateX(-50%);
+        }
+        .nav-link:hover::after {
+            width: 100%;
+        }
+        .nav-link.active {
+            color: #2E8B57;
+        }
+        .nav-link.active::after {
+            width: 100%;
+        }
+
+        /* 其它原有样式保持不变 */
+        .container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 15px;
+        }
+        .card {
+            border: none;
+            border-radius: 12px;
+            background: #fff;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            margin-bottom: 20px;
+        }
+        .card-header {
+            padding: 12px 15px;
+            border-bottom: none;
+            border-radius: 12px 12px 0 0;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+        .card-body {
+            padding: 15px;
+        }
+        .bg-primary { background-color: #2E8B57 !important; }
+        .bg-warning { background-color: #366806 !important; }
+        .bg-success { background-color: #28a745 !important; }
+        .bg-info { background-color: #063005 !important; }
+        .friend-list {
+            max-height: 320px;
+            overflow-y: auto;
+            padding: 10px;
+        }
+        .friend-item {
+            padding: 10px 15px;
+            background: #fff;
+            border: 1px solid #eaeaea;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background 0.3s;
+        }
+        .friend-item:hover {
+            background: #f5f5f5;
+        }
+        .message-box {
+            max-height: 420px;
+            overflow-y: auto;
+            padding: 15px;
+        }
+        .message-item {
+            padding: 12px 15px;
+            background: #fff;
+            border: 1px solid #eaeaea;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            transition: background 0.3s;
+        }
+        .message-item.unread {
+            background: #eaf4fc;
+            font-weight: 500;
+        }
+        .chat-window {
+            display: none;
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 320px;
+            height: 420px;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            overflow: hidden;
+            z-index: 1000;
+        }
+        .chat-header {
+            padding: 12px 15px;
+            background: #2E8B57;
+            color: #fff;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+        .chat-messages {
+            height: 300px;
+            padding: 15px;
+            background: #f9f9f9;
+            overflow-y: auto;
+        }
+        .chat-input {
+            padding: 10px 15px;
+            border-top: 1px solid #ddd;
+            background: #fff;
+        }
+        .chat-input .form-control {
+            border-radius: 20px;
+            border: 1px solid #ccc;
+        }
+        .chat-input .btn {
+            border-radius: 20px;
+            margin-left: 10px;
+        }
+    </style>
+</head>
+<body>
+    <!-- 统一后的导航栏（复制自 profile 页面） -->
+    <nav class="bg-white shadow-sm">
+        <div class="mx-auto px-6 h-[60px] flex items-center justify-between">
+            <!-- 左侧：LOGO与标题 -->
+            <div class="flex items-center space-x-2">
+                <i class="fas fa-paw text-primary text-2xl flex justify-center items-center w-8 h-8"></i>
+                <span class="font-['Pacifico'] text-[20px] text-gray-800">
+                    Dwen Dwen's Neighbor
+                </span>
+            </div>
+            <!-- 右侧：导航菜单 (大屏显示) -->
+            <div class="hidden md:flex items-center space-x-7">
+                <a href="/knowledge" class="nav-link text-[16px] text-gray-800 hover:text-primary whitespace-nowrap">
+                    Endangered Species
+                </a>
+                <a href="/sounds" class="nav-link text-[16px] text-gray-800 hover:text-primary whitespace-nowrap">
+                    🎵🎧
+                </a>
+                <a href="/qna" class="nav-link text-[16px] text-gray-800 hover:text-primary whitespace-nowrap">
+                    Quizzes
+                </a>
+                <a href="/collection" class="nav-link text-[16px] text-gray-800 hover:text-primary whitespace-nowrap">
+                    Collection
+                </a>
+                <a href="/profile" class="nav-link text-[16px] text-gray-800 hover:text-primary whitespace-nowrap">
+                    Profile
+                </a>
+                <a href="/chat" class="nav-link active text-[16px] text-gray-800 hover:text-primary whitespace-nowrap">
+                    Chat
+                </a>
+                <a href="/community" class="nav-link text-[16px] text-gray-800 hover:text-primary whitespace-nowrap">
+                    Community
+                </a>
+            </div>
+            <!-- 移动端折叠按钮 (小屏显示) -->
+            <button class="md:hidden flex items-center justify-center w-10 h-10 text-gray-800">
+                <i class="fas fa-bars text-xl"></i>
+            </button>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <div class="row">
+            <!-- 左侧：好友列表和好友申请 -->
+            <div class="col-md-4">
+                <!-- 好友列表 -->
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">好友列表</h5>
+                    </div>
+                    <div class="card-body friend-list">
+                        {% for friend_id, friend in friends.items() %}
+                        <div class="friend-item d-flex justify-content-between align-items-center mb-2">
+                            <span>{{ friend.name }}</span>
+                            <button class="btn btn-sm btn-outline-primary" onclick="openChat('{{ friend_id }}', '{{ friend.name }}')">
+                                发送消息
+                            </button>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- 好友申请 -->
+                <div class="card mb-4">
+                    <div class="card-header bg-warning text-white">
+                        <h5 class="mb-0">Friend Request</h5>
+                    </div>
+                    <div class="card-body">
+                        {% for request_id, request in friend_requests.items() %}
+                        <div class="friend-request-item mb-2">
+                            <p>{{ request.sender_name }} wants to be your friend</p>
+                            <div class="btn-group">
+                                <button class="btn btn-sm btn-success" onclick="handleFriendRequest('{{ request_id }}', 'accept')">
+                                    Accept
+                                </button>
+                                <button class="btn btn-sm btn-danger" onclick="handleFriendRequest('{{ request_id }}', 'reject')">
+                                    Refuse
+                                </button>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- 添加好友 -->
+                <div class="card">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0">Add Friend</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="input-group">
+                            <input type="email" id="friendEmail" class="form-control" placeholder="Enter friend email">
+                            <div class="input-group-append">
+                                <button class="btn btn-success" onclick="sendFriendRequest()">Send request</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 右侧：消息收件箱 -->
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0">Message inbox</h5>
+                    </div>
+                    <div class="card-body message-box">
+                        {% for message_id, message in messages.items() %}
+                        <div class="message-item mb-3 {% if not message.read %}unread{% endif %}">
+                            <div class="d-flex justify-content-between">
+                                <h6>{{ message.sender_name }}</h6>
+                                <small class="text-muted">{{ message.timestamp }}</small>
+                            </div>
+                            <p class="mb-0">{{ message.content }}</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 聊天窗口 -->
+    <div id="chatWindow" class="chat-window">
+        <div class="chat-header" onclick="toggleChat()">
+            <h5 class="mb-0" id="chatTitle">and <span id="chatFriendName"></span> Chat</h5>
+        </div>
+        <div class="chat-messages" id="chatMessages"></div>
+        <div class="chat-input">
+            <div class="input-group">
+                <input type="text" id="messageInput" class="form-control" placeholder="Enter message...">
+                <div class="input-group-append">
+                    <button class="btn btn-primary" onclick="sendMessage()">Send</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script>
+        let currentChatFriend = null;
+
+        function openChat(friendId, friendName) {
+            currentChatFriend = friendId;
+            document.getElementById('chatFriendName').textContent = friendName;
+            document.getElementById('chatWindow').style.display = 'block';
+            loadChatMessages(friendId);
+        }
+
+        function toggleChat() {
+            const chatWindow = document.getElementById('chatWindow');
+            chatWindow.style.display = chatWindow.style.display === 'none' ? 'block' : 'none';
+        }
+
+        function loadChatMessages(friendId) {
+            // 这里需要实现加载聊天记录的逻辑
+            const chatMessages = document.getElementById('chatMessages');
+            chatMessages.innerHTML = ''; // 清空现有消息
+        }
+
+        function sendMessage() {
+            if (!currentChatFriend) return;
+            
+            const messageInput = document.getElementById('messageInput');
+            const content = messageInput.value.trim();
+            
+            if (!content) return;
+
+            fetch('/send_message', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    receiver_prefix: currentChatFriend,
+                    content: content
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    messageInput.value = '';
+                    loadChatMessages(currentChatFriend);
+                } else {
+                    alert(data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Sending message failed');
+            });
+        }
+
+        function sendFriendRequest() {
+            const emailInput = document.getElementById('friendEmail');
+            const email = emailInput.value.trim();
+            
+            if (!email) {
+                alert('Please enter your email address');
+                return;
+            }
+
+            fetch('/send_friend_request', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    email: email
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    emailInput.value = '';
+                    alert('Friend request has been sent');
+                } else {
+                    alert(data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Failed to send the friend request');
+            });
+        }
+
+        function handleFriendRequest(requestId, action) {
+            fetch('/handle_friend_request', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    sender_prefix: requestId,
+                    action: action
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    location.reload(); // 刷新页面以更新好友列表
+                } else {
+                    alert(data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Failed to handle the friend request');
+            });
+        }
+
+        // 标记消息为已读
+        function markMessageAsRead(messageId) {
+            fetch('/mark_message_read', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    message_id: messageId
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    const messageElement = document.querySelector(`[data-message-id="${messageId}"]`);
+                    if (messageElement) {
+                        messageElement.classList.remove('unread');
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+    </script>
+</body>
+</html> 

@@ -1,0 +1,929 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Challenge Mode - Dwen Dwen's Neighbour</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    body {
+      background: linear-gradient(135deg, #f6f8f9 0%, #e9ecef 100%);
+      min-height: 100vh;
+      font-family: 'Poppins', sans-serif;
+      padding: 0;
+      margin: 0;
+      overflow-x: hidden;
+    }
+
+    /* 游戏容器 */
+    .game-wrapper {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 30px 20px;
+      position: relative;
+    }
+    
+    /* 游戏标题和用户信息布局 */
+    .header-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+      flex-wrap: wrap;
+    }
+    
+    /* 游戏标题 */
+    .game-title {
+      text-align: left;
+      margin-bottom: 0;
+      position: relative;
+      flex: 1;
+      display: flex;
+      align-items: center;
+    }
+    
+    .game-title h1 {
+      font-family: 'Pacifico', cursive;
+      font-size: 2.5rem;
+      color: #333;
+      margin-bottom: 0;
+      margin-right: 10px;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .game-title p {
+      font-size: 1rem;
+      color: #666;
+      max-width: 400px;
+      margin: 0;
+      padding-left: 15px;
+      border-left: 2px solid #eee;
+    }
+    
+    /* 用户信息区 */
+    .user-info {
+      display: flex;
+      align-items: center;
+      background: white;
+      padding: 10px 20px;
+      border-radius: 50px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+      margin-left: 20px;
+    }
+    
+    .user-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin-right: 10px;
+      border: 2px solid #fff;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    
+    .user-name {
+      font-weight: 600;
+      color: #333;
+      margin-right: 10px;
+      font-size: 0.9rem;
+    }
+    
+    .user-score {
+      background: linear-gradient(135deg, #4a148c, #3949ab);
+      color: white;
+      padding: 3px 12px;
+      border-radius: 20px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      font-size: 0.9rem;
+      margin-right: 10px;
+    }
+    
+    .user-count {
+      background: #f8f9fa;
+      color: #333;
+      padding: 3px 12px;
+      border-radius: 20px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      font-size: 0.9rem;
+      margin-right: 10px;
+    }
+    
+    .user-best {
+      background: #f8f9fa;
+      color: #333;
+      padding: 3px 12px;
+      border-radius: 20px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      font-size: 0.9rem;
+    }
+    
+    .user-best.highlight {
+      animation: highlight 1s ease;
+    }
+    
+    @keyframes highlight {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.1); background: #e8eaf6; }
+      100% { transform: scale(1); }
+    }
+    
+    /* 开始游戏按钮 */
+    .start-btn, #hint-btn {
+      background: linear-gradient(135deg, #4a148c, #3949ab);
+      color: white;
+      border: none;
+      padding: 12px 30px;
+      border-radius: 50px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      box-shadow: 0 10px 20px rgba(74, 20, 140, 0.3);
+      transition: all 0.3s ease;
+      display: block;
+      margin: 30px auto;
+      cursor: pointer;
+    }
+    
+    .start-btn:hover, #hint-btn:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 25px rgba(74, 20, 140, 0.4);
+    }
+
+    .start-btn i, #hint-btn i {
+      margin-right: 10px;
+    }
+
+    /* 游戏区域 */
+    .game-container {
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+      padding: 30px;
+      margin-top: 20px;
+      display: none;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .game-instruction {
+      font-size: 1.5rem;
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: 20px;
+      color: #333;
+      position: relative;
+      padding-bottom: 10px;
+    }
+
+    .game-instruction::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 80%;
+      height: 3px;
+      background: linear-gradient(90deg, #4a148c, #3949ab);
+      border-radius: 3px;
+    }
+
+    /* 问题图片 */
+    .question-image-container {
+      text-align: center;
+      margin-bottom: 30px;
+      position: relative;
+    }
+    
+    #question-image {
+      width: 350px;
+      height: auto;
+      border: 5px solid #ddd;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      margin: 20px auto;
+      display: none;
+      transition: all 0.3s ease;
+    }
+    
+    #question-image:hover {
+      transform: scale(1.05);
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    }
+    
+    /* 答案选项 */
+    .answer-options {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+    
+    .answer-btn {
+      background: white;
+      border: 2px solid #eee;
+      border-radius: 12px;
+      padding: 12px 15px;
+      font-size: 1rem;
+      font-weight: 500;
+      color: #333;
+      transition: all 0.3s ease;
+      cursor: pointer;
+      text-align: center;
+    }
+    
+    .answer-btn:hover {
+      background: #f8f9fa;
+      border-color: #4a148c;
+      transform: translateY(-3px);
+      box-shadow: 0 5px 15px rgba(74, 20, 140, 0.1);
+    }
+
+    .answer-btn.correct {
+      background: linear-gradient(135deg, #4CAF50, #8BC34A);
+      color: white;
+      border: none;
+      animation: pulse 0.5s ease;
+    }
+
+    .answer-btn.incorrect {
+      background: linear-gradient(135deg, #F44336, #FF5722);
+      color: white;
+      border: none;
+      animation: shake 0.5s ease;
+    }
+
+    /* 结果消息 */
+    .result-message {
+      text-align: center;
+      font-size: 1.3rem;
+      font-weight: 600;
+      margin: 20px 0;
+      min-height: 40px;
+      transition: all 0.3s ease;
+    }
+
+    .result-message.correct {
+      color: #4CAF50;
+      animation: fadeInUp 0.5s ease;
+    }
+
+    .result-message.incorrect {
+      color: #F44336;
+      animation: fadeInUp 0.5s ease;
+    }
+
+    /* 游戏控制按钮 */
+    .game-controls {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      margin-top: 20px;
+    }
+    
+    .control-btn {
+      padding: 10px 25px;
+      border-radius: 50px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      border: none;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+
+    .next-btn {
+      background: linear-gradient(135deg, #4a148c, #3949ab);
+      color: white;
+      box-shadow: 0 5px 15px rgba(74, 20, 140, 0.3);
+    }
+
+    .next-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(74, 20, 140, 0.4);
+    }
+
+    .end-btn {
+      background: white;
+      color: #333;
+      border: 2px solid #eee;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    }
+
+    .end-btn:hover {
+      background: #f8f9fa;
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+    }
+
+    /* 排行榜按钮 */
+    #view-leaderboard {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: linear-gradient(135deg, #4a148c, #3949ab);
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 50px;
+      font-weight: 600;
+      box-shadow: 0 5px 15px rgba(74, 20, 140, 0.3);
+      transition: all 0.3s ease;
+      z-index: 10;
+    }
+    
+    #view-leaderboard:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(74, 20, 140, 0.4);
+    }
+
+    /* Modal styles for Leaderboard */
+    .modal-dialog {
+      max-width: 600px;
+    }
+    
+    .modal-content {
+      width: 100%;
+      text-align: center;
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+    }
+    
+    .modal-header {
+      background: linear-gradient(135deg, #4a148c, #3949ab);
+      color: white;
+      border-bottom: none;
+      padding: 20px 30px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    
+    .modal-title {
+      font-weight: 700;
+      font-size: 1.8rem;
+      margin: 0;
+    }
+    
+    .modal-body {
+      padding: 30px;
+      text-align: center;
+    }
+    
+    .leaderboard-list {
+      margin: 0;
+      padding: 0;
+      list-style-type: none;
+    }
+    
+    .leaderboard-item {
+      display: flex;
+      align-items: center;
+      margin-bottom: 15px;
+      padding: 15px 20px;
+      border-radius: 10px;
+      transition: all 0.3s ease;
+      background-color: #f8f9fa;
+    }
+    
+    .leaderboard-item:hover {
+      background: #f0f0f0;
+      transform: translateX(5px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+    }
+    
+    .leaderboard-rank-container {
+      display: flex;
+      align-items: center;
+      margin-right: 15px;
+    }
+    
+    .leaderboard-rank {
+      font-size: 1.5rem;
+      font-weight: 700;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    
+    .rank-1 {
+      background: linear-gradient(135deg, #ffd700, #ffc107);
+      color: white;
+    }
+    
+    .rank-2 {
+      background: linear-gradient(135deg, #c0c0c0, #a9a9a9);
+      color: white;
+    }
+    
+    .rank-3 {
+      background: linear-gradient(135deg, #cd7f32, #b87333);
+      color: white;
+    }
+    
+    .leaderboard-name {
+      font-weight: 600;
+      flex: 1;
+      text-align: left;
+    }
+    
+    .leaderboard-score {
+      font-weight: 700;
+      color: #4a148c;
+    }
+    
+    .trophy-icon {
+      margin-right: 10px;
+      font-size: 1.2rem;
+    }
+
+    /* 动画效果 */
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+      20%, 40%, 60%, 80% { transform: translateX(5px); }
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    /* 得分动画 */
+    .score-animation {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 3rem;
+      font-weight: 700;
+      color: #4CAF50;
+      pointer-events: none;
+      animation: floatUp 1s ease-out forwards;
+      z-index: 1000;
+    }
+
+    @keyframes floatUp {
+      0% {
+        opacity: 1;
+        transform: translate(-50%, -50%);
+      }
+      100% {
+        opacity: 0;
+        transform: translate(-50%, -100%);
+      }
+    }
+
+    /* 背景装饰 */
+    .bg-decoration {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      overflow: hidden;
+    }
+
+    .bg-circle {
+      position: absolute;
+      border-radius: 50%;
+      opacity: 0.1;
+    }
+
+    .bg-circle:nth-child(1) {
+      width: 300px;
+      height: 300px;
+      background: linear-gradient(135deg, #4a148c, #3949ab);
+      top: -100px;
+      right: -100px;
+    }
+
+    .bg-circle:nth-child(2) {
+      width: 200px;
+      height: 200px;
+      background: linear-gradient(135deg, #6a1b9a, #5c6bc0);
+      bottom: -50px;
+      left: -50px;
+    }
+
+    .bg-circle:nth-child(3) {
+      width: 150px;
+      height: 150px;
+      background: linear-gradient(135deg, #4a148c, #3949ab);
+      top: 50%;
+      right: 10%;
+    }
+
+    /* 响应式调整 */
+    @media (max-width: 768px) {
+      .header-container {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      
+      .user-info {
+        margin-left: 0;
+        margin-top: 15px;
+      }
+      
+      .game-title h1 {
+        font-size: 2rem;
+      }
+      
+      .answer-options {
+        grid-template-columns: 1fr;
+      }
+      
+      #question-image {
+        width: 280px;
+      }
+      
+      #view-leaderboard {
+        position: relative;
+        top: auto;
+        right: auto;
+        margin: 20px auto;
+        display: block;
+      }
+    }
+
+    /* 返回按钮样式 */
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      padding: 8px 15px;
+      background: white;
+      border-radius: 50px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      color: #333;
+      font-weight: 500;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      margin-right: 15px;
+      height: fit-content;
+    }
+
+    .back-btn:hover {
+      transform: translateX(-5px);
+      box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+      color: #4a148c;
+    }
+
+    .back-btn i {
+      margin-right: 8px;
+      font-size: 1rem;
+    }
+    
+    /* 顶部按钮容器 */
+    .top-buttons {
+      display: flex;
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+<body>
+  <!-- 背景装饰 -->
+  <div class="bg-decoration">
+    <div class="bg-circle"></div>
+    <div class="bg-circle"></div>
+    <div class="bg-circle"></div>
+  </div>
+
+  <!-- 排行榜按钮 -->
+  <button id="view-leaderboard">
+    <i class="fas fa-trophy"></i> Leaderboard
+  </button>
+
+  <!-- 游戏主体 -->
+  <div class="game-wrapper">
+    <!-- 游戏标题和用户信息 -->
+    <div class="header-container">
+      <div class="game-title">
+         <!-- 返回按钮 -->
+        <a href="/qna" class="back-btn">
+          <i class="fas fa-arrow-left"></i>
+          <span>Return</span>
+        </a>
+        <h1>Challenge</h1>
+        <p>Challenge of consecutive correct answers! </p>
+      </div>
+      
+      <div class="user-info">
+        <img class="user-avatar" src="{{ user_info['avatar'] }}" alt="User Avatar">
+        <span class="user-name">{{ user_info['display_name'] }}</span>
+        <div class="user-score">
+          <i class="fas fa-star"></i>
+          <span id="user-score">{{ user_info['score'] }}</span>
+        </div>
+        <div class="user-count">
+          <i class="fas fa-sync-alt"></i>
+          <span id="current-count">0</span>
+        </div>
+        <div class="user-best" id="history-best-container">
+          <i class="fas fa-trophy"></i>
+          <span id="history-best">{{ user_info['history_best'] }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 开始游戏按钮 -->
+    <button class="start-btn" id="start-game-btn">
+      <i class="fas fa-play"></i> Start Game
+    </button>
+
+    <!-- 游戏区域 -->
+    <div class="game-container" id="game-container">
+      <div class="game-instruction">What is the English name of "<span id="animal-name"></span>"?</div>
+      
+      <div class="question-image-container">
+        <button id="hint-btn" class="start-btn">
+          <i class="fas fa-lightbulb"></i> Hint (Show Image)
+        </button>
+        <img id="question-image" src="" alt="Animal Image">
+      </div>
+      
+      <div class="answer-options">
+        <button id="answer1" class="answer-btn">Option 1</button>
+        <button id="answer2" class="answer-btn">Option 2</button>
+        <button id="answer3" class="answer-btn">Option 3</button>
+        <button id="answer4" class="answer-btn">Option 4</button>
+      </div>
+
+      <div class="result-message" id="result-message"></div>
+
+      <div class="game-controls">
+        <button id="next-question" class="control-btn next-btn">Next Question</button>
+        <button id="end-game" class="control-btn end-btn">End Game</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Leaderboard Modal -->
+  <div class="modal" tabindex="-1" role="dialog" id="leaderboard-modal">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Leaderboard</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body" id="leaderboard-content">
+          <!-- Leaderboard content will be dynamically loaded here -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- jQuery, Bootstrap JS -->
+  <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+  <script>
+    $(document).ready(function () {
+      let currentAnimal, correctAnswer, currentOptions;
+      let currentCount = 0;
+      let historyBest = {{ user_info['history_best'] }};
+
+      // Start Game button: When clicked, start the game.
+      $('#start-game-btn').click(function () {
+        $(this).fadeOut(300);
+        $('#game-container').fadeIn(500);
+        getQuestion();
+      });
+
+      // View Leaderboard button: Fetches leaderboard data and displays the modal.
+      $('#view-leaderboard').click(function () {
+        $.get('/get_leaderboard', function (data) {
+          if (data.status === 'success') {
+            let leaderboardHtml = '<ul class="leaderboard-list">';
+            data.leaderboard.forEach(function (entry, index) {
+              let rankClass = '';
+              let trophyIcon = '';
+
+              if (index === 0) {
+                rankClass = 'rank-1';
+                trophyIcon = '<i class="fas fa-trophy trophy-icon" style="color: #ffd700;"></i>';
+              } else if (index === 1) {
+                rankClass = 'rank-2';
+                trophyIcon = '<i class="fas fa-trophy trophy-icon" style="color: #c0c0c0;"></i>';
+              } else if (index === 2) {
+                rankClass = 'rank-3';
+                trophyIcon = '<i class="fas fa-trophy trophy-icon" style="color: #cd7f32;"></i>';
+              }
+
+              leaderboardHtml += `
+                <li class="leaderboard-item">
+                  <div class="leaderboard-rank-container">
+                    <div class="leaderboard-rank ${rankClass}">${index + 1}</div>
+                  </div>
+                  <div class="leaderboard-name">${trophyIcon} ${entry.username}</div>
+                  <div class="leaderboard-score">${entry.history_best}</div>
+                </li>
+              `;
+            });
+            leaderboardHtml += '</ul>';
+            $('#leaderboard-content').html(leaderboardHtml);
+            $('#leaderboard-modal').modal('show');
+          }
+        });
+      });
+
+      // Hint button: When clicked, shows the animal image and hides itself.
+      $('#hint-btn').click(function () {
+        $('#question-image').fadeIn(500);
+        $(this).fadeOut(300);
+      });
+
+      // Function to get a new question from the server.
+      function getQuestion() {
+        // Before loading a new question, reset the Hint button and hide the image.
+        $('#hint-btn').show();
+        $('#question-image').hide();
+        $('#next-question').hide();
+        $('#result-message').empty();
+
+        $.get('/get_random_animal', function (data) {
+          if (data.status === 'success' && data.animals.length > 0) {
+            const randomIndex = Math.floor(Math.random() * data.animals.length);
+            currentAnimal = data.animals[randomIndex];
+
+            // Set the animal name in the question
+            $('#animal-name').text(currentAnimal.name + " " + currentAnimal.cn);
+            correctAnswer = currentAnimal.en;
+
+            // Prepare answer options
+            currentOptions = [correctAnswer, ...getIncorrectOptions(data.animals, correctAnswer)];
+            currentOptions = shuffleOptions(currentOptions);
+
+            // Display the answer options
+            $('#answer1').text(currentOptions[0]);
+            $('#answer2').text(currentOptions[1]);
+            $('#answer3').text(currentOptions[2]);
+            $('#answer4').text(currentOptions[3]);
+
+            // Set the image URL
+            $('#question-image').attr('src', currentAnimal.photo);
+
+            // Clear any previous result message
+            $('#result-message').empty();
+          }
+        });
+      }
+
+      // Function to get three incorrect options
+      function getIncorrectOptions(allAnimals, correctAnswer) {
+        let incorrectAnswers = [];
+        while (incorrectAnswers.length < 3) {
+          const randomAnimal = allAnimals[Math.floor(Math.random() * allAnimals.length)];
+          if (randomAnimal.en !== correctAnswer && !incorrectAnswers.includes(randomAnimal.en)) {
+            incorrectAnswers.push(randomAnimal.en);
+          }
+        }
+        return incorrectAnswers;
+      }
+
+      // Shuffle options
+      function shuffleOptions(options) {
+        return options.sort(() => Math.random() - 0.5);
+      }
+
+      // Answer selection handling
+      $('.answer-btn').click(function () {
+        const selectedAnswer = $(this).text();
+        const isCorrect = selectedAnswer === correctAnswer;
+
+        if (isCorrect) {
+          $('#result-message').text("You answered correctly! +1 points").addClass('correct').removeClass('incorrect');
+          currentCount++;
+          updateScore(1);
+
+          // 创建得分动画
+          createScoreAnimation();
+        } else {
+          $('#result-message').text("Oops! Incorrect answer. Correct answer was " + correctAnswer).addClass('incorrect').removeClass('correct');
+          currentCount = 0;
+        }
+
+        // If currentCount exceeds historyBest, update historyBest
+        if (currentCount > historyBest) {
+          historyBest = currentCount;
+          updateHistoryBest(historyBest);
+        }
+
+        // Update current count display
+        $('#current-count').text(currentCount);
+
+        // Disable answer buttons
+        $('.answer-btn').prop('disabled', true);
+
+        // Show the Next Question button
+        $('#next-question').show();
+      });
+
+      // Next Question button
+      $('#next-question').click(function () {
+        $(this).hide();
+        $('.answer-btn').prop('disabled', false);
+        getQuestion();
+      });
+
+      // End Game button
+      $('#end-game').click(function () {
+        $.ajax({
+          url: '/update_history_best',
+          type: 'POST',
+          contentType: 'application/json',
+          data: JSON.stringify({ history_best: historyBest }),
+          success: function (data) {
+            if (data.status === 'success') {
+              $('#user-score').text(data.score);
+              $('#history-best').text(historyBest);
+            }
+          }
+        });
+        window.location.href = '/qna';
+      });
+
+      // Function to update historyBest
+      function updateHistoryBest(best) {
+        $.ajax({
+          url: '/update_history_best',
+          type: 'POST',
+          contentType: 'application/json',
+          data: JSON.stringify({ history_best: best }),
+          success: function (data) {
+            if (data.status === 'success') {
+              $('#history-best').text(best);
+              // 添加高亮动效
+              $('#history-best-container').addClass('highlight');
+              setTimeout(function() {
+                $('#history-best-container').removeClass('highlight');
+              }, 1000);
+            }
+          }
+        });
+      }
+
+      // Function to update the score
+      function updateScore(points) {
+        $.ajax({
+          url: '/add_score',
+          type: 'POST',
+          contentType: 'application/json',
+          data: JSON.stringify({ points: points }),
+          success: function (data) {
+            if (data.status === 'success') {
+              $('#user-score').text(data.score);
+            }
+          }
+        });
+      }
+      
+      // 创建得分动画
+      function createScoreAnimation() {
+        const $scoreAnim = $('<div class="score-animation">+1</div>');
+        $('body').append($scoreAnim);
+        
+        // 动画结束后移除元素
+        setTimeout(function() {
+          $scoreAnim.remove();
+        }, 1000);
+      }
+    });
+  </script>
+</body>
+</html>

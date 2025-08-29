@@ -1,0 +1,1109 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ province }} Distribution of endangered animals - Dwen Dwen's Neighbour</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <script src="{{ url_for('static', filename='js/echarts.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/jquery-3.1.1.min.js') }}"></script>
+    <style>
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+            color: #333;
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 1.5rem 0;
+            margin: 0;
+            position: relative;
+        }
+
+        .container {
+            width: 94%;
+            max-width: 1480px;
+            min-height: calc(100vh - 3rem);
+            max-height: calc(100vh - 3rem);
+            margin: 0 auto;
+            background: #FFFFFF;
+            padding: 2rem;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            box-sizing: border-box;
+            overflow: auto;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+
+        @media (min-height: 900px) {
+            .container {
+                max-height: 90vh;
+            }
+        }
+        
+        @media (max-width: 1200px) {
+            body {
+                padding: 1rem 0;
+            }
+            
+            .container {
+                width: 95%;
+                padding: 1.5rem;
+                min-height: calc(100vh - 2rem);
+                max-height: calc(100vh - 2rem);
+            }
+        }
+
+        .container-fluid {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+
+        .page-title {
+            font-size: 1.8rem;
+            color: #2E8B57;
+            font-weight: 700;
+            margin-top: 0.5rem;
+            margin-bottom: 1.5rem;
+            text-align: center;
+            position: relative;
+            padding-left: 0;
+            padding-right: 0;
+        }
+
+        .page-title::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, #2E8B57, transparent);
+        }
+
+        .map-container {
+            width: 100%;
+            height: 100%;
+            min-height: 600px;
+            max-height: calc(100vh - 9rem);
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.06);
+            overflow: hidden;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        
+        .map-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, #2E8B57, #4CAF50, #8BC34A, #2E8B57);
+            background-size: 200% 100%;
+            animation: gradient 3s linear infinite;
+            z-index: 2;
+        }
+        
+        @keyframes gradient {
+            0% { background-position: 0% 0%; }
+            100% { background-position: 200% 0%; }
+        }
+        
+        #provinceMap {
+            width: 100%;
+            height: 100%;
+        }
+
+        .animals-section {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.06);
+            padding: 1.5rem;
+            height: 100%;
+            min-height: 600px;
+            max-height: calc(100vh - 9rem);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .section-title {
+            font-size: 1.4rem;
+            color: #2E8B57;
+            margin-bottom: 1.2rem;
+            font-weight: 600;
+            border-bottom: 2px solid rgba(46, 139, 87, 0.1);
+            padding-bottom: 0.5rem;
+        }
+
+        .animal-list {
+            flex: 1;
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: #2E8B57 #f1f1f1;
+        }
+
+        .animal-list::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .animal-list::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        .animal-list::-webkit-scrollbar-thumb {
+            background: #2E8B57;
+            border-radius: 10px;
+        }
+
+        .category-header {
+            font-size: 1.1rem;
+            padding: 0.6rem 0.8rem;
+            background: rgba(46, 139, 87, 0.1);
+            color: #2E8B57;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            font-weight: 500;
+        }
+
+        .animal-card {
+            display: flex;
+            margin-bottom: 1.2rem;
+            border-radius: 10px;
+            background: white;
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.06);
+            transition: all 0.3s ease;
+            overflow: hidden;
+            min-height: 140px;
+            height: 160px;
+            position: relative;
+        }
+
+        .animal-card:hover {
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            transform: translateY(-3px);
+        }
+
+        .animal-img-container {
+            width: 140px;
+            min-width: 140px;
+            height: 140px;
+            overflow: hidden;
+        }
+
+        .animal-img-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+
+        .animal-card:hover .animal-img-container img {
+            transform: scale(1.08);
+        }
+
+        .animal-content {
+            flex: 1;
+            padding: 0.8rem 1rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            text-align: left;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .animal-name {
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin-bottom: 0.3rem;
+            color: #333;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .cn-name {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 0.5rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .animal-info {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 0.5rem;
+            position: relative;
+            top: -5px;
+        }
+
+        .protection-level {
+            display: inline-block;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            margin-right: 0.5rem;
+            color: white;
+            position: relative;
+            top: -2px;
+        }
+
+        .protection-area {
+            display: inline-flex;
+            align-items: center;
+            color: #666;
+            font-size: 0.85rem;
+        }
+
+        .protection-area i {
+            margin-right: 0.3rem;
+            color: #2E8B57;
+        }
+
+        /* 省份区域滑动样式 */
+        .area-scroll-container {
+            display: flex;
+            overflow-x: auto;
+            scrollbar-width: thin;
+            scrollbar-color: #2E8B57 #f0f0f0;
+            white-space: nowrap;
+            padding: 0.25rem 0;
+            margin-bottom: 1.2rem;
+            -webkit-overflow-scrolling: touch;
+            max-width: 100%;
+            width: 100%;
+        }
+
+        .area-scroll-container::-webkit-scrollbar {
+            height: 4px;
+        }
+
+        .area-scroll-container::-webkit-scrollbar-track {
+            background: #f0f0f0;
+            border-radius: 10px;
+        }
+
+        .area-scroll-container::-webkit-scrollbar-thumb {
+            background-color: #2E8B57;
+            border-radius: 10px;
+        }
+
+        .area-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.25rem 0.5rem;
+            margin-right: 0.5rem;
+            background-color: #e8f5e9;
+            border-radius: 15px;
+            font-size: 0.75rem;
+            color: #2E8B57;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .area-badge i {
+            margin-right: 0.25rem;
+            font-size: 0.75rem;
+        }
+
+        .animal-links {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            margin-top: 0.25rem;
+            position: absolute;
+            bottom: 1rem;
+            right: 1rem;
+        }
+
+        .wiki-link {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.3rem 0.7rem;
+            background: rgba(46, 139, 87, 0.1);
+            color: #2E8B57;
+            border-radius: 5px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            white-space: nowrap;
+        }
+
+        .wiki-link:hover {
+            background: rgba(46, 139, 87, 0.2);
+            text-decoration: none;
+            color: #1b5e20;
+        }
+
+        .wiki-link i {
+            margin-right: 0.3rem;
+        }
+
+        .CR { background-color: #EF4444; }
+        .EN { background-color: #F59E0B; }
+        .VU { background-color: #8B5CF6; }
+        .NT { background-color: #3B82F6; }
+        .LC { background-color: #10B981; }
+
+        .back-to-map {
+            display: inline-flex;
+            align-items: center;
+            color: #2E8B57;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.3rem;
+            margin: 0;
+            transition: all 0.3s ease;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            background-color: rgba(46, 139, 87, 0.05);
+            position: relative;
+            z-index: 10;
+            flex-shrink: 0;
+            min-width: 200px;
+        }
+
+        .back-to-map:hover {
+            color: #1b5e20;
+            text-decoration: none;
+            background-color: rgba(46, 139, 87, 0.1);
+        }
+
+        .back-to-map i {
+            margin-right: 0.5rem;
+            animation: float-arrow 1.5s ease-in-out infinite;
+        }
+
+        .back-to-map:hover i {
+            animation-duration: 0.8s;
+        }
+
+        @keyframes float-arrow {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-4px); }
+        }
+
+        @media (max-width: 991px) {
+            .container {
+                padding: 1.5rem;
+            }
+            
+            .row {
+                flex-direction: column;
+            }
+            
+            .map-container, .animals-section {
+                height: 550px;
+                min-height: auto;
+                max-height: none;
+                margin-bottom: 1.5rem;
+            }
+
+            .animal-img-container {
+                width: 120px;
+                min-width: 120px;
+                height: 120px;
+            }
+
+            .page-title {
+                font-size: 1.5rem;
+            }
+
+            .back-to-map {
+                font-size: 1.1rem;
+            }
+        }
+
+        @media (max-width: 767px) {
+            .container {
+                padding: 1rem;
+                border-radius: 12px;
+            }
+
+            .header-container {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .back-to-map {
+                margin-bottom: 1rem;
+            }
+
+            .page-title {
+                font-size: 1.3rem;
+                margin-bottom: 1rem;
+            }
+
+            .placeholder {
+                display: none;
+            }
+
+            .map-container, .animals-section {
+                height: 450px;
+            }
+
+            .details-content .thumb,
+            .details-content .thumbinner,
+            .details-content figure,
+            .details-content .infobox {
+                float: none !important;
+                margin: 1em auto !important;
+                max-width: 100% !important;
+                width: 100% !important;
+                display: block;
+            }
+
+            .details-content p {
+                display: block;
+                margin: 0.5em 0;
+            }
+
+            .details-content ul,
+            .details-content ol {
+                display: block;
+            }
+
+            .details-content-container {
+                padding: 30px 20px;
+            }
+
+            .details-content {
+                padding: 0 20px;
+            }
+        }
+
+        .float-arrow {
+            animation: float-arrow 2s ease-in-out infinite;
+            display: inline-block;
+        }
+
+        @keyframes float-arrow {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-5px);
+            }
+        }
+
+        .header-container {
+            width: 100%;
+            position: relative;
+        }
+
+        .row {
+            margin-top: 1.5rem;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .reset-map-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            z-index: 100;
+            background-color: rgba(255, 255, 255, 0.9);
+            border: 1px solid #2E8B57;
+            color: #2E8B57;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .reset-map-btn:hover {
+            background-color: #2E8B57;
+            color: white;
+            transform: rotate(-15deg);
+        }
+        
+        .reset-map-btn:focus {
+            outline: none;
+        }
+        
+        .reset-map-btn.rotating {
+            animation: rotate-btn 0.5s ease;
+        }
+        
+        @keyframes rotate-btn {
+            0% { transform: rotate(0); }
+            100% { transform: rotate(-360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header-container d-flex justify-content-between align-items-center mb-3">
+            <a href="/knowledge" class="back-to-map">
+                <i class="fas fa-arrow-left mr-2 float-arrow"></i> Return to Map
+            </a>
+            <h1 class="page-title flex-grow-1 text-center">{{ province }}'s Distribution of Endangered Animals</h1>
+            <div style="width: 200px;"></div> <!-- placeholder div to balance the layout -->
+        </div>
+
+        <div class="row">
+            <!-- 左侧地图 -->
+            <div class="col-lg-7 mb-4">
+                <div class="map-container" style="position: relative;">
+                    <div id="provinceMap" style="width: 100%; height: 700px; border-radius: 16px; background: white; box-shadow: 0 5px 15px rgba(0, 0, 0, 0.06); overflow: hidden;"></div>
+                    <button id="resetMapBtn" class="reset-map-btn" title="Reset Map" style="position: absolute; top: 15px; right: 15px; z-index: 100;">
+                        <i class="fas fa-undo-alt"></i>
+                    </button>
+                </div>
+            </div>
+            <!-- 右侧动物列表 -->
+            <div class="col-lg-5">
+                <div class="animals-section">
+                    <h3 class="section-title">{{ province }}'s List of Endangered Animals</h3>
+                    <div class="animal-list">
+                        {% for category, animals in categorized_animals.items() %}
+                            <div class="mb-4">
+                                <div class="category-header">{{ category }}</div>
+                                {% for animal in animals %}
+                                    <div class="animal-card">
+                                        <div class="animal-img-container">
+                                            <img src="{{ animal.photo }}" alt="{{ animal.name }}" loading="lazy">
+                                        </div>
+                                        <div class="animal-content">
+                                            <div>
+                                                <h4 class="animal-name">{{ animal.name }}</h4>
+                                                <p class="cn-name">{{ animal.cn }} {{ animal.en }}</p>
+                                                <div class="area-scroll-container">
+                                                    {% if animal.area and "," in animal.area %}
+                                                        {% for area in animal.area.split(',') %}
+                                                        <div class="area-badge">
+                                                            <i class="fas fa-map-marker-alt"></i>
+                                                            {{ area.strip() }}
+                                                        </div>
+                                                        {% endfor %}
+                                                    {% else %}
+                                                        <div class="area-badge">
+                                                            <i class="fas fa-map-marker-alt"></i>
+                                                            {{ animal.area }}
+                                                        </div>
+                                                    {% endif %}
+                                                </div>
+                                                <div class="animal-info">
+                                                    <span class="protection-level {{ animal.type }}">{{ animal.type }}</span>
+                                                </div>
+                                            </div>
+                                            <div class="animal-links">
+                                                <a href="javascript:void(0)" onclick="showDetails('{{ animal.id }}')" class="wiki-link">
+                                                    <i class="fas fa-info-circle"></i>
+                                                    <span>View Encyclopedia</span>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 页面加载完成后再初始化地图
+        window.addEventListener('DOMContentLoaded', function() {
+            // 初始化地图
+            var myChart = echarts.init(document.getElementById('provinceMap'));
+            var defaultOption = null;
+
+            // 复原按钮点击事件
+            document.getElementById('resetMapBtn').addEventListener('click', function() {
+                if (defaultOption) {
+                    // 重置地图到初始状态
+                    myChart.setOption(defaultOption);
+                    
+                    // 添加动画效果
+                    const btn = this;
+                    btn.classList.add('rotating');
+                    setTimeout(() => {
+                        btn.classList.remove('rotating');
+                    }, 500);
+                }
+            });
+
+            // 转换中文分类标题为英文全拼
+            translateCategoryTitle();
+
+            // 加载省份地图数据
+            $.get("{{ province_map_url }}", function(data) {
+                echarts.registerMap('{{ province }}', data);
+
+                var option = {
+                    title: {
+                        text: '{{ province }} Map',
+                        left: 'center',
+                        textStyle: {
+                            color: '#2E8B57',
+                            fontSize: 20,
+                            fontWeight: 'bold'
+                        },
+                        top: 15
+                    },
+                    tooltip: {
+                        trigger: 'item',
+                        formatter: '{b}',
+                        backgroundColor: 'rgba(255,255,255,0.9)',
+                        borderColor: '#2E8B57',
+                        borderWidth: 1,
+                        padding: [8, 12],
+                        textStyle: {
+                            color: '#333',
+                            fontSize: 13
+                        }
+                    },
+                    toolbox: {
+                        show: false
+                    },
+                    series: [{
+                        name: '{{ province }}',
+                        type: 'map',
+                        map: '{{ province }}',
+                        roam: true,
+                        zoom: 1,
+                        center: null,
+                        label: {
+                            show: true,
+                            fontSize: 12,
+                            color: '#333'
+                        },
+                        emphasis: {
+                            label: {
+                                fontSize: 14,
+                                fontWeight: 'bold'
+                            },
+                            itemStyle: {
+                                areaColor: '#4CAF50'
+                            }
+                        },
+                        itemStyle: {
+                            areaColor: '#f3f8ff',
+                            borderColor: '#82c596',
+                            borderWidth: 1
+                        }
+                    }]
+                };
+
+                myChart.setOption(option);
+                
+                // 保存初始配置
+                defaultOption = JSON.parse(JSON.stringify(option));
+
+                // 窗口大小改变时，重置图表大小
+                window.addEventListener('resize', function() {
+                    myChart.resize();
+                });
+            });
+        });
+
+        // 转换中文分类标题为英文全拼
+        function translateCategoryTitle() {
+            const categoryHeaders = document.querySelectorAll('.category-header');
+            categoryHeaders.forEach(header => {
+                const text = header.textContent.trim();
+                if (text.includes('极危')) {
+                    header.textContent = 'Critically Endangered (CR)';
+                } else if (text.includes('濒危')) {
+                    header.textContent = 'Endangered (EN)';
+                } else if (text.includes('易危')) {
+                    header.textContent = 'Vulnerable (VU)';
+                } else if (text.includes('近危')) {
+                    header.textContent = 'Near Threatened (NT)';
+                } else if (text.includes('无危')) {
+                    header.textContent = 'Least Concern (LC)';
+                }
+            });
+        }
+
+        // 显示动物详情弹窗
+        function showDetails(animalId) {
+          console.log("get detail, ID:", animalId);
+          fetch(`/fetch-details/${animalId}`)
+            .then(response => {
+              console.log("Response Status:", response.status);
+              return response.json();
+            })
+            .then(data => {
+              console.log("get data:", data);
+              if (data.status === "success") {
+                // 创建弹窗
+                const modal = document.createElement('div');
+                modal.className = 'details-modal';
+                modal.innerHTML = `
+                  <div class="details-modal-overlay">
+                    <div class="details-modal-content">
+                      <button class="details-modal-close" onclick="closeDetailsModal()">&times;</button>
+                      <div class="details-content-container">
+                        <div class="details-border-decoration details-border-left"></div>
+                        <div class="details-border-decoration details-border-right"></div>
+                        <div class="details-content">
+                          <h1>${data.title}</h1>
+                          ${data.content}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                `;
+                document.body.appendChild(modal);
+
+                // 禁止背景滚动
+                document.body.style.overflow = 'hidden';
+
+                // 处理内容排版
+                const contentElem = modal.querySelector('.details-content');
+
+                // 调整图片排版
+                setTimeout(() => {
+                  // 获取所有的图片容器
+                  const thumbs = contentElem.querySelectorAll('.thumb, .thumbinner');
+                  thumbs.forEach(thumb => {
+                    // 如果不是右浮动的，设为右浮动
+                    if (!thumb.style.float) {
+                      thumb.style.float = 'right';
+                      thumb.style.margin = '0 0 15px 20px';
+                      thumb.style.maxWidth = '350px';
+                    }
+                  });
+
+                  // 处理所有普通图片
+                  const standaloneImages = contentElem.querySelectorAll('img:not(.thumbinner img):not(figure img)');
+                  standaloneImages.forEach(img => {
+                    // 如果不在某个容器内，把它包在一个figure里
+                    if (img.parentElement.tagName !== 'FIGURE' &&
+                        !img.parentElement.classList.contains('thumbinner') &&
+                        !img.parentElement.classList.contains('infobox')) {
+                      const figure = document.createElement('figure');
+                      img.parentNode.insertBefore(figure, img);
+                      figure.appendChild(img);
+                      figure.style.float = 'right';
+                      figure.style.margin = '0 0 15px 20px';
+                      figure.style.maxWidth = '350px';
+                      figure.style.padding = '8px';
+                      figure.style.backgroundColor = '#f8f9fa';
+                      figure.style.border = '1px solid #eaecf0';
+                      figure.style.borderRadius = '4px';
+                    }
+                  });
+
+                  // 清除浮动
+                  const clearDiv = document.createElement('div');
+                  clearDiv.style.clear = 'both';
+                  contentElem.appendChild(clearDiv);
+                }, 100); // 短暂延时确保DOM已更新
+              } else {
+                console.error("Failed to obtain details:", data);
+                alert("Unable to obtain animal details, please try again later.");
+              }
+            })
+            .catch(error => {
+              console.error("Error in obtaining details:", error);
+              alert("An error occurred while obtaining animal details. Please try again later.");
+            });
+        }
+
+        // 关闭详情弹窗
+        function closeDetailsModal() {
+            const modal = document.querySelector('.details-modal');
+            if (modal) {
+                modal.remove();
+                // 恢复背景滚动
+                document.body.style.overflow = '';
+            }
+        }
+
+        // 添加弹窗样式
+        const detailsStyle = document.createElement('style');
+        detailsStyle.textContent = `
+          .details-modal {
+            position: fixed;
+            z-index: 1000;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+          }
+
+          .details-modal-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(3px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1001;
+          }
+
+          .details-modal-content {
+            background: #fff;
+            width: 90%;
+            max-width: 1200px;
+            max-height: 90vh;
+            border-radius: 8px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+            position: relative;
+            overflow-y: auto;
+          }
+
+          .details-modal-close {
+            position: fixed;
+            top: 50px;
+            right: 220px;
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #666;
+            z-index: 1002;
+          }
+
+          .details-modal-close:hover {
+            color: #333;
+          }
+
+          .details-content-container {
+            position: relative;
+            padding: 40px;
+            background: #fff;
+            font-family: 'Georgia', serif;
+            line-height: 1.8;
+          }
+
+          .details-border-decoration {
+            position: absolute;
+            top: 15px;
+            bottom: 15px;
+            width: 12px;
+            background-repeat: repeat-y;
+            z-index: 1;
+            opacity: 0.8;
+          }
+
+          .details-border-left {
+            left: 15px;
+            background-image: url("data:image/svg+xml,%3Csvg width='12' height='100' viewBox='0 0 12 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 0 L1 100' stroke='%232E8B57' stroke-width='2' stroke-opacity='0.9'/%3E%3Cpath d='M6 0 L6 100' stroke='%232E8B57' stroke-width='1' stroke-opacity='0.6'/%3E%3Cpath d='M11 0 L11 100' stroke='%232E8B57' stroke-width='0.5' stroke-opacity='0.4'/%3E%3C/svg%3E");
+          }
+
+          .details-border-right {
+            right: 15px;
+            background-image: url("data:image/svg+xml,%3Csvg width='12' height='100' viewBox='0 0 12 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 0 L11 100' stroke='%232E8B57' stroke-width='2' stroke-opacity='0.9'/%3E%3Cpath d='M6 0 L6 100' stroke='%232E8B57' stroke-width='1' stroke-opacity='0.6'/%3E%3Cpath d='M1 0 L1 100' stroke='%232E8B57' stroke-width='0.5' stroke-opacity='0.4'/%3E%3C/svg%3E");
+          }
+
+          .details-content {
+            position: relative;
+            z-index: 2;
+            padding: 0 40px;
+          }
+
+          .details-content h1 {
+            font-family: 'Times New Roman', serif;
+            font-size: 2.5em;
+            color: #2E8B57;
+            text-align: center;
+            margin-bottom: 30px;
+            position: relative;
+            padding-bottom: 15px;
+          }
+
+          .details-content h1::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, #2E8B57, transparent);
+          }
+
+          /* 专业百科风格的内容排版 */
+          .details-content .thumbinner {
+            float: right;
+            margin: 0 0 15px 20px;
+            max-width: 350px;
+            border: 1px solid #eaecf0;
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+          }
+
+          .details-content .thumbcaption {
+            font-size: 0.85em;
+            line-height: 1.4;
+            padding: 5px;
+            color: #555;
+            text-align: center;
+          }
+
+          .details-content figure {
+            margin: 0 0 15px 20px;
+            padding: 8px;
+            float: right;
+            max-width: 350px;
+            background-color: #f8f9fa;
+            border: 1px solid #eaecf0;
+            border-radius: 4px;
+          }
+
+          .details-content figcaption {
+            font-size: 0.85em;
+            line-height: 1.4;
+            padding: 5px;
+            color: #555;
+            text-align: center;
+          }
+
+          .details-content p {
+            font-size: 1.1em;
+            line-height: 1.8;
+            margin-bottom: 20px;
+            color: #333;
+            text-align: justify;
+          }
+
+          .details-content img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 5px auto;
+            border-radius: 4px;
+          }
+
+          .details-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+          }
+
+          .details-content table, .details-content th, .details-content td {
+            border: 1px solid #ddd;
+          }
+
+          .details-content th, .details-content td {
+            padding: 10px;
+            text-align: left;
+          }
+
+          .details-content th {
+            background-color: #f1f1f1;
+          }
+
+          .details-content blockquote {
+            border-left: 4px solid #2E8B57;
+            padding: 15px 20px;
+            margin: 20px 0;
+            background: #f8f9fa;
+            font-style: italic;
+            color: #444;
+          }
+
+          .details-content a {
+            color: #2E8B57;
+            text-decoration: none;
+            border-bottom: 1px solid #2E8B57;
+            transition: all 0.3s ease;
+          }
+
+          .details-content a:hover {
+            color: #1b5e20;
+            border-bottom-color: #1b5e20;
+          }
+
+          .details-content h2 {
+            font-size: 1.8em;
+            color: #2E8B57;
+            margin-top: 40px;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+          }
+
+          .details-content h3 {
+            font-size: 1.5em;
+            color: #2E8B57;
+            margin-top: 30px;
+            margin-bottom: 15px;
+          }
+
+          .details-content ul, .details-content ol {
+            margin: 20px 0;
+            padding-left: 30px;
+          }
+
+          .details-content li {
+            margin-bottom: 10px;
+            line-height: 1.6;
+          }
+
+          /* 清除浮动，确保内容正确流动 */
+          .details-content::after {
+            content: "";
+            display: table;
+            clear: both;
+          }
+
+          /* 高亮样式 */
+          .details-content .highlight {
+            background-color: rgba(46, 139, 87, 0.1);
+            padding: 2px 5px;
+            border-radius: 2px;
+          }
+
+          /* 适配维基百科特定样式 */
+          .details-content .infobox {
+            float: right;
+            clear: right;
+            margin: 0 0 1em 1em;
+            max-width: 22em;
+            border: 1px solid #a2a9b1;
+            border-spacing: 3px;
+            background-color: #f8f9fa;
+            font-size: 0.9em;
+          }
+        `;
+        document.head.appendChild(detailsStyle);
+
+        // 添加事件监听，点击ESC键或点击背景关闭弹窗
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeDetailsModal();
+            }
+        });
+
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('details-modal-overlay')) {
+                closeDetailsModal();
+            }
+        });
+    </script>
+</body>
+</html>

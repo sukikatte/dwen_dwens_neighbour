@@ -1,0 +1,504 @@
+{% extends "base.html" %}
+
+{% block title %}Games - Dwen Dwen's Neighbour{% endblock %}
+
+{% block head %}
+  <!-- 保留 Bootstrap，以继续使用 .container、.btn 等类 -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+
+  <style>
+
+    /* 卡牌翻转效果 */
+    .card-container {
+      perspective: 1000px;
+      width: 240px;  /* 增加宽度 */
+      height: 320px; /* 增加高度 */
+      margin: 15px;
+      display: inline-block;
+    }
+
+    .card {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      transition: transform 0.8s;
+      transform-style: preserve-3d;
+      cursor: pointer;
+    }
+
+    .card-container:hover .card {
+      transform: rotateY(180deg);
+    }
+
+    .card-front, .card-back {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      backface-visibility: hidden;
+      border-radius: 8px;
+      box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      text-align: center;
+    }
+
+    /* 每张卡片不同的渐变颜色 */
+    .card-front.guess-who {
+      background: linear-gradient(135deg, #6939d6, #ed70ae);
+    }
+
+    .card-front.matching {
+      background: linear-gradient(135deg, #4f98e3, #276bdf);
+    }
+
+    .card-front.puzzle {
+      background: linear-gradient(135deg, #f83a9a, #2fdfca);
+    }
+
+    .card-front.concentration {
+      background: linear-gradient(135deg, #ffd426, #fb7011);
+    }
+
+    .card-front.challenge {
+      background: linear-gradient(135deg, #7a4ae4, #3B82F6);
+    }
+
+    .card-back {
+      background: white;
+      transform: rotateY(180deg);
+      color: #333;
+      border: 2px solid rgba(0,0,0,0.05);
+    }
+
+    /* 牌背颜色与正面相对应但更浅 */
+    .card-back.guess-who {
+      background: rgba(183, 148, 236, 0.05);
+      border-color: rgba(136, 74, 228, 0.8);
+    }
+
+    .card-back.matching {
+      background: rgba(67, 161, 255, 0.05);
+      border-color: rgba(47, 54, 248, 0.8);
+    }
+
+    .card-back.puzzle {
+      background: rgba(109, 56, 200, 0.05);
+      border-color: rgb(241, 84, 161, 0.8);
+    }
+
+
+    .card-back.concentration {
+      background: rgba(255, 179, 38, 0.05);
+      border-color: rgb(251, 112, 17, 0.8);
+    }
+
+    .card-back.challenge {
+      background: rgba(74, 87, 228, 0.05);
+      border-color: rgb(47, 54, 248, 0.8);
+    }
+
+    .card-icon {
+      font-size: 2.5rem;
+      margin-bottom: 15px;
+      color: white;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+
+    .card-title {
+      font-size: 1.4rem;
+      font-weight: bold;
+      margin-bottom: 10px;
+      color: white;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+      font-family: 'Poppins', sans-serif;
+    }
+
+    .card-description {
+      font-size: 0.95rem;
+      line-height: 1.5;
+      font-family: 'Poppins', sans-serif;
+      font-weight: 400;
+      color: #555;
+    }
+
+    .card-description strong {
+      color: #333;
+      font-weight: 600;
+    }
+
+    .card-description em {
+      font-style: italic;
+      color: #666;
+    }
+
+    .games-container {
+      display: flex;
+      flex-wrap: nowrap;
+      justify-content: center;
+      align-items: center;
+      overflow-x: auto;
+      padding: 30px 0;
+      margin-bottom: 140px;
+    }
+
+    .section-title {
+      text-align: center;
+      margin: 40px 0 20px;
+      color: #000000;
+      font-weight: bold;
+      font-size: 2.2rem;
+      font-family: 'Pacifico', cursive;
+      position: relative;
+      display: block;
+      width: 100%;
+    }
+
+    .section-title::after {
+      content: '';
+      position: absolute;
+      bottom: -8px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 60%;
+      height: 3px;
+      background: linear-gradient(90deg, transparent, #2a302a, transparent);
+    }
+
+    .section-subtitle {
+      text-align: center;
+      margin-bottom: 30px;
+      color: #555;
+      font-size: 1.1rem;
+      font-family: 'Poppins', sans-serif;
+      max-width: 1200px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .multiplayer-button {
+      display: block;
+      margin: 40px auto;
+      padding: 14px 36px;
+      background: linear-gradient(135deg, #2f36f8, #f154a1);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 8px rgba(47, 54, 248, 0.2);
+      font-family: 'Poppins', sans-serif;
+      font-size: 1.1rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .multiplayer-button:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 12px rgb(47, 54, 248, 0.2);
+      background: linear-gradient(135deg, #2f86f8, #ed70ae);
+    }
+
+    .multiplayer-button:active {
+      transform: translateY(1px);
+      box-shadow: 0 2px 4px rgb(47, 54, 248, 0.2);
+    }
+
+    .multiplayer-button i {
+      margin-right: 8px;
+      transition: transform 0.3s ease;
+    }
+
+    .multiplayer-button:hover i {
+      transform: scale(1.1);
+    }
+
+    /* 页面背景 */
+    body {
+      background: linear-gradient(135deg, #f6f8f9 0%, #e9ecef 100%);
+      min-height: 100vh;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    /* 容器样式 */
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    /* 动画效果 */
+    .animate-float {
+      animation: float 6s ease-in-out infinite;
+    }
+
+    .animate-fade-in {
+      animation: fadeIn 1s ease-in-out;
+    }
+
+    .animate-slide-in {
+      animation: slideIn 0.5s ease-out;
+    }
+        /* 背景装饰 */
+    .bg-decoration {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      overflow: hidden;
+    }
+
+    .bg-pattern {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%232E8B57' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    }
+
+    .bg-gradient {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle at 20% 20%, rgba(46, 139, 87, 0.1) 0%, transparent 50%),
+                  radial-gradient(circle at 80% 80%, rgba(76, 175, 80, 0.1) 0%, transparent 50%);
+    }
+
+   /* Override the paw icon color */
+    .nav-container i.fas.fa-paw {
+      color: #2E8B57 !important;
+    }
+
+
+
+    /* 新增：引言区域 */
+    .quote-section {
+      margin-top: 0px;
+      text-align: center;
+      padding: 30px 20px;
+      max-width: 100%;
+      width: 1300px;
+    }
+
+    .quote {
+      font-size: 1.4rem;
+      line-height: 1.8;
+      color: #333;
+      font-style: italic;
+      position: relative;
+      padding: 0 60px;
+      margin: 0 auto;
+      max-width: 100%;
+    }
+
+    .quote::before,
+    .quote::after {
+      content: '"';
+      font-size: 4rem;
+      position: absolute;
+      opacity: 0.3;
+      font-family: Georgia, serif;
+      color: #2E8B57;
+    }
+
+    .quote::before {
+      top: -20px;
+      left: 10px;
+    }
+
+    .quote::after {
+      bottom: -60px;
+      right: 10px;
+    }
+
+    @keyframes float {
+      0% { transform: translateY(0px); }
+      50% { transform: translateY(-10px); }
+      100% { transform: translateY(0px); }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes slideIn {
+      from { transform: translateY(20px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    /* 用户信息显示样式 */
+    .user-info {
+      background: linear-gradient(135deg, #009dff, #7deed3);
+      color: white;
+      padding: 8px 15px;
+      border-radius: 20px;
+      font-weight: 600;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      font-family: 'Poppins', sans-serif;
+      display: flex;
+      align-items: center;
+      transition: all 0.3s ease;
+      position: relative;
+      margin-bottom: -45px;
+      float: right;
+    }
+    
+    .user-info:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+    }
+    
+    .user-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      margin-right: 8px;
+      border: 2px solid rgba(255,255,255,0.7);
+    }
+    
+    .user-name {
+      margin-right: 10px;
+      font-size: 0.95rem;
+      max-width: 100px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    
+    .score-section {
+      display: flex;
+      align-items: center;
+      border-left: 1px solid rgba(255,255,255,0.3);
+      padding-left: 10px;
+      margin-left: 5px;
+    }
+    
+    .score-section i {
+      margin-right: 5px;
+      font-size: 1.1rem;
+    }
+    
+    .score-value {
+      font-size: 1.1rem;
+    }
+
+  </style>
+
+{% endblock %}
+
+{% block content %}
+<body>
+  <!-- 背景装饰 -->
+  <div class="bg-decoration">
+    <div class="bg-pattern"></div>
+    <div class="bg-gradient"></div>
+  </div>
+  
+  <div class="container mt-5">
+    <!-- 用户信息显示 -->
+    <div class="user-info animate-fade-in">
+      <img src="{{ user_avatar }}" alt="用户头像" class="user-avatar">
+      <span class="user-name">{{ user_name }}</span>
+      <div class="score-section">
+        <i class="fas fa-star"></i>
+        <span class="score-value">{{ user_score }}</span>
+      </div>
+    </div>
+    
+    <div style="clear: both;"></div>
+    
+    <h2 class="section-title animate-fade-in">Animal Knowledge Games</h2>
+    <p class="section-subtitle animate-fade-in">Games are based on the encyclopedia section, have a try and earn scores to take care of your red panda! 🐾🎮💖</p>
+    <div class="games-container">
+      <!-- All cards in one row -->
+      <!-- Guess Who? Card -->
+      <div class="card-container animate-float" style="animation-delay: 0s;">
+        <a href="/guess_who_page" class="card">
+          <div class="card-front guess-who">
+            <div class="card-icon"><i class="fas fa-question-circle"></i></div>
+            <div class="card-title">Guess Who</div>
+          </div>
+          <div class="card-back guess-who">
+            <div class="card-description">
+              <strong>Guess the animal</strong> from its image! 🐾<br><br>
+              <em>Let's see how well you know the animals!</em> 🐼🐒
+            </div>
+          </div>
+        </a>
+      </div>
+      <!-- Matching Game Card -->
+      <div class="card-container animate-float" style="animation-delay: 0.4s;">
+        <a href="/matching_game_page" class="card">
+          <div class="card-front matching">
+            <div class="card-icon"><i class="fas fa-random"></i></div>
+            <div class="card-title">Matching</div>
+          </div>
+          <div class="card-back matching">
+            <div class="card-description">
+              <strong>Match the images</strong> with the correct animals' name! 💡<br><br>
+              <em>4 different animals at once and make those impressions last!</em> ✅
+            </div>
+          </div>
+        </a>
+      </div>
+         <!-- Animal Puzzle Card -->
+      <div class="card-container animate-float" style="animation-delay: 0.2s;">
+        <a href="/puzzle" class="card">
+          <div class="card-front puzzle">
+            <div class="card-icon"><i class="fas fa-puzzle-piece"></i></div>
+            <div class="card-title">Animal Puzzle</div>
+          </div>
+          <div class="card-back puzzle">
+            <div class="card-description">
+              <strong>Challenge yourself</strong> with the 2✖️2 animal puzzle! 🧩<br><br>
+              <em>Let's deepen your memory of these amazing creatures!</em> 🐾✨
+            </div>
+          </div>
+        </a>
+      </div>
+      <!-- Draw Cards Card -->
+      <div class="card-container animate-float" style="animation-delay: 0.6s;">
+        <a href="/draw" class="card">
+          <div class="card-front concentration">
+            <div class="card-icon"><i class="fas fa-layer-group"></i></div>
+            <div class="card-title">Concentration</div>
+          </div>
+          <div class="card-back concentration">
+            <div class="card-description">
+              <strong>Flip over two cards</strong> of the same animal! 🃏<br><br>
+              <em>If they match, your super memory will earn you scores!</em> 🎉
+            </div>
+          </div>
+        </a>
+      </div>
+      <!-- Challenge Mode Card -->
+      <div class="card-container animate-float" style="animation-delay: 0.8s;">
+        <a href="/challenge_mode_page" class="card">
+          <div class="card-front challenge">
+            <div class="card-icon"><i class="fas fa-trophy"></i></div>
+            <div class="card-title">Challenge</div>
+          </div>
+          <div class="card-back challenge">
+            <div class="card-description">
+              <strong>Connect the animals names</strong> in Scientific & Chinese to English! 🌍<br><br>
+              <em>Become an international-friendly animal protector!</em> 💚
+            </div>
+          </div>
+        </a>
+      </div>
+    </div>
+
+  </div>
+{% endblock %}
+
+{% block scripts %}
+
+{% endblock %}

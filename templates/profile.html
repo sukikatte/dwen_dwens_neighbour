@@ -1,0 +1,885 @@
+{% extends "base.html" %}
+
+{% block title %}Profile - Dwen Dwen's Neighbour{% endblock %}
+
+{% block head %}
+<style>
+  body {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #f0f4f8 0%, #d9e2ec 100%);
+    font-family: 'Poppins', sans-serif;
+  }
+
+  /* 导航栏样式优化 */
+  .nav-container {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  }
+
+  .nav-brand {
+    font-family: 'Pacifico', cursive;
+    font-size: 1.35rem;
+    color: #1a1a1a;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-left: -1rem;
+  }
+
+  .nav-brand i {
+    font-size: 1.5rem;
+    color: #2E8B57;
+  }
+
+  .nav-menu {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .nav-item {
+    position: relative;
+    padding: 0.5rem 0.875rem;
+    border-radius: 8px;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1rem;
+    font-weight: 500;
+    color: #4a5568;
+  }
+
+  .nav-item i {
+    font-size: 1.1rem;
+    transition: transform 0.3s ease;
+  }
+
+  .nav-item:hover {
+    background-color: rgba(46, 139, 87, 0.08);
+    color: #2E8B57;
+  }
+
+  .nav-item:hover i {
+    transform: scale(1.2);
+  }
+
+  .nav-item:hover span {
+    text-decoration: underline;
+    text-underline-offset: 4px;
+  }
+
+  .nav-item.active {
+    background-color: rgba(46, 139, 87, 0.12);
+    color: #2E8B57;
+  }
+
+  .nav-item.active::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 30px;
+    height: 2px;
+    background-color: #2E8B57;
+    border-radius: 4px;
+  }
+
+  /* 头像选择优化 */
+  .avatar-option {
+    cursor: pointer;
+    border: 3px solid transparent;
+    border-radius: 16px;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    transform: scale(1);
+    overflow: hidden;
+  }
+
+  .avatar-option:hover {
+    transform: scale(1.05);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  }
+
+  .avatar-option.selected {
+    border-color: #2E8B57;
+    transform: scale(1.1);
+    box-shadow: 0 12px 24px rgba(46, 139, 87, 0.2);
+  }
+
+  /* 输入框样式优化 */
+  .input-field {
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .input-field:focus-within {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+  }
+
+  .input-field input {
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+  }
+
+  .input-field input:focus {
+    border-color: #2E8B57;
+    box-shadow: 0 0 0 4px rgba(46, 139, 87, 0.1);
+  }
+
+  /* 按钮样式优化 */
+  .btn-primary {
+    background: linear-gradient(135deg, #2E8B57, #4CAF50);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    border: none;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn-primary::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, rgba(255,255,255,0.2), transparent);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 24px rgba(46, 139, 87, 0.25);
+  }
+
+  .btn-primary:hover::after {
+    opacity: 1;
+  }
+
+  .btn-danger {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    transition: all 0.3s ease;
+  }
+
+  .btn-danger:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 16px rgba(220, 38, 38, 0.3);
+  }
+
+  /* 卡片样式优化 */
+  .profile-card {
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    border-radius: 24px;
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+  }
+
+  .profile-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+  }
+
+  /* 动画效果优化 */
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateX(-30px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
+
+  .animate-fade-in {
+    animation: fadeIn 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .animate-slide-in {
+    animation: slideIn 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* 背景装饰 */
+  .bg-decoration {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    overflow: hidden;
+  }
+
+  .bg-pattern {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%232E8B57' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  }
+
+  .bg-gradient {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle at 20% 20%, rgba(46, 139, 87, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(76, 175, 80, 0.1) 0%, transparent 50%);
+  }
+
+     /* Override the paw icon color */
+  .nav-container i.fas.fa-paw {
+    color: #2E8B57 !important;
+  }
+
+  /* 捐赠统计卡片优化 */
+  .donation-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+    margin-top: 2rem;
+  }
+
+  .stat-card {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 16px;
+    padding: 1.5rem;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .stat-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.06);
+  }
+
+  .stat-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    flex-shrink: 0;
+  }
+
+  .stat-content {
+    flex: 1;
+  }
+
+  .stat-value {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin: 0.25rem 0;
+  }
+
+  .stat-label {
+    color: #666;
+    font-size: 0.875rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  /* 头像选择优化 */
+  .avatar-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    gap: 1rem;
+    justify-items: center;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  .avatar-option {
+    cursor: pointer;
+    border: 3px solid transparent;
+    border-radius: 16px;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    transform: scale(1);
+    overflow: hidden;
+    width: 80px;
+    height: 80px;
+  }
+
+  /* 头像选择模态框优化 */
+  #avatarGridModal {
+    display: grid;
+    grid-template-columns: repeat(4, 80px);
+    gap: 1rem;
+    justify-content: center;
+    padding: 1rem;
+  }
+
+  .avatar-option {
+    cursor: pointer;
+    border: 3px solid transparent;
+    border-radius: 16px;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    transform: scale(1);
+    overflow: hidden;
+    width: 80px;
+    height: 80px;
+  }
+
+  /* 模态框优化 */
+  .modal-content {
+    background: rgba(255, 255, 255, 0.98);
+    backdrop-filter: blur(20px);
+    border-radius: 24px;
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* 左侧卡片拉伸到与右侧对齐 */
+  .profile-left-card {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+  
+  .profile-info-content {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .profile-info-fields {
+    flex-grow: 1;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+  <!-- 背景装饰 -->
+  <div class="bg-decoration">
+    <div class="bg-pattern"></div>
+    <div class="bg-gradient"></div>
+  </div>
+
+  <!-- 主体内容优化 -->
+  <div class="pb-16 min-h-screen">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 h-full">
+        <!-- 左侧：个人信息卡片 -->
+        <div class="lg:col-span-2 h-full">
+          <div class="profile-card bg-white shadow-lg animate-slide-in h-full profile-left-card">
+            <div class="relative h-40 bg-gradient-to-r from-primary to-secondary overflow-hidden">
+              <div class="absolute inset-0 bg-black/20"></div>
+              <div class="absolute bottom-0 left-0 right-0 p-6 flex items-end">
+                <div class="w-24 h-24 rounded-full border-4 border-white shadow-lg overflow-hidden bg-white">
+                  <img id="avatarPreview"
+                       src="{{ user_data.get('avatar', url_for('static', filename='images/default-avatar.jpeg')) }}"
+                      alt="Current Avatar"
+                      class="w-full h-full object-cover">
+                </div>
+                <div class="ml-4 mb-4 text-white">
+                  <h2 class="text-xl font-bold" id="displayName">
+                    {{ user_data.name or 'Panda Protector' }}
+                  </h2>
+                  <p class="text-white/80">Animal Protection Volunteer</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="p-6 profile-info-content">
+              <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-semibold text-gray-800">Account Information</h3>
+                <button id="logout" class="btn-danger text-white px-4 py-2 rounded-lg flex items-center">
+                  <i class="fas fa-sign-out-alt mr-2"></i>Log Out
+                </button>
+              </div>
+
+              <div class="space-y-6 profile-info-fields">
+                <!-- 邮箱（只读） -->
+                <div class="input-field">
+                  <label class="block text-sm font-medium text-gray-700 mb-2" for="email">Email</label>
+                  <div class="relative">
+                    <i class="fas fa-envelope absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                    <input type="email" id="email" class="w-full pl-12 pr-4 py-3 bg-gray-50 border-none rounded-lg focus:ring-2 focus:ring-primary focus:ring-opacity-50" value="{{ user_info.email }}" readonly/>
+                  </div>
+                </div>
+
+                <!-- 用户名 -->
+                <div class="input-field">
+                  <label class="block text-sm font-medium text-gray-700 mb-2" for="username">Username</label>
+                  <div class="flex gap-4">
+                    <div class="relative flex-1">
+                      <i class="fas fa-user absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                      <input type="text" id="username" class="w-full pl-12 pr-4 py-3 bg-gray-50 border-none rounded-lg focus:ring-2 focus:ring-primary focus:ring-opacity-50" value="{{ user_data.name or '' }}" readonly/>
+                    </div>
+                    <button id="editUsername" class="btn-primary text-white px-4 py-3 rounded-lg flex items-center">
+                      <i class="fas fa-edit mr-2"></i>Edit
+                    </button>
+                    <button id="saveUsername" class="hidden bg-green-500 text-white px-4 py-3 rounded-lg flex items-center hover:bg-green-600 transition-colors">
+                      <i class="fas fa-check mr-2"></i>Save
+                    </button>
+                  </div>
+                </div>
+
+                <!-- 新密码 -->
+                <div class="input-field">
+                  <label class="block text-sm font-medium text-gray-700 mb-2" for="password">Change Password</label>
+                  <div class="flex gap-4">
+                    <div class="relative flex-1">
+                      <i class="fas fa-lock absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                      <input type="password" id="password" class="w-full pl-12 pr-4 py-3 bg-gray-50 border-none rounded-lg focus:ring-2 focus:ring-primary focus:ring-opacity-50" placeholder="Enter new password"/>
+                    </div>
+                    <button id="updatePassword" class="btn-primary text-white px-4 py-3 rounded-lg flex items-center">
+                      <i class="fas fa-key mr-2"></i>Update
+                    </button>
+                  </div>
+                </div>
+                
+                <!-- 添加额外的空间填充 -->
+                <div class="mt-auto pt-10"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 右侧：头像选择和分数卡片 -->
+        <div class="space-y-6">
+          <!-- 头像选择卡片 -->
+          <div class="profile-card bg-white shadow-lg animate-slide-in" style="animation-delay: 0.2s;">
+            <div class="p-6">
+              <h3 class="text-xl font-semibold text-gray-800 mb-6">Change Avatar</h3>
+              <p class="text-gray-600 mb-6">Choose a new avatar from our collection or upload your own image.</p>
+
+              <button id="changeAvatarBtn" class="btn-primary text-white px-6 py-3 rounded-xl flex items-center mb-8 mx-auto">
+                <i class="fas fa-user-circle mr-2"></i>Select System Avatar
+              </button>
+
+              <div class="avatar-grid" id="avatarGrid">
+                <!-- 头像选项将通过JavaScript动态加载 -->
+              </div>
+            </div>
+          </div>
+
+          <!-- 分数卡片 -->
+          <div class="bg-white rounded-xl shadow-md p-6 flex items-center justify-center animate-fade-in">
+            <div class="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center mr-4">
+              <i class="fas fa-star text-green-500 text-xl"></i>
+            </div>
+            <div>
+              <p class="text-gray-500 text-sm">Total Score</p>
+              <p class="text-2xl font-bold text-gray-800">{{ user_data.get('score', 0) }}</p>
+            </div>
+          </div>
+          
+          <!-- 小熊猫信息卡片 -->
+          <div class="bg-white rounded-xl shadow-md p-6 animate-fade-in" style="animation-delay: 0.3s;">
+            <div class="flex items-center mb-4">
+              <div class="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center mr-4">
+                <i class="fas fa-paw text-red-500 text-xl"></i>
+              </div>
+              <h3 class="text-lg font-semibold text-gray-800">MY RED PANDA</h3>
+            </div>
+            <div id="pandaInfo" class="mt-2">
+              <div class="flex justify-center items-center h-12">
+                <div class="w-6 h-6 border-t-4 border-r-4 border-red-500 border-solid rounded-full animate-spin"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 捐赠统计卡片优化 -->
+      <div class="profile-card mt-8 p-8">
+        <div class="flex items-center justify-between mb-6">
+          <h3 class="text-2xl font-semibold text-gray-800">My Donation Record</h3>
+          <a href="/donation" class="btn-primary text-white px-6 py-3 rounded-xl flex items-center gap-2 hover:shadow-lg transition-all">
+            <i class="fas fa-chart-bar"></i>
+            view detailed records
+          </a>
+        </div>
+        
+        <div class="donation-stats">
+          <div class="stat-card">
+            <div class="stat-icon bg-green-50 text-green-500">
+              <i class="fas fa-heart"></i>
+            </div>
+            <div class="stat-content">
+              <div class="stat-value">{{ user_data.get('donation_count', 0) }}</div>
+              <div class="stat-label">Number of Donations</div>
+            </div>
+          </div>
+          
+          <div class="stat-card">
+            <div class="stat-icon bg-blue-50 text-blue-500">
+              <i class="fas fa-yen-sign"></i>
+            </div>
+            <div class="stat-content">
+              <div class="stat-value">￥{{ "%.2f"|format(user_data.get('total_donation', 0) or 0) }}</div>
+              <div class="stat-label">Total Amount Donated</div>
+            </div>
+          </div>
+          
+          <div class="stat-card">
+            <div class="stat-icon bg-yellow-50 text-yellow-500">
+              <i class="fas fa-medal"></i>
+            </div>
+            <div class="stat-content">
+              <div class="stat-value">{{ get_medal_level(user_data.get('donation_count', 0)) }}</div>
+              <div class="stat-label">Medals Earned</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 头像选择 Modal -->
+  <div id="avatarModalBackdrop" class="hidden fixed inset-0 bg-black/50 z-40 backdrop-blur-sm"></div>
+  <div id="avatarModal" class="hidden fixed z-50 inset-0 flex items-center justify-center">
+    <div class="bg-white w-[500px] max-w-full p-6 rounded-xl shadow-2xl relative transform transition-all animate-fade-in">
+      <h2 class="text-xl font-semibold text-gray-800 mb-4 text-center">Select New Avatar</h2>
+      <div class="mb-6 max-h-[300px] overflow-y-auto" id="avatarGridModal"></div>
+      <div class="flex justify-end space-x-4">
+        <button id="cancelAvatar" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors">Cancel</button>
+        <button id="saveAvatar" class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-opacity-90 transition-colors">Save</button>
+      </div>
+      <button id="closeModalX" class="absolute top-3 right-3 text-gray-500 hover:text-gray-700 transition-colors">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+  </div>
+{% endblock %}
+
+{% block scripts %}
+  <script>
+    // Firebase 配置
+    const firebaseConfig = {
+      apiKey: "AIzaSyChBNhuH-ZTESkATucQItGiVVF4Dng5P5U",
+      authDomain: "animalprotection-ba7f1.firebaseapp.com",
+      databaseURL: "https://animalprotection-ba7f1-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "animalprotection-ba7f1",
+      storageBucket: "animalprotection-ba7f1.appspot.com",
+      messagingSenderId: "618432337560",
+      appId: "1:618432337560:web:705231ab346e20f16062ed",
+      measurementId: "G-PTSTW2N14B"
+    };
+
+    // 先初始化 Firebase 应用
+    firebase.initializeApp(firebaseConfig);
+    
+    // 然后再获取服务
+    const auth = firebase.auth();
+    const db = firebase.database();
+
+    document.addEventListener("DOMContentLoaded", function () {
+      // 退出登录
+      const logoutBtn = document.getElementById('logout');
+      logoutBtn.addEventListener('click', function () {
+        fetch('/logout', { method: 'POST' })
+          .then(response => response.json())
+          .then(data => {
+            if (data.status === "success") {
+              window.location.href = data.redirect_url;
+            }
+          });
+      });
+
+      // 获取小熊猫信息
+      loadPandaInfo();
+  
+      function loadPandaInfo() {
+        // 获取用户邮箱前缀
+        const userEmailPrefix = "{{ session['user']['email'].split('@')[0] }}";
+        const pandaInfoDiv = document.getElementById('pandaInfo');
+
+        try {
+          console.log("Loading panda information, user prefix:", userEmailPrefix);
+          
+          // 先尝试从后端获取数据（更可靠的方法）
+          fetch('/get_panda_info')
+            .then(response => response.json())
+            .then(data => {
+              if (data.success && data.panda_data) {
+                const pandaData = data.panda_data;
+                console.log("Panda data obtained from backend API:", pandaData);
+                
+                // 显示熊猫信息
+                renderPandaInfo(pandaData);
+              } else {
+                // 如果后端API失败，尝试直接从Firebase获取
+                fallbackToFirebase();
+              }
+            })
+            .catch(error => {
+              console.error("Failed to retrieve panda data from the backend, try connecting directly to Firebase:", error);
+              fallbackToFirebase();
+            });
+          
+          function fallbackToFirebase() {
+            console.log("Using Firebase backup solution ..");
+            try {
+              // 从Firebase获取熊猫信息
+              const database = firebase.database();
+              const pandaRef = database.ref('my_panda/' + userEmailPrefix);
+              
+              pandaRef.once('value')
+                .then(function(snapshot) {
+                  const pandaData = snapshot.val();
+                  console.log("Panda data obtained directly from Firebase:", pandaData);
+                  
+                  if (pandaData && pandaData.name) {
+                    renderPandaInfo(pandaData);
+                  } else {
+                    showNoPanda();
+                  }
+                })
+                .catch(function(error) {
+                  console.error("Firebase encountered an error while obtaining panda data:", error);
+                  // 如果是权限错误，视为未认养小熊猫
+                  if (error.message && error.message.includes("permission_denied")) {
+                    showNoPanda();
+                  } else {
+                    showError("Unable to retrieve data from Firebase:" + error.message);
+                  }
+                });
+            } catch (e) {
+              console.error("Firebase operation error:", e);
+              showError("Firebase operation failed:" + e.message);
+            }
+          }
+          
+          function renderPandaInfo(pandaData) {
+            // 格式化日期
+            let adoptedDateText = 'Unknown date';
+            if (pandaData.adopted_at) {
+              try {
+                const adoptedDate = new Date(pandaData.adopted_at);
+                adoptedDateText = adoptedDate.toLocaleDateString();
+              } catch (e) {
+                console.error("Date formatting error:", e);
+              }
+            }
+            
+            // 显示熊猫信息
+            pandaInfoDiv.innerHTML = `
+              <div class="text-center">
+                <div class="flex items-center justify-center mt-3 mb-2">
+                  <i class="fas fa-heart text-red-500 mr-2"></i>
+                  <p class="text-xl font-semibold text-gray-800">${pandaData.name}</p>
+                </div>
+                <p class="text-gray-600 text-sm">Date of adoption: ${adoptedDateText}</p>
+                <a href="/my_panda" class="mt-3 inline-block px-4 py-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition-colors">
+                  <i class="fas fa-eye mr-1"></i> View my little panda
+                </a>
+              </div>
+            `;
+          }
+          
+          function showNoPanda() {
+            // 显示未认养信息
+            pandaInfoDiv.innerHTML = `
+              <div class="text-center py-3">
+                <p class="text-gray-600 mb-3">You have not adopted a red panda yet</p>
+                <a href="/my_panda" class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-opacity-90 transition-colors inline-block">
+                  <i class="fas fa-paw mr-1"></i> Click to go to adoption
+                </a>
+              </div>
+            `;
+          }
+          
+          function showError(message) {
+            pandaInfoDiv.innerHTML = `
+              <div class="text-center py-3">
+                <p class="text-red-500">Loading failed: ${message}</p>
+                <button onclick="loadPandaInfo()" class="mt-2 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors">
+                  <i class="fas fa-sync-alt mr-1"></i> Retry
+                </button>
+              </div>
+            `;
+          }
+        } catch (e) {
+          console.error("Overall error loading panda information:", e);
+          // 检查是否是权限错误
+          if (e.message && e.message.includes("permission_denied")) {
+            showNoPanda();
+          } else {
+            pandaInfoDiv.innerHTML = `
+              <div class="text-center py-3">
+                <p class="text-red-500">Data loading failed: ${e.message}</p>
+                <button onclick="loadPandaInfo()" class="mt-2 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors">
+                  <i class="fas fa-sync-alt mr-1"></i> Retry
+                </button>
+              </div>
+            `;
+          }
+        }
+      }
+
+      // 更换头像相关逻辑
+      const avatarBaseUrl = "{{ url_for('static', filename='images/') }}";
+      const avatarPreview = document.getElementById('avatarPreview');
+      let originalAvatar = avatarPreview.src;
+      let selectedAvatar = null;
+      const changeAvatarBtn = document.getElementById('changeAvatarBtn');
+      const avatarModal = document.getElementById('avatarModal');
+      const avatarModalBackdrop = document.getElementById('avatarModalBackdrop');
+      const avatarGridModal = document.getElementById('avatarGridModal');
+      const cancelAvatarBtn = document.getElementById('cancelAvatar');
+      const saveAvatarBtn = document.getElementById('saveAvatar');
+      const closeModalX = document.getElementById('closeModalX');
+
+      changeAvatarBtn.addEventListener('click', openAvatarModal);
+      cancelAvatarBtn.addEventListener('click', closeAvatarModal);
+      closeModalX.addEventListener('click', closeAvatarModal);
+      avatarModalBackdrop.addEventListener('click', closeAvatarModal);
+
+      function openAvatarModal() {
+        avatarModal.classList.remove('hidden');
+        avatarModalBackdrop.classList.remove('hidden');
+        selectedAvatar = null;
+        loadAvatarOptions();
+      }
+
+      function closeAvatarModal() {
+        avatarModal.classList.add('hidden');
+        avatarModalBackdrop.classList.add('hidden');
+      }
+
+      function loadAvatarOptions() {
+        const avatarList = [
+          "default-avatar.jpeg", "1.jpeg", "2.jpeg", "3.jpeg", "4.jpeg", "5.jpeg",
+          "6.jpeg", "7.jpeg", "8.jpeg", "9.jpeg", "10.jpeg", "11.jpeg", "12.jpeg",
+          "13.jpeg", "14.jpeg", "15.jpeg", "16.jpeg", "17.jpeg"
+        ];
+        avatarGridModal.innerHTML = "";
+        avatarList.forEach((file) => {
+          const img = document.createElement('img');
+          img.src = avatarBaseUrl + file;
+          img.alt = file;
+          img.className = "avatar-option w-16 h-16 object-cover";
+          img.addEventListener('click', function () {
+            document.querySelectorAll('.avatar-option').forEach(el => el.classList.remove('selected'));
+            img.classList.add('selected');
+            selectedAvatar = img.src;
+          });
+          avatarGridModal.appendChild(img);
+        });
+      }
+
+      saveAvatarBtn.addEventListener('click', function () {
+        if (!selectedAvatar) {
+          alert("Please select an avatar first!");
+          return;
+        }
+        if (selectedAvatar === originalAvatar) {
+          alert("You chose the same avatar. It seems you really like this image!");
+        } else {
+          fetch('/update_avatar', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ avatar: selectedAvatar })
+          })
+          .then(response => response.json())
+          .then(data => {
+            if (data.status === "success") {
+              alert("Avatar updated successfully!");
+              originalAvatar = selectedAvatar;
+              avatarPreview.src = selectedAvatar;
+            } else {
+              alert("Error updating avatar: " + data.message);
+            }
+          })
+          .catch(error => {
+            console.error("Error:", error);
+            alert("An error occurred while updating the avatar.");
+          });
+        }
+        closeAvatarModal();
+      });
+
+      // 编辑/保存用户名
+      const editUsernameBtn = document.getElementById('editUsername');
+      const saveUsernameBtn = document.getElementById('saveUsername');
+      const usernameInput = document.getElementById('username');
+
+      editUsernameBtn.addEventListener('click', function () {
+        usernameInput.removeAttribute('readonly');
+        editUsernameBtn.classList.add('hidden');
+        saveUsernameBtn.classList.remove('hidden');
+      });
+
+      saveUsernameBtn.addEventListener('click', function () {
+        const newUsername = usernameInput.value.trim();
+        if (!newUsername) {
+          alert("Username cannot be empty!");
+          return;
+        }
+        fetch('/update_username', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username: newUsername })
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.status === "success") {
+            alert("Username updated successfully!");
+            usernameInput.setAttribute('readonly', 'true');
+            editUsernameBtn.classList.remove('hidden');
+            saveUsernameBtn.classList.add('hidden');
+            const displayName = document.getElementById('displayName');
+            if (displayName) {
+              displayName.textContent = newUsername;
+            }
+          } else {
+            alert("Error updating username: " + data.message);
+          }
+        });
+      });
+
+      // 更新密码
+      const updatePasswordBtn = document.getElementById('updatePassword');
+      const passwordInput = document.getElementById('password');
+      updatePasswordBtn.addEventListener('click', function () {
+        const newPassword = passwordInput.value;
+        if (newPassword.length < 6) {
+          alert("Password must be at least 6 characters!");
+          return;
+        }
+        fetch('/update_password', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ password: newPassword })
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.status === "success") {
+            alert("Password updated successfully!");
+            passwordInput.value = "";
+          } else {
+            alert("Error updating password: " + data.message);
+          }
+        });
+      });
+    });
+  </script>
+{% endblock %}
+
+

@@ -1,0 +1,1098 @@
+{% extends "base.html" %}
+
+{% block title %}Encyclopedia - Dwen Dwen's Neighbour{% endblock %}
+
+{% block head %}
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+<script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#2E8B57',
+            secondary: '#4CAF50',
+            accent: '#FFA726',
+            cr: '#EF4444',
+            en: '#F59E0B',
+            vu: '#8B5CF6',
+            nt: '#3B82F6',
+            lc: '#10B981'
+          },
+          borderRadius: {
+            'xl': '16px',
+            '2xl': '20px',
+            '3xl': '24px'
+          },
+          animation: {
+            'float': 'float 6s ease-in-out infinite',
+            'fade-in': 'fadeIn 1s ease-in-out',
+            'slide-in': 'slideIn 0.5s ease-out',
+            'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+            'bounce-slow': 'bounce 2s infinite'
+          },
+          keyframes: {
+            float: {
+              '0%, 100%': { transform: 'translateY(0)' },
+              '50%': { transform: 'translateY(-10px)' }
+            },
+            fadeIn: {
+              '0%': { opacity: '0' },
+              '100%': { opacity: '1' }
+            },
+            slideIn: {
+              '0%': { transform: 'translateX(-100%)' },
+              '100%': { transform: 'translateX(0)' }
+            },
+            bounce: {
+              '0%, 100%': { transform: 'translateY(0)' },
+              '50%': { transform: 'translateY(-10px)' }
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+
+  <style>
+    body {
+      min-height: 1024px;
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #f6f8f9 0%, #e9ecef 100%);
+    }
+
+    /* 地图区域样式 */
+    .map-container {
+      background: white;
+      border-radius: 24px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .map-container::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 5px;
+      background: linear-gradient(90deg, #2E8B57, #4CAF50, #8BC34A, #2E8B57);
+      background-size: 200% 100%;
+      animation: gradient 3s linear infinite;
+    }
+
+    @keyframes gradient {
+      0% { background-position: 0% 0%; }
+      100% { background-position: 200% 0%; }
+    }
+
+    .map-container:hover {
+      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+      transform: translateY(-5px);
+    }
+
+    .chart {
+      border-radius: 16px;
+      overflow: hidden;
+    }
+
+    /* 滚动指示器 */
+    .scroll-indicator {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-top: 1rem;
+      margin-bottom: 2rem;
+      color: #2E8B57;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .scroll-indicator span {
+      font-size: 0.9rem;
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+    }
+
+    .scroll-indicator i {
+      font-size: 1.2rem;
+      animation: bounce-slow 2s infinite;
+    }
+
+    .scroll-indicator:hover {
+      transform: translateY(3px);
+    }
+
+    /* 动物卡片样式 */
+    .animal-card {
+      background: white;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+      transition: all 0.4s ease;
+      position: relative;
+      border: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    .animal-card:hover {
+      transform: translateY(-10px);
+      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+    }
+
+    .animal-card img {
+      transition: transform 0.5s ease;
+    }
+
+    .animal-card:hover img {
+      transform: scale(1.05);
+    }
+
+    .animal-card-content {
+      padding: 1.5rem;
+    }
+
+    .animal-card-title {
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .animal-card-title i {
+      color: #2E8B57;
+    }
+
+    .animal-card-type {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      padding: 0.25rem 0.75rem;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: white;
+    }
+
+    /* 省份区域滑动样式 */
+    .area-scroll-container {
+      display: flex;
+      overflow-x: auto;
+      scrollbar-width: thin;
+      scrollbar-color: #2E8B57 #f0f0f0;
+      white-space: nowrap;
+      padding: 0.5rem 0;
+      margin-bottom: 0.5rem;
+      margin-top: 0.5rem;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .area-scroll-container::-webkit-scrollbar {
+      height: 6px;
+    }
+
+    .area-scroll-container::-webkit-scrollbar-track {
+      background: #f0f0f0;
+      border-radius: 10px;
+    }
+
+    .area-scroll-container::-webkit-scrollbar-thumb {
+      background-color: #2E8B57;
+      border-radius: 10px;
+    }
+
+    .area-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.25rem 0.75rem;
+      margin-right: 0.5rem;
+      background-color: #e8f5e9;
+      border-radius: 15px;
+      font-size: 0.85rem;
+      color: #2E8B57;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .area-badge i {
+      margin-right: 0.35rem;
+      font-size: 0.85rem;
+    }
+
+    /* 搜索和筛选区域 */
+    .search-container {
+      background: white;
+      border-radius: 16px;
+      padding: 1.5rem;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+      margin-bottom: 2rem;
+      position: relative;
+    }
+
+    .search-container::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 5px;
+      background: linear-gradient(90deg, #2E8B57, #4CAF50, #8BC34A, #2E8B57);
+      background-size: 200% 100%;
+      animation: gradient 3s linear infinite;
+      border-radius: 16px 16px 0 0;
+    }
+
+    .search-input {
+      border: 2px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+      transition: all 0.3s ease;
+    }
+
+    .search-input:focus {
+      border-color: #2E8B57;
+      box-shadow: 0 0 0 3px rgba(46, 139, 87, 0.1);
+    }
+
+    .filter-button {
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      font-weight: 500;
+      transition: all 0.3s ease;
+    }
+
+    .filter-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    /* 页面标题样式 */
+    .page-title {
+      font-family: 'Montserrat', sans-serif;
+      color: #2E8B57;
+      text-align: center;
+      margin-bottom: 1rem;
+      position: relative;
+      display: inline-block;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+    }
+
+    .page-title::after {
+      content: '';
+      position: absolute;
+      bottom: -5px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 50%;
+      height: 3px;
+      background: linear-gradient(90deg, transparent, #2E8B57, transparent);
+    }
+
+    /* 动画效果 */
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes slideIn {
+      from { transform: translateY(20px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    .animate-fade-in {
+      animation: fadeIn 1s ease-in-out;
+    }
+
+    .animate-slide-in {
+      animation: slideIn 0.5s ease-out;
+    }
+     /* 背景装饰 */
+    .bg-decoration {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      overflow: hidden;
+    }
+
+    .bg-pattern {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%232E8B57' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    }
+
+    .bg-gradient {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle at 20% 20%, rgba(46, 139, 87, 0.1) 0%, transparent 50%),
+                  radial-gradient(circle at 80% 80%, rgba(76, 175, 80, 0.1) 0%, transparent 50%);
+    }
+
+    /* Override the paw icon color */
+    .nav-container i.fas.fa-paw {
+      color: #2E8B57 !important;
+    }
+
+  </style>
+  <script src="{{ url_for('static', filename='js/echarts.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/jquery-3.1.1.min.js') }}"></script>
+
+{% endblock %}
+
+{% block content %}
+<body>
+  <!-- 背景装饰 -->
+  <div class="bg-decoration">
+    <div class="bg-pattern"></div>
+    <div class="bg-gradient"></div>
+  </div>
+
+
+  <!-- ====================== 页面主体内容 ====================== -->
+  <div class="pt-8 max-w-[1440px] mx-auto px-4">
+    <div class="container">
+      <p class="text-center text-gray-600 mb-8">
+      Click on the area on the map to explore China's unique animal world! <br>
+      Every province hides precious wildlife, let's learn about their stories together🗺️🐼✨</p>
+      <!-- 地图区域 -->
+      <div class="map-container animate-fade-in">
+        <div id="chart" class="chart" style="height: 530px;"></div>
+      </div>
+
+      <!-- 滚动指示器 -->
+      <div class="scroll-indicator" onclick="scrollToSearch()">
+        <span>Scroll down to explore more</span>
+        <i class="fas fa-chevron-down"></i>
+      </div>
+    </div>
+  </div>
+
+  <!-- 动物卡片区域 -->
+  <div class="max-w-[1440px] mx-auto p-6">
+
+    <!-- 搜索和筛选区域 -->
+    <div class="search-container animate-slide-in">
+      <!-- 搜索栏和提示文字在同一行 -->
+      <div class="mb-6 flex flex-row items-end justify-between gap-4">
+        <div class="text-gray-600 font-medium w-2/5 flex-shrink-0">
+          <span>Click on the conservation status tags to filter animals👇</span>
+        </div>
+        <div class="flex items-center space-x-4 w-3/5">
+          <div class="relative flex-grow">
+            <input type="text" id="searchInput" class="search-input w-full pl-10" placeholder="search animals by scientific/English/Chinese name">
+            <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+          </div>
+          <button onclick="fetchAnimals()" class="px-4 py-3 bg-primary text-white rounded-lg hover:bg-green-700 transition-all flex items-center gap-2 justify-center flex-shrink-0">
+            <i class="fas fa-search"></i>
+            <span>Search</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- 分类按钮 -->
+      <div class="flex flex-wrap gap-2">
+        <button onclick="filterByType('ALL')" class="filter-button bg-gray-500 text-white">
+          <i class="fas fa-globe mr-2"></i>View All
+        </button>
+        <button onclick="filterByType('CR')" class="filter-button bg-cr text-white">
+          <i class="fas fa-radiation-alt mr-2"></i>Critically Endangered (CR)
+        </button>
+        <button onclick="filterByType('EN')" class="filter-button bg-en text-white">
+          <i class="fas fa-exclamation-circle mr-2"></i>Endangered (EN)
+        </button>
+        <button onclick="filterByType('VU')" class="filter-button bg-vu text-white">
+          <i class="fas fa-exclamation-triangle mr-2"></i>Vulnerable (VU)
+        </button>
+        <button onclick="filterByType('NT')" class="filter-button bg-nt text-white">
+          <i class="fas fa-info-circle mr-2"></i>Near Threatened (NT)
+        </button>
+        <button onclick="filterByType('LC')" class="filter-button bg-lc text-white">
+          <i class="fas fa-check-circle mr-2"></i>Least Concern (LC)
+        </button>
+      </div>
+    </div>
+
+    <!-- 动物卡片展示区 -->
+    <div id="animalList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      <!-- 动物卡片将被 JavaScript 动态填充 -->
+    </div>
+  </div>
+<script src="https://code.responsivevoice.org/responsivevoice.js?key=jUPC9Ctv"></script>
+{% endblock %}
+
+{% block scripts %}
+
+  <script type="text/javascript">
+    // 基于准备好的dom，初始化echarts图表
+    var myChart = echarts.init(document.getElementById('chart'));
+
+    // 从 Flask 传递过来的省份地图数据 URL
+    var provinces = {{ provinces | tojson }};
+    var chinaMapUrl = "{{ china_map_url }}";
+
+    // 加载中国地图数据
+    $.get(chinaMapUrl, function(chinaJson) {
+      echarts.registerMap('china', chinaJson);
+
+      var option = {
+        title: {
+          text: 'Distribution Map of Animals in China',
+          left: 'center',
+          textStyle: {
+            fontSize: 28,
+            fontWeight: 'bold',
+            color: '#2E8B57',
+            fontFamily: 'Montserrat, sans-serif'
+          }
+        },
+        tooltip: {
+          trigger: 'item',
+          formatter: '{b}'
+        },
+        visualMap: {
+          min: 0,
+          max: 32,
+          left: 'left',
+          top: 'bottom',
+          text: [' ', 'number of species'],
+          calculable: true,
+          inRange: {
+            color: ['#e0f3f8', '#2E8B57']
+          }
+        },
+        toolbox: {
+          show: true,
+          orient: 'vertical',
+          left: 'right',
+          top: 'center',
+          feature: {
+            restore: {
+              title: 'Reset View',
+              show: true
+            },
+            saveAsImage: {
+              title: 'Save As Image',
+              show: true
+            }
+          }
+        },
+        series: [{
+          name: '中国',
+          type: 'map',
+          map: 'china',
+          roam: true,
+          emphasis: {
+            label: {
+              show: true
+            },
+            itemStyle: {
+              areaColor: '#4CAF50'
+            }
+          },
+          data: [
+            {name: '北京', value: 9},
+            {name: '天津', value: 8},
+            {name: '上海', value: 3},
+            {name: '重庆', value: 22},
+            {name: '河北', value: 9},
+            {name: '河南', value: 10},
+            {name: '云南', value: 29},
+            {name: '辽宁', value: 8},
+            {name: '黑龙江', value: 13},
+            {name: '湖南', value: 13},
+            {name: '安徽', value: 14},
+            {name: '山东', value: 13},
+            {name: '新疆', value: 17},
+            {name: '江苏', value: 10},
+            {name: '浙江', value: 19},
+            {name: '江西', value: 15},
+            {name: '湖北', value: 18},
+            {name: '广西', value: 18},
+            {name: '甘肃', value: 25},
+            {name: '山西', value: 8},
+            {name: '内蒙古', value: 12},
+            {name: '陕西', value: 15},
+            {name: '吉林', value: 13},
+            {name: '福建', value: 13},
+            {name: '贵州', value: 18},
+            {name: '广东', value: 15},
+            {name: '青海', value: 16},
+            {name: '西藏', value: 18},
+            {name: '四川', value: 32},
+            {name: '宁夏', value: 13},
+            {name: '海南', value: 6},
+            {name: '台湾', value: 4},
+          ]
+        }]
+      };
+
+      // 使用配置项显示图表
+      myChart.setOption(option);
+
+      // 点击事件处理
+      var timeFn;
+      myChart.on('click', function(params) {
+        clearTimeout(timeFn);
+        timeFn = setTimeout(function() {
+            var name = params.name;
+            var mapCode = provinces[name];
+            if (!mapCode) {
+                alert('No map displaying this area');
+                return;
+            }
+            // 跳转到省份详情页面
+            window.location.href = `/province/${name}`;
+        }, 250);
+      });
+    });
+
+    // 滚动到搜索区域
+    function scrollToSearch() {
+      const searchContainer = document.querySelector('.search-container');
+      searchContainer.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // 为搜索框添加回车键事件
+    document.addEventListener("DOMContentLoaded", function() {
+      const searchInput = document.getElementById("searchInput");
+      searchInput.addEventListener("keypress", function(event) {
+        if (event.key === "Enter") {
+          event.preventDefault();
+          fetchAnimals();
+        }
+      });
+      
+      // 初始加载动物列表
+      fetchAnimals();
+    });
+
+    let selectedType = '';
+
+    function fetchAnimals() {
+      const query = document.getElementById("searchInput").value.trim();
+      console.log("search content:", query);
+      console.log("filter type:", selectedType);
+
+      fetch(`/get_animal?search=${encodeURIComponent(query)}&type=${encodeURIComponent(selectedType)}`)
+              .then(response => response.json())
+              .then(data => {
+                console.log("API return data:", data);
+
+                if (data.status === "success") {
+                  const animalList = document.getElementById("animalList");
+                  animalList.innerHTML = "";
+
+                  data.animals.forEach((animal, index) => {
+                    console.log("handle animal:", animal);
+
+                    const cnName = animal.cn ? animal.cn : "unknown"; // 确保 cn 不为空
+                    const categoryColor = getCategoryColor(animal.type);
+                    const categoryIcon = getCategoryIcon(animal.type);
+                    
+                    // 处理区域/省份数据，分割为数组
+                    const areas = animal.area ? animal.area.split(',').map(area => area.trim()) : [];
+
+                    const card = document.createElement("div");
+                    card.className = "animal-card animate-slide-in";
+                    card.style.animationDelay = `${index * 0.1}s`;
+
+                    card.innerHTML = `
+                      <div class="animal-card-type" style="background-color: ${categoryColor};">
+                        <i class="${categoryIcon} mr-1"></i>${animal.type}
+                      </div>
+                      <div class="overflow-hidden">
+                        <img src="${animal.photo}" class="w-full h-56 object-cover" alt="${animal.name}">
+                      </div>
+                      <div class="animal-card-content">
+                        <div class="animal-card-title">
+                          <i class="fas fa-paw"></i>
+                          <span class="cursor-pointer" onclick="playWord('${animal.name}', 'en')">${animal.name}</span>
+                        </div>
+                        <p class="text-base text-gray-700 mt-1">
+                          <span class="cursor-pointer" onclick="playWord('${animal.en}', 'en')">${animal.en}</span>
+                          <span class="cursor-pointer" onclick="playWord('${cnName}', 'zh')">(${cnName})</span>
+                        </p>
+                        <div class="area-scroll-container">
+                          ${areas.map(area => `
+                            <div class="area-badge">
+                              <i class="fas fa-map-marker-alt"></i>${area}
+                            </div>
+                          `).join('')}
+                        </div>
+                        <div class="mt-2 flex justify-between items-center">
+                          <a href="javascript:void(0)" onclick="showDetails('${animal.id}')" class="text-primary hover:text-green-700 font-medium flex items-center">
+                            <i class="fas fa-info-circle mr-1"></i>
+                            <span>View Encyclopedia</span>
+                          </a>
+                          <button onclick="playSound('${animal.soundUrl}')" class="px-3 py-1.5 bg-blue-100 text-blue-600 rounded-lg hover:bg-blue-200 transition-all flex items-center">
+                            <i class="fas fa-volume-up mr-1"></i>
+                            <span>Calls</span>
+                          </button>
+                        </div>
+                      </div>
+                    `;
+                    animalList.appendChild(card);
+                  });
+                }
+              })
+              .catch(error => console.error("Error fetching animals:", error));
+    }
+
+    function playSound(url) {
+      if (!url || url === "undefined") {
+        console.error("The audio URL is empty or undefined");
+        return;
+      }
+
+      const fullUrl = window.location.origin + url;  // 确保 URL 是完整路径
+      console.log("Play audio URL:", fullUrl);
+
+      const audio = new Audio(fullUrl);
+      audio.play().then(() => {
+        console.log("Audio playback successful");
+      }).catch(error => {
+        console.error("Audio playback failed:", error);
+      });
+    }
+
+    function filterByType(type) {
+      selectedType = type === 'ALL' ? '' : type;
+      fetchAnimals();
+    }
+
+    function getCategoryColor(type) {
+      switch (type) {
+        case 'CR':
+          return '#EF4444';
+        case 'EN':
+          return '#F59E0B';
+        case 'VU':
+          return '#8B5CF6';
+        case 'NT':
+          return '#3B82F6';
+        case 'LC':
+          return '#10B981';
+        default:
+          return '#A9A9A9';
+      }
+    }
+
+    function getCategoryIcon(type) {
+      switch (type) {
+        case 'EN':
+          return 'fas fa-exclamation-circle'; // Endangered
+        case 'CR':
+          return 'fas fa-radiation-alt'; // Critically Endangered
+        case 'VU':
+          return 'fas fa-exclamation-triangle'; // Vulnerable
+        case 'NT':
+          return 'fas fa-info-circle'; // Near Threatened
+        case 'LC':
+          return 'fas fa-check-circle'; // Least Concern
+        default:
+          return 'fas fa-question-circle'; // Default
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", fetchAnimals);
+
+    function playWord(word, lang) {
+      if (!word) return;
+
+      let voice = lang === "zh" ? "Chinese Female" : "UK English Female";
+
+      if (!responsiveVoice.voiceSupport()) {
+        console.error("Speech synthesis is not supported");
+        return;
+      }
+
+      responsiveVoice.speak(word, voice, {
+        rate: 1,
+        pitch: 1
+      });
+    }
+
+    // 显示动物详情弹窗
+    function showDetails(animalId) {
+      console.log("Get Details, ID:", animalId);
+      fetch(`/fetch-details/${animalId}`)
+        .then(response => {
+          console.log("Response status:", response.status);
+          return response.json();
+        })
+        .then(data => {
+          console.log("get data:", data);
+          if (data.status === "success") {
+            // 创建弹窗
+            const modal = document.createElement('div');
+            modal.className = 'details-modal';
+            modal.innerHTML = `
+              <div class="details-modal-overlay">
+                <div class="details-modal-content">
+                  <button class="details-modal-close" onclick="closeDetailsModal()">&times;</button>
+                  <div class="details-content-container">
+                    <div class="details-border-decoration details-border-left"></div>
+                    <div class="details-border-decoration details-border-right"></div>
+                    <div class="details-content">
+                      <h1>${data.title}</h1>
+                      ${data.content}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            `;
+            document.body.appendChild(modal);
+
+            // 禁止背景滚动
+            document.body.style.overflow = 'hidden';
+
+            // 处理内容排版
+            const contentElem = modal.querySelector('.details-content');
+
+            // 调整图片排版
+            setTimeout(() => {
+              // 获取所有的图片容器
+              const thumbs = contentElem.querySelectorAll('.thumb, .thumbinner');
+              thumbs.forEach(thumb => {
+                // 如果不是右浮动的，设为右浮动
+                if (!thumb.style.float) {
+                  thumb.style.float = 'right';
+                  thumb.style.margin = '0 0 15px 20px';
+                  thumb.style.maxWidth = '350px';
+                }
+              });
+
+              // 处理所有普通图片
+              const standaloneImages = contentElem.querySelectorAll('img:not(.thumbinner img):not(figure img)');
+              standaloneImages.forEach(img => {
+                // 如果不在某个容器内，把它包在一个figure里
+                if (img.parentElement.tagName !== 'FIGURE' &&
+                    !img.parentElement.classList.contains('thumbinner') &&
+                    !img.parentElement.classList.contains('infobox')) {
+                  const figure = document.createElement('figure');
+                  img.parentNode.insertBefore(figure, img);
+                  figure.appendChild(img);
+                  figure.style.float = 'right';
+                  figure.style.margin = '0 0 15px 20px';
+                  figure.style.maxWidth = '350px';
+                  figure.style.padding = '8px';
+                  figure.style.backgroundColor = '#f8f9fa';
+                  figure.style.border = '1px solid #eaecf0';
+                  figure.style.borderRadius = '4px';
+                }
+              });
+
+              // 清除浮动
+              const clearDiv = document.createElement('div');
+              clearDiv.style.clear = 'both';
+              contentElem.appendChild(clearDiv);
+            }, 100); // 短暂延时确保DOM已更新
+          } else {
+            console.error("Failed to retrieve details:", data);
+            alert("Unable to obtain animal details, please try again later.");
+          }
+        })
+        .catch(error => {
+          console.error("Error in obtaining details:", error);
+          alert("Unable to obtain animal details, please try again later.");
+        });
+    }
+
+    // 关闭详情弹窗
+    function closeDetailsModal() {
+      const modal = document.querySelector('.details-modal');
+      if (modal) {
+        modal.remove();
+        // 恢复背景滚动
+        document.body.style.overflow = '';
+      }
+    }
+
+    // 添加弹窗样式
+    const detailsStyle = document.createElement('style');
+    detailsStyle.textContent = `
+      .details-modal {
+        position: fixed;
+        z-index: 1000;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+      }
+
+      .details-modal-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(255, 255, 255, 0.3);
+        backdrop-filter: blur(3px);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1001;
+      }
+
+      .details-modal-content {
+        background: #fff;
+        width: 90%;
+        max-width: 1200px;
+        max-height: 90vh;
+        border-radius: 8px;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+        position: relative;
+        overflow-y: auto;
+      }
+
+      .details-modal-close {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        background: none;
+        border: none;
+        font-size: 24px;
+        cursor: pointer;
+        color: #666;
+        z-index: 1002;
+      }
+
+      .details-modal-close:hover {
+        color: #333;
+      }
+
+      .details-content-container {
+        position: relative;
+        padding: 40px;
+        background: #fff;
+        font-family: 'Georgia', serif;
+        line-height: 1.8;
+      }
+
+      .details-border-decoration {
+        position: absolute;
+        top: 15px;
+        bottom: 15px;
+        width: 12px;
+        background-repeat: repeat-y;
+        z-index: 1;
+        opacity: 0.8;
+      }
+
+      .details-border-left {
+        left: 15px;
+        background-image: url("data:image/svg+xml,%3Csvg width='12' height='100' viewBox='0 0 12 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 0 L1 100' stroke='%232E8B57' stroke-width='2' stroke-opacity='0.9'/%3E%3Cpath d='M6 0 L6 100' stroke='%232E8B57' stroke-width='1' stroke-opacity='0.6'/%3E%3Cpath d='M11 0 L11 100' stroke='%232E8B57' stroke-width='0.5' stroke-opacity='0.4'/%3E%3C/svg%3E");
+      }
+
+      .details-border-right {
+        right: 15px;
+        background-image: url("data:image/svg+xml,%3Csvg width='12' height='100' viewBox='0 0 12 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 0 L11 100' stroke='%232E8B57' stroke-width='2' stroke-opacity='0.9'/%3E%3Cpath d='M6 0 L6 100' stroke='%232E8B57' stroke-width='1' stroke-opacity='0.6'/%3E%3Cpath d='M1 0 L1 100' stroke='%232E8B57' stroke-width='0.5' stroke-opacity='0.4'/%3E%3C/svg%3E");
+      }
+
+      .details-content {
+        position: relative;
+        z-index: 2;
+        padding: 0 40px;
+      }
+
+      .details-content h1 {
+        font-family: 'Times New Roman', serif;
+        font-size: 2.5em;
+        color: #2E8B57;
+        text-align: center;
+        margin-bottom: 30px;
+        position: relative;
+        padding-bottom: 15px;
+      }
+
+      .details-content h1::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 100px;
+        height: 3px;
+        background: linear-gradient(90deg, transparent, #2E8B57, transparent);
+      }
+
+      /* 专业百科风格的内容排版 */
+      .details-content .thumbinner {
+        float: right;
+        margin: 0 0 15px 20px;
+        max-width: 350px;
+        border: 1px solid #eaecf0;
+        background-color: #f8f9fa;
+        padding: 10px;
+        border-radius: 4px;
+      }
+
+      .details-content .thumbcaption {
+        font-size: 0.85em;
+        line-height: 1.4;
+        padding: 5px;
+        color: #555;
+        text-align: center;
+      }
+
+      .details-content figure {
+        margin: 0 0 15px 20px;
+        padding: 8px;
+        float: right;
+        max-width: 350px;
+        background-color: #f8f9fa;
+        border: 1px solid #eaecf0;
+        border-radius: 4px;
+      }
+
+      .details-content figcaption {
+        font-size: 0.85em;
+        line-height: 1.4;
+        padding: 5px;
+        color: #555;
+        text-align: center;
+      }
+
+      .details-content p {
+        font-size: 1.1em;
+        line-height: 1.8;
+        margin-bottom: 20px;
+        color: #333;
+        text-align: justify;
+      }
+
+      .details-content img {
+        max-width: 100%;
+        height: auto;
+        display: block;
+        margin: 5px auto;
+        border-radius: 4px;
+      }
+
+      .details-content table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 20px 0;
+      }
+
+      .details-content table, .details-content th, .details-content td {
+        border: 1px solid #ddd;
+      }
+
+      .details-content th, .details-content td {
+        padding: 10px;
+        text-align: left;
+      }
+
+      .details-content th {
+        background-color: #f1f1f1;
+      }
+
+      .details-content blockquote {
+        border-left: 4px solid #2E8B57;
+        padding: 15px 20px;
+        margin: 20px 0;
+        background: #f8f9fa;
+        font-style: italic;
+        color: #444;
+      }
+
+      .details-content a {
+        color: #2E8B57;
+        text-decoration: none;
+        border-bottom: 1px solid #2E8B57;
+        transition: all 0.3s ease;
+      }
+
+      .details-content a:hover {
+        color: #1b5e20;
+        border-bottom-color: #1b5e20;
+      }
+
+      .details-content h2 {
+        font-size: 1.8em;
+        color: #2E8B57;
+        margin-top: 40px;
+        margin-bottom: 20px;
+        border-bottom: 1px solid #eee;
+        padding-bottom: 10px;
+      }
+
+      .details-content h3 {
+        font-size: 1.5em;
+        color: #2E8B57;
+        margin-top: 30px;
+        margin-bottom: 15px;
+      }
+
+      .details-content ul, .details-content ol {
+        margin: 20px 0;
+        padding-left: 30px;
+      }
+
+      .details-content li {
+        margin-bottom: 10px;
+        line-height: 1.6;
+      }
+
+      /* 清除浮动，确保内容正确流动 */
+      .details-content::after {
+        content: "";
+        display: table;
+        clear: both;
+      }
+
+      /* 高亮样式 */
+      .details-content .highlight {
+        background-color: rgba(46, 139, 87, 0.1);
+        padding: 2px 5px;
+        border-radius: 2px;
+      }
+
+      /* 适配维基百科特定样式 */
+      .details-content .infobox {
+        float: right;
+        clear: right;
+        margin: 0 0 1em 1em;
+        max-width: 22em;
+        border: 1px solid #a2a9b1;
+        border-spacing: 3px;
+        background-color: #f8f9fa;
+        font-size: 0.9em;
+      }
+    `;
+    document.head.appendChild(detailsStyle);
+
+    // 添加事件监听，点击ESC键或点击背景关闭弹窗
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        closeDetailsModal();
+      }
+    });
+
+    document.addEventListener('click', function(e) {
+      if (e.target.classList.contains('details-modal-overlay')) {
+        closeDetailsModal();
+      }
+    });
+  </script>
+
+  <!-- 若还需要 Bootstrap JS，请保留 -->
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+{% endblock %}

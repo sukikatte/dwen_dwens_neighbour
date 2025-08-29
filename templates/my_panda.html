@@ -1,0 +1,3555 @@
+{% extends "base.html" %}
+
+{% block title %}My Red Panda - Dwen Dwen's Neighbour{% endblock %}
+
+{% block head %}
+    <style>
+        /* Cartoon style decoration - without modifying layout structure */
+        body {
+            font-family: 'Comic Sans MS', 'Marker Felt', 'Arial Rounded MT Bold', sans-serif;
+            background-color: #FFFBF5;
+            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23F9D4D4' fill-opacity='0.2'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        }
+
+        /* Earn Score Link Styles */
+        .earn-score-link {
+            position: relative;
+            margin: 5px 0 15px 0;
+            text-align: center;
+        }
+
+        .earn-score-link a {
+            color: #FF6B6B;
+            font-size: 14px;
+            text-decoration: none;
+            font-weight: 500;
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 15px;
+            background-color: #FFFBF5;
+            border: 1px dashed #FF9494;
+            transition: all 0.2s ease;
+        }
+
+        .earn-score-link a:hover {
+            background-color: #FFE5E5;
+            transform: translateY(-2px);
+            box-shadow: 0 3px 5px rgba(0,0,0,0.1);
+        }
+
+        .earn-score-link .fas {
+            margin-left: 5px;
+            color: #FF9494;
+            font-size: 16px;
+        }
+
+        .earn-score-tooltip {
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 200px;
+            background-color: #333;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            z-index: 1000;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            margin-top: 10px;
+        }
+
+        .earn-score-tooltip::after {
+            content: '';
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border-width: 6px;
+            border-style: solid;
+            border-color: transparent transparent #333 transparent;
+        }
+
+        .earn-score-link a:hover + .earn-score-tooltip {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* Cartoon style modal */
+        .modal-a {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.6);
+            backdrop-filter: blur(5px);
+            transition: all 0.3s ease;
+        }
+
+        .modal-a-content {
+            background-color: #FFF8E8;
+            margin: 15% auto;
+            padding: 25px;
+            border: 3px solid #333;
+            width: 360px;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 8px 8px 0 rgba(0,0,0,0.2);
+            transform: translateY(-20px);
+            opacity: 0;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+
+        /* Decorative styles, not affecting layout */
+        .modal h2 {
+            color: #FF6B6B;
+            font-size: 28px;
+            text-shadow: 2px 2px 0px #FFE5E5;
+            letter-spacing: 1px;
+        }
+
+        .close {
+            position: absolute;
+            right: 20px;
+            top: 15px;
+            color: #888;
+            font-size: 24px;
+            font-weight: bold;
+            transition: all 0.2s ease;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: #555;
+            text-decoration: none;
+            cursor: pointer;
+            transform: rotate(90deg);
+        }
+
+        /* Keep existing layout, add cartoon decoration style */
+        #pandaName {
+            border: 3px solid #333;
+            border-radius: 12px;
+            background-color: #FFFBF5;
+            box-shadow: inset 2px 2px 5px rgba(0,0,0,0.1);
+            font-size: 16px;
+            padding: 12px 15px;
+            width: 90%;
+            margin: 15px 0;
+            box-sizing: border-box;
+        }
+
+        #confirmAdopt {
+            background-color: #FF9494;
+            color: white;
+            border: 3px solid #333;
+            border-radius: 12px;
+            box-shadow: 3px 3px 0 #333;
+            font-weight: bold;
+            padding: 12px 25px;
+            margin-top: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        #confirmAdopt:hover:not(:disabled) {
+            transform: translate(-2px, -2px);
+            box-shadow: 5px 5px 0 #333;
+        }
+
+        #confirmAdopt:active:not(:disabled) {
+            transform: translate(0px, 0px);
+            box-shadow: 1px 1px 0 #333;
+        }
+
+        #confirmAdopt:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .score-display {
+            background-color: #FFF8E8;
+            padding: 8px 15px;
+            border: 2px solid #333;
+            border-radius: 8px;
+            display: inline-block;
+            margin: 10px 0;
+            color: #FF6B6B;
+            font-weight: bold;
+            box-shadow: 2px 2px 0 rgba(0,0,0,0.1);
+        }
+
+        /* Keep original layout, add cartoon style */
+        .panda-container {
+            width: 100%;
+            margin-top: 30px;
+            margin-left: 50px;
+            margin-right: auto;
+            position: relative;
+            margin-bottom: 80px;
+        }
+
+        .panda-layout {
+            display: flex;
+            flex-direction: row;
+            max-width: calc(100% - 40px);
+            margin: 0;
+            padding: 0;
+            position: relative;
+            min-height: 450px;
+        }
+
+        .panda-status-panel {
+            background-color: #FFF8E8;
+            border: 3px solid #333;
+            border-radius: 18px;
+            box-shadow: 6px 6px 0 rgba(0,0,0,0.2);
+            padding: 15px;
+            height: fit-content;
+            width: 350px;
+            margin-left: 0;
+        }
+
+        .panda-status-panel h3 {
+            color: #FF6B6B;
+            font-size: 22px;
+            text-shadow: 1px 1px 0px #FFE5E5;
+            border-bottom: 3px dotted #333;
+            margin-top: 0;
+            padding-bottom: 10px;
+            text-align: center;
+        }
+
+        .status-bars {
+            width: 100%;
+        }
+
+        .status-bar {
+            margin-top: 15px;
+            margin-bottom: 15px;
+        }
+
+        /* Game machine style central area */
+        .panda-center-area {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 500px;
+            margin: 0 auto;
+            z-index: 10;
+            /* Game machine shell */
+            background-color: #FF9494;
+            border: 5px solid #333;
+            border-radius: 25px;
+            padding: 25px 15px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+
+        /* Add game machine decoration button */
+        .panda-center-area::before {
+            content: '';
+            position: absolute;
+            top: 12px;
+            left: 15px;
+            width: 12px;
+            height: 12px;
+            background-color: #FFC107;
+            border: 2px solid #333;
+            border-radius: 50%;
+            box-shadow: inset 1px 1px 2px rgba(0,0,0,0.2);
+        }
+
+        .panda-center-area::after {
+            content: '';
+            position: absolute;
+            top: 12px;
+            right: 15px;
+            width: 35px;
+            height: 8px;
+            background-color: #333;
+            border-radius: 4px;
+        }
+
+        /* Game machine top effect pattern */
+        .panda-center-area .game-decoration {
+            position: absolute;
+            top: -15px;
+            left: 0;
+            right: 0;
+            height: 10px;
+            overflow: hidden;
+            z-index: 5;
+        }
+
+        /* Add dynamic decoration element */
+        @keyframes movingStars {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+
+        .game-stars-top {
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            height: 20px;
+            background: repeating-linear-gradient(
+                90deg,
+                transparent,
+                transparent 10px,
+                #FFD700 10px,
+                #FFD700 15px,
+                transparent 15px,
+                transparent 25px
+            );
+            animation: pulse 2s infinite alternate;
+            z-index: 5;
+            border-radius: 10px;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        /* Add top decorative LED light */
+        .panda-center-area .game-led-lights {
+            position: absolute;
+            top: -8px;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            z-index: 6;
+        }
+
+        .game-led {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: #ff0000;
+            box-shadow: 0 0 5px #ff0000;
+            animation: blinkLed 1.5s infinite alternate;
+        }
+
+        .game-led:nth-child(2) {
+            animation-delay: 0.5s;
+            background-color: #00ff00;
+            box-shadow: 0 0 5px #00ff00;
+        }
+
+        .game-led:nth-child(3) {
+            animation-delay: 1s;
+            background-color: #0000ff;
+            box-shadow: 0 0 5px #0000ff;
+        }
+
+        @keyframes blinkLed {
+            0% { opacity: 0.3; transform: scale(0.8); }
+            100% { opacity: 1; transform: scale(1.2); }
+        }
+
+        /* Page footer style modification - increase margin to prevent overlap */
+        footer {
+            position: relative !important;
+            bottom: auto !important;
+            margin-top: 150px !important;  /* Increase to 150px to ensure no overlap */
+            width: 100% !important;
+            clear: both !important;         /* Ensure clear float */
+        }
+
+        /* Ensure content area height is suitable, page footer below game machine */
+        #main-content {
+            min-height: auto !important;
+            height: auto !important;
+            padding-bottom: 80px;           /* Increase bottom padding */
+            position: relative;             /* Ensure positioning context */
+        }
+
+        /* Ensure game machine and travel area are correctly displayed below page footer - increase margin */
+        .panda-container {
+            margin-bottom: 60px;           /* Increase bottom margin */
+            min-height: 650px;              /* Ensure minimum height */
+        }
+
+        #pandaTravelSection {
+            margin-bottom: 100px;           /* Increase bottom margin for travel area */
+        }
+
+        /* Game machine screen style */
+        .panda-info {
+            background-color: #C4E8D0;
+            border: 5px solid #333;
+            border-radius: 10px;
+            box-shadow: inset 0 0 15px rgba(0,0,0,0.1);
+            padding: 15px;
+            text-align: center;
+            max-width: 450px;
+            width: 100%;
+            margin: 0 auto 20px auto;
+            position: relative;
+        }
+
+        /* Add screen line effect */
+        .panda-info::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: repeating-linear-gradient(
+                0deg,
+                rgba(255,255,255,0.05),
+                rgba(255,255,255,0.05) 2px,
+                transparent 2px,
+                transparent 4px
+            );
+            pointer-events: none;
+            border-radius: 5px;
+        }
+
+        .panda-details {
+            margin-top: 15px;
+            padding: 10px 0;
+        }
+
+        .panda-details h3 {
+            margin: 5px 0;
+            color: #333;
+            font-size: 24px;
+            text-shadow: 1px 1px 0px rgba(255,255,255,0.5);
+        }
+
+        /* Panda container in game machine screen */
+        .little_panda-container {
+            position: relative;
+            width: 200px;
+            height: 200px;
+            margin: 0 auto;
+            transition: transform 0.3s ease;
+            transform-origin: center bottom;
+            animation: gentle-sway 4s ease-in-out infinite;
+            /* Remove white background circle */
+            /* background-color: rgba(255,255,255,0.3); */
+            /* border-radius: 50%; */
+            /* padding: 10px; */
+        }
+
+        /* Game machine button area */
+        .panda-interaction {
+            background-color: #FF9494;
+            border-top: 3px solid #333;
+            padding: 20px;
+            width: 100%;
+            max-width: 450px;
+            margin: 0 auto;
+            border-radius: 0 0 15px 15px;
+        }
+
+        /* Game machine button arrangement */
+        .panda-actions {
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            gap: 15px;
+            position: relative;
+        }
+
+        /* D-pad style */
+        .panda-actions::before {
+            content: '';
+            position: absolute;
+            left: -15px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 40px;
+            height: 40px;
+            background-color: #333;
+            border-radius: 50%;
+            clip-path: polygon(
+                35% 0%, 65% 0%, 65% 35%, 100% 35%, 100% 65%, 65% 65%,
+                65% 100%, 35% 100%, 35% 65%, 0% 65%, 0% 35%, 35% 35%
+            );
+            display: none; /* Temporarily hidden, can be shown if layout allows */
+        }
+
+        /* Game machine button style */
+        .action-btn {
+            background-color: #FFD700;
+            color: #333;
+            border: 3px solid #333;
+            border-radius: 50%;
+            box-shadow: 3px 3px 0 #333;
+            font-weight: bold;
+            padding: 15px;
+            width: 80px;
+            height: 80px;
+            transition: all 0.2s ease;
+            flex: 0 1 auto;
+            text-align: center;
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .action-btn i {
+            margin-bottom: 5px;
+            font-size: 24px;
+        }
+
+        .action-btn:hover {
+            transform: translate(-2px, -2px);
+            box-shadow: 5px 5px 0 #333;
+        }
+
+        .action-btn:active {
+            transform: translate(0px, 0px);
+            box-shadow: 1px 1px 0 #333;
+            background-color: #FFC107;
+        }
+
+        /* Different buttons */
+        #feedBtn {
+            background-color: #94D8FF;
+        }
+
+        #playBtn {
+            background-color: #98FB98;
+        }
+
+        #travelBtn {
+            background-color: #FFB6C1;
+        }
+
+        .panda-tips {
+            background-color: #FFFBF5;
+            border: 2px dashed #FF9494;
+            border-radius: 15px;
+            padding: 15px;
+            font-size: 14px;
+            margin-top: 20px;
+            text-align: left;
+        }
+
+        .panda-tips h4 {
+            margin-top: 0;
+            color: #FF6B6B;
+            font-size: 18px;
+        }
+
+        .panda-tips ul {
+            padding-left: 20px;
+            margin-bottom: 0;
+        }
+
+        .panda-tips li {
+            position: relative;
+            margin-left: -20px;
+            margin-top: 5px;
+            margin-bottom: 5px;
+            color: #666;
+            font-size: 13px;
+            padding-left: 5px;
+        }
+
+        .panda-tips li::before {
+            content: '🐾';
+            position: absolute;
+            left: -20px;
+            font-size: 14px;
+        }
+
+        @media (max-width: 900px) {
+            .panda-layout {
+                flex-direction: column;
+            }
+
+            .panda-center-area {
+                position: relative;
+                left: auto;
+                transform: none;
+                width: 100%;
+                max-width: 500px;
+                margin: 20px auto;
+            }
+
+            .panda-status-panel {
+                width: 100%;
+                max-width: 500px;
+                margin: 0 auto 20px auto;
+            }
+        }
+
+        /* Cartoon style status bar */
+        .status-bar-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+
+        .status-bar-track {
+            width: 100%;
+            height: 15px;
+            background-color: #e0e0e0;
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+            border: 2px solid #333;
+            height: 20px;
+        }
+
+        .status-bar-fill {
+            height: 100%;
+            border-radius: 8px;
+            transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .fullness-bar .status-bar-fill {
+            background: linear-gradient(90deg, #FF9494, #FFB4B4);
+        }
+
+        .mood-bar .status-bar-fill {
+            background: linear-gradient(90deg, #94D8FF, #B4E8FF);
+        }
+
+        .fatigue-bar .status-bar-fill {
+            background: linear-gradient(90deg, #A394FF, #C4B4FF);
+        }
+
+        /* Panda animation style enhancement */
+        .little_panda-container {
+            position: relative;
+            width: 200px;
+            height: 200px;
+            margin: 0 auto;
+            transition: transform 0.3s ease;
+            transform-origin: center bottom;
+            animation: gentle-sway 4s ease-in-out infinite;
+        }
+
+        @keyframes gentle-sway {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(-1deg); }
+            75% { transform: rotate(1deg); }
+        }
+
+        .little_panda-part {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .little_panda-part[alt="left-ear"] {
+            animation: leftEarMove 3.5s infinite;
+            transform-origin: center;
+        }
+
+        .little_panda-part[alt="right-ear"] {
+            animation: rightEarMove 3.5s infinite;
+            transform-origin: center;
+        }
+
+        @keyframes leftEarMove {
+            0% { transform: rotate(0deg); }
+            14.3% { transform: rotate(-2deg); }
+            28.6% { transform: rotate(0deg); }
+            42.9% { transform: rotate(-1deg); }
+            57.1% { transform: rotate(0deg); }
+            100% { transform: rotate(0deg); }
+        }
+
+        @keyframes rightEarMove {
+            0% { transform: rotate(0deg); }
+            14.3% { transform: rotate(2deg); }
+            28.6% { transform: rotate(0deg); }
+            42.9% { transform: rotate(1deg); }
+            57.1% { transform: rotate(0deg); }
+            100% { transform: rotate(0deg); }
+        }
+
+        .little_panda-part[alt="tail"] {
+            transform-origin: 30% 70%;
+        }
+
+        .tail-wag {
+            animation: tailWag 1s ease-in-out;
+        }
+
+        @keyframes tailWag {
+            0% { transform: rotate(0deg); }
+            25% { transform: rotate(1deg); }
+            50% { transform: rotate(-1deg); }
+            75% { transform: rotate(0.5deg); }
+            100% { transform: rotate(0deg); }
+        }
+
+        .panda-sad {
+            animation: pandaSad 1.5s infinite;
+        }
+
+        @keyframes pandaSad {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(2px); }
+        }
+
+        .ear-twitch {
+            animation: earTwitch 0.5s ease-in-out;
+        }
+
+        @keyframes earTwitch {
+            0% { transform: rotate(0deg); }
+            25% { transform: rotate(-3deg); }
+            50% { transform: rotate(2deg); }
+            75% { transform: rotate(-1deg); }
+            100% { transform: rotate(0deg); }
+        }
+
+        .high-fatigue {
+            color: #9C27B0 !important;
+            font-weight: bold;
+        }
+
+        /* Cartoon style certificate button */
+        .certificate-button-container {
+            margin-top: 15px;
+        }
+
+        .certificate-btn {
+            background-color: #FF9494;
+            color: white;
+            border: 3px solid #333;
+            border-radius: 12px;
+            box-shadow: 3px 3px 0 #333;
+            padding: 10px 15px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto;
+        }
+
+        .certificate-btn i {
+            margin-right: 8px;
+        }
+
+        .certificate-btn:hover {
+            transform: translate(-2px, -2px);
+            box-shadow: 5px 5px 0 #333;
+        }
+
+        /* Food selection modal style */
+        .food-selection {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.6);
+            backdrop-filter: blur(5px);
+            transition: all 0.3s ease;
+        }
+
+        .food-selection-content {
+            background-color: #FFF8E8;
+            border: 3px solid #333;
+            border-radius: 20px;
+            box-shadow: 8px 8px 0 rgba(0,0,0,0.2);
+            margin: 15% auto;
+            padding: 25px;
+            width: 500px;
+            text-align: center;
+            transform: translateY(-20px);
+            opacity: 0;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .food-options {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 20px;
+        }
+
+        .food-option {
+            background-color: #FFFBF5;
+            border: 2px solid #333;
+            border-radius: 12px;
+            box-shadow: 3px 3px 0 rgba(0,0,0,0.1);
+            cursor: pointer;
+            padding: 15px;
+            transition: all 0.2s ease;
+            width: 80px;
+            height: 80px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .food-option:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 5px 5px 0 rgba(0,0,0,0.1);
+            background-color: #FFE5E5;
+        }
+
+        .food-icon {
+            font-size: 36px;
+            filter: drop-shadow(2px 2px 0 rgba(0,0,0,0.1));
+            margin-bottom: 5px;
+        }
+
+        .food-name {
+            font-size: 12px;
+            color: #555;
+        }
+
+        .food-selection .score-display {
+            background-color: #FFFBF5;
+            padding: 10px 15px;
+            border-radius: 8px;
+            display: inline-block;
+            margin: 10px 0 20px;
+            color: #FF6B6B;
+            font-weight: bold;
+            font-size: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .score-cost-notice {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #FFFBF5;
+            border: 2px dashed #FF9494;
+            border-radius: 8px;
+            color: #FF6B6B;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        /* Travel map style */
+        #pandaTravelSection {
+            background-color: #FFF8E8;
+            border: 3px solid #333;
+            border-radius: 18px;
+            box-shadow: 6px 6px 0 rgba(0,0,0,0.2);
+            display: none;
+            margin-top: 180px;
+            margin-bottom: 100px;
+            padding: 30px;
+            text-align: center;
+            max-width: 1400px;
+            width: 95%;
+            margin-left: auto;
+            margin-right: auto;
+            position: relative;
+            z-index: 5;
+            clear: both;
+        }
+
+        #pandaTravelSection::before {
+            content: '';
+            position: absolute;
+            top: -10px;
+            left: 20px;
+            right: 20px;
+            height: 20px;
+            background-color: #FFF8E8;
+            border: 3px solid #333;
+            border-bottom: none;
+            border-radius: 10px 10px 0 0;
+            z-index: -1;
+        }
+
+        #pandaTravelSection h2 {
+            color: #FF6B6B;
+            font-size: 30px;
+            text-shadow: 2px 2px 0px #FFE5E5;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+
+        #pandaTravelSection p {
+            margin-bottom: 25px;
+            color: #666;
+            line-height: 1.5;
+        }
+
+        .map-container {
+            border: 3px solid #333;
+            border-radius: 15px;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.1);
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .chart {
+            background-color: #f5f5f5;
+            height: 600px !important;
+        }
+
+        /* Travel countdown style */
+        #travelCountdown {
+            background-color: #FFD4D4;
+            border: 3px solid #333;
+            border-radius: 15px;
+            box-shadow: 4px 4px 0 rgba(0,0,0,0.2);
+            color: #333;
+            font-weight: bold;
+            animation: bounce 0.5s infinite alternate;
+        }
+
+        @keyframes bounce {
+            from { transform: translateX(-50%) translateY(0); }
+            to { transform: translateX(-50%) translateY(-5px); }
+        }
+
+        /* Travel evaluation modal style */
+        #travelRatingModal {
+            background-color: #FFF8E8;
+            border: 3px solid #333;
+            border-radius: 20px;
+            box-shadow: 8px 8px 0 rgba(0,0,0,0.2);
+        }
+
+        #travelRatingModal h3 {
+            color: #FF6B6B;
+            font-size: 24px;
+            text-shadow: 2px 2px 0px #FFE5E5;
+        }
+
+        #closeRatingBtn {
+            background-color: #94D8FF;
+            color: #333;
+            border: 3px solid #333;
+            border-radius: 12px;
+            box-shadow: 3px 3px 0 #333;
+            font-weight: bold;
+            transition: all 0.2s ease;
+        }
+
+        #closeRatingBtn:hover {
+            transform: translate(-2px, -2px);
+            box-shadow: 5px 5px 0 #333;
+        }
+
+        #closeRatingBtn:active {
+            transform: translate(0px, 0px);
+            box-shadow: 1px 1px 0 #333;
+        }
+
+        /* Certificate style */
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            #certificateTemplate, #certificateTemplate * {
+                visibility: visible;
+            }
+            #certificateTemplate {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                height: 100%;
+                display: block !important;
+            }
+        }
+
+        .certificate-container {
+            width: 210mm;
+            height: 297mm;
+            padding: 20mm;
+            margin: 0 auto;
+            background-color: #fff;
+            font-family: 'Comic Sans MS', 'Marker Felt', 'Arial Rounded MT Bold', sans-serif;
+        }
+
+        .certificate {
+            width: 100%;
+            height: 100%;
+            border: 10px solid #4ECDC4;
+            border-radius: 10px;
+            padding: 20px;
+            position: relative;
+            background-color: #FFFBF5;
+            box-shadow: 0 0 20px rgba(0,0,0,0.2);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .certificate-header {
+            text-align: center;
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        .certificate-badge {
+            position: absolute;
+            top: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 60px;
+            color: #FFDB58;
+            text-shadow: 2px 2px 0 #333;
+            background-color: #FF6B6B;
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 5px solid #333;
+        }
+
+        .certificate-header h1 {
+            font-size: 36px;
+            color: #FF6B6B;
+            margin-top: 60px;
+            text-shadow: 2px 2px 0 #FFE5E5;
+            font-weight: bold;
+        }
+
+        .certificate-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px;
+        }
+
+        .certificate-text-block {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .certificate-text {
+            font-size: 20px;
+            color: #555;
+            margin: 8px 0;
+        }
+
+        .certificate-username, .certificate-pandaname {
+            font-size: 32px;
+            font-weight: bold;
+            color: #FF6B6B;
+            margin: 10px 0;
+            text-shadow: 1px 1px 0 #FFE5E5;
+        }
+
+        .certificate-panda-image {
+            width: 250px;
+            height: 250px;
+            position: relative;
+            margin: 20px auto;
+        }
+
+        .certificate-pledge {
+            font-size: 18px;
+            color: #666;
+            text-align: center;
+            margin: 20px 0;
+            padding: 10px;
+            border-top: 1px dashed #FF9494;
+            border-bottom: 1px dashed #FF9494;
+        }
+
+        .certificate-seal {
+            position: absolute;
+            bottom: 20px;
+            right: 40px;
+            font-size: 80px;
+            color: #FF9494;
+            opacity: 0.5;
+            transform: rotate(-15deg);
+        }
+
+        .panda-mood-rules {
+            margin-top: 20px;
+            background-color: #FFF8E8;
+            border: 2px dashed #FF9494;
+            border-radius: 12px;
+            padding: 15px;
+            box-shadow: 3px 3px 0 rgba(0,0,0,0.1);
+        }
+
+        .panda-mood-rules h4 {
+            color: #FF6B6B;
+            font-size: 18px;
+            text-align: center;
+            margin-top: 0;
+            margin-bottom: 15px;
+            text-shadow: 1px 1px 0px #FFE5E5;
+            border-bottom: 2px dotted #FFD4D4;
+            padding-bottom: 8px;
+        }
+
+        .mood-rule-bars {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .mood-rule-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background-color: #FFFBF5;
+            padding: 8px 12px;
+            border-radius: 10px;
+            border: 2px solid #FFE5E5;
+        }
+
+        .mood-rule-icon {
+            font-size: 24px;
+            color: #FF9494;
+            width: 40px;
+            text-align: center;
+        }
+
+        .mood-rule-icon.sad {
+            color: #9C27B0;
+        }
+
+        .mood-rule-text {
+            flex: 1;
+            padding: 0 15px;
+            text-align: left;
+        }
+
+        .mood-rule-text span {
+            font-size: 14px;
+            color: #333;
+            font-weight: bold;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .mood-rule-meter {
+            width: 100%;
+            height: 12px;
+            background-color: #f5f5f5;
+            border-radius: 6px;
+            overflow: hidden;
+            border: 2px solid #ddd;
+            position: relative;
+        }
+
+        .mood-rule-fill {
+            height: 100%;
+            transition: width 0.5s ease;
+        }
+
+        .fullness-color {
+            background: linear-gradient(90deg, #FF9494, #FFB4B4);
+        }
+
+        .mood-color {
+            background: linear-gradient(90deg, #94D8FF, #B4E8FF);
+        }
+
+        .fatigue-color {
+            background: linear-gradient(90deg, #A394FF, #C4B4FF);
+        }
+
+        .mood-threshold-marker {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background-color: #333;
+        }
+
+        .mood-rule-summary {
+            font-size: 15px;
+            color: #FF6B6B;
+            margin-top: 10px;
+            text-align: center;
+            font-weight: bold;
+            background-color: #FFFBF5;
+            border-radius: 8px;
+            padding: 8px;
+            border: 2px solid #FFE5E5;
+        }
+
+        /* Add right side score display and panda diary button style */
+        .user-points-diary {
+            position: fixed;
+            top: 100px;
+            right: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            z-index: 100;
+            background-color: #FFF8E8;
+            border: 3px solid #333;
+            border-radius: 15px;
+            padding: 15px;
+            box-shadow: 4px 4px 0 rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+        }
+
+        .user-points {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            font-weight: bold;
+            color: #FF6B6B;
+            font-size: 18px;
+        }
+
+        .user-points i {
+            margin-right: 8px;
+            color: gold;
+            font-size: 22px;
+        }
+
+        .diary-button {
+            background-color: #94D8FF;
+            color: white;
+            border: 3px solid #333;
+            border-radius: 12px;
+            box-shadow: 3px 3px 0 #333;
+            padding: 10px 15px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .diary-button i {
+            margin-right: 8px;
+            font-size: 16px;
+        }
+
+        .diary-button:hover {
+            transform: translate(-2px, -2px);
+            box-shadow: 5px 5px 0 #333;
+        }
+
+        /* Panda diary modal style */
+        .diary-modal {
+            display: none;
+            position: fixed;
+            z-index: 1001;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.6);
+            backdrop-filter: blur(5px);
+        }
+
+        .diary-modal-content {
+            background-color: #FFF8E8;
+            margin: 10% auto;
+            padding: 25px;
+            border: 3px solid #333;
+            width: 60%;
+            max-width: 700px;
+            border-radius: 20px;
+            box-shadow: 8px 8px 0 rgba(0,0,0,0.2);
+            position: relative;
+            transform: translateY(-20px);
+            opacity: 0;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .diary-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 3px dotted #333;
+            padding-bottom: 10px;
+        }
+
+        .diary-modal-header h2 {
+            color: #FF6B6B;
+            margin: 0;
+            font-size: 24px;
+            text-shadow: 2px 2px 0px #FFE5E5;
+        }
+
+        .diary-modal .close {
+            color: #888;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .diary-entry-form {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .diary-date {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 15px;
+        }
+
+        .diary-title-input {
+            border: 2px solid #333;
+            border-radius: 10px;
+            padding: 10px;
+            margin-bottom: 15px;
+            font-family: inherit;
+            font-size: 16px;
+        }
+
+        .diary-content-textarea {
+            border: 2px solid #333;
+            border-radius: 10px;
+            padding: 10px;
+            margin-bottom: 20px;
+            min-height: 200px;
+            font-family: inherit;
+            font-size: 16px;
+            resize: vertical;
+        }
+
+        .diary-submit-btn {
+            background-color: #94D8FF;
+            color: white;
+            border: 3px solid #333;
+            border-radius: 12px;
+            box-shadow: 3px 3px 0 #333;
+            padding: 10px 15px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            align-self: center;
+            width: 150px;
+        }
+
+        .diary-submit-btn:hover {
+            transform: translate(-2px, -2px);
+            box-shadow: 5px 5px 0 #333;
+        }
+
+        .diary-entries-list {
+            margin-top: 20px;
+            max-height: 200px;
+            overflow-y: auto;
+            border-top: 3px dotted #333;
+            padding-top: 15px;
+        }
+
+        .diary-entry-item {
+            border-bottom: 1px solid #ddd;
+            padding: 10px 0;
+            cursor: pointer;
+        }
+
+        .diary-entry-item:hover {
+            background-color: #FFECEC;
+        }
+
+        .diary-entry-title {
+            font-weight: bold;
+            color: #333;
+        }
+
+        .diary-entry-date {
+            font-size: 12px;
+            color: #888;
+        }
+
+        /* 地图收集弹窗样式 */
+        .map-collection-modal {
+            display: none;
+            position: fixed;
+            z-index: 1001;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.6);
+            backdrop-filter: blur(5px);
+        }
+
+        .map-collection-content {
+            background-color: #FFF8E8;
+            margin: 5% auto;
+            padding: 25px;
+            border: 3px solid #333;
+            width: 80%;
+            max-width: 900px;
+            border-radius: 20px;
+            box-shadow: 8px 8px 0 rgba(0,0,0,0.2);
+            position: relative;
+            transform: translateY(-20px);
+            opacity: 0;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .map-collection-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 3px dotted #333;
+            padding-bottom: 10px;
+        }
+
+        .map-collection-header h2 {
+            color: #FF6B6B;
+            margin: 0;
+            font-size: 24px;
+            text-shadow: 2px 2px 0px #FFE5E5;
+        }
+
+        .province-list {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+        }
+
+        .province-item {
+            background-color: #f5f5f5;
+            border: 2px solid #ddd;
+            border-radius: 12px;
+            padding: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .province-item.visited {
+            background-color: #C4E8D0;
+            border-color: #4ECDC4;
+        }
+
+        .province-name {
+            font-weight: bold;
+            font-size: 18px;
+            margin-bottom: 5px;
+            color: #666;
+        }
+
+        .province-item.visited .province-name {
+            color: #333;
+        }
+
+        .province-rating {
+            margin-top: 5px;
+            color: #888;
+        }
+
+        .province-item.visited .province-rating {
+            color: #FF6B6B;
+        }
+
+        .province-reason {
+            margin-top: 10px;
+            font-size: 13px;
+            color: #999;
+            line-height: 1.3;
+        }
+
+        .province-item.visited .province-reason {
+            color: #555;
+        }
+    </style>
+
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <script>
+      // Initialize Firebase
+      const firebaseConfig = {
+        apiKey: "AIzaSyChBNhuH-ZTESkATucQItGiVVF4Dng5P5U",
+        authDomain: "animalprotection-ba7f1.firebaseapp.com",
+        databaseURL: "https://animalprotection-ba7f1-default-rtdb.asia-southeast1.firebasedatabase.app",
+        projectId: "animalprotection-ba7f1",
+        storageBucket: "animalprotection-ba7f1.appspot.com",
+        messagingSenderId: "618432337560",
+        appId: "1:618432337560:web:705231ab346e20f16062ed",
+        measurementId: "G-PTSTW2N14B"
+      };
+      firebase.initializeApp(firebaseConfig);
+    </script>
+
+    <!-- 如果是新认养的熊猫，自动滚动到页面顶部 -->
+    {% if request.args.get('newly_adopted') == 'true' %}
+    <script>
+        window.onload = function() {
+            window.scrollTo(0, 0);
+        }
+    </script>
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+    <div id="main-content">
+        <!-- Add right side score display and panda diary button -->
+        {% if has_panda %}
+        <div class="user-points-diary">
+            <div class="user-points">
+                <i class="fas fa-star"></i> <span id="user-points">My Score: {{ score }}</span>
+            </div>
+            <div class="earn-score-link">
+                <a href="/qna" id="earn-score-help">How to earn score <i class="fas fa-question-circle"></i></a>
+                <div class="earn-score-tooltip">Visit the Games page to complete quizzes and earn scores. Click to go!</div>
+            </div>
+            <!-- Care Tips -->
+            <div class="panda-tips">
+                <h4>Care Tips</h4>
+                <ul>
+                    <li>Feed your panda regularly to keep it full</li>
+                    <li>Play with it often to improve its mood</li>
+                    <li>Be careful not to let it get too tired</li>
+                </ul>
+            </div>
+
+            <button id="diaryButton" class="diary-button">
+                <i class="fas fa-book"></i>My Little Diary 💗
+            </button>
+
+            <!-- Add map collection button -->
+            <button id="mapCollectionButton" class="diary-button" style="margin-top: 10px; background-color: #98FB98;">
+                <i class="fas fa-map-marked-alt"></i>Province Collection 🗺️
+            </button>
+        </div>
+        {% endif %}
+
+        <!-- Panda diary modal -->
+        <div id="diaryModal" class="diary-modal">
+            <div class="diary-modal-content">
+                <div class="diary-modal-header">
+                    <h2>My Panda Diary</h2>
+                    <span class="close" id="closeDiaryModal">&times;</span>
+                </div>
+                <div class="diary-entry-form">
+                    <div class="diary-date" id="currentDate"></div>
+                    <input type="text" class="diary-title-input" id="diaryTitle" placeholder="Diary Title">
+                    <textarea class="diary-content-textarea" id="diaryContent" placeholder="Write about your day with your panda..."></textarea>
+                    <button class="diary-submit-btn" id="saveDiaryBtn">Save Entry</button>
+                </div>
+                <div class="diary-entries-list" id="diaryEntriesList">
+                    <!-- Diary entries will be displayed here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- 添加地图收集弹窗 -->
+        <div id="mapCollectionModal" class="map-collection-modal">
+            <div class="map-collection-content">
+                <div class="map-collection-header">
+                    <h2>My Province Collection</h2>
+                    <span class="close" id="closeMapModal">&times;</span>
+                </div>
+                <p style="margin-bottom: 20px; color: #666;">
+                    <i class="fas fa-info-circle"></i> Explore China with your red panda! Visited provinces will light up and show their panda-friendliness rating.
+                </p>
+                <div class="province-list" id="provinceList">
+                    <!-- Province list will be generated by JavaScript -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Add travel countdown display area -->
+        <div id="travelCountdown" style="display: none; position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background-color: rgba(46, 139, 87, 0.9); color: white; padding: 15px 30px; border-radius: 10px; z-index: 1000; font-size: 18px; font-weight: bold; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
+            <i class="fas fa-hourglass-half" style="margin-right: 10px;"></i> Time remaining: <span id="countdownTime">10</span> seconds
+        </div>
+
+        <!-- Add travel evaluation modal -->
+        <div id="travelRatingModal" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: white; padding: 25px; border-radius: 15px; z-index: 1100; max-width: 500px; width: 90%; box-shadow: 0 10px 30px rgba(0,0,0,0.3); text-align: center;">
+            <h3 style="color: #2E8B57; margin-top: 0;"><i class="fas fa-map-marked-alt" style="margin-right: 10px;"></i>Travel Rating</h3>
+            <div style="margin: 20px 0;">
+                <p><strong>Destination:</strong><span id="ratingProvince"></span></p>
+                <p><strong>Recommendation Score:</strong><span id="ratingStars" style="color: #FFD700; font-size: 24px;"></span></p>
+                <p><strong>Evaluation:</strong><span id="ratingReason" style="color: #555;"></span></p>
+            </div>
+            <button id="closeRatingBtn" style="background: linear-gradient(45deg, #4ECDC4, #2E8B57); color: white; border: none; border-radius: 8px; padding: 10px 20px; font-size: 16px; cursor: pointer; transition: all 0.3s ease;">
+                I Understand
+            </button>
+        </div>
+
+        <div id="content">
+
+            {% if not has_panda %}
+               {% include 'adopt_intro.html' %}
+            {% else %}
+            <div class="panda-container">
+                <div class="panda-layout">
+                    <!-- Left status bar area -->
+                    <div class="panda-status-panel">
+                        <h3>Live Status</h3>
+                        <div class="status-bars">
+                            <div class="status-bar fullness-bar">
+                                <div class="status-bar-label">
+                                    <span><i class="fas fa-utensils"></i> Fullness</span>
+                                    <span id="fullnessValue">100%</span>
+                                </div>
+                                <div class="status-bar-track">
+                                    <div class="status-bar-fill" id="fullnessFill" style="width: 100%;"></div>
+                                </div>
+                            </div>
+
+                            <div class="status-bar mood-bar">
+                                <div class="status-bar-label">
+                                    <span><i class="fas fa-smile"></i> Mood</span>
+                                    <span id="moodValue">100%</span>
+                                </div>
+                                <div class="status-bar-track">
+                                    <div class="status-bar-fill" id="moodFill" style="width: 100%;"></div>
+                                </div>
+                            </div>
+
+                            <div class="status-bar fatigue-bar">
+                                <div class="status-bar-label">
+                                    <span><i class="fas fa-tired"></i> Fatigue</span>
+                                    <span id="fatigueValue">0%</span>
+                                </div>
+                                <div class="status-bar-track">
+                                    <div class="status-bar-fill" id="fatigueFill" style="width: 0%;"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Panda mood rules -->
+                        <div class="panda-mood-rules">
+                            <h4>Mood Rules</h4>
+                            <div class="mood-rule-bars">
+                                <div class="mood-rule-bar">
+                                    <div class="mood-rule-icon">
+                                        <i class="fas fa-utensils"></i>
+                                    </div>
+                                    <div class="mood-rule-text">
+                                        <span>Fullness below 50%</span>
+                                        <div class="mood-rule-meter">
+                                            <div class="mood-rule-fill fullness-color" style="width: 50%;"></div>
+                                            <div class="mood-threshold-marker" style="left: 50%;"></div>
+                                        </div>
+                                    </div>
+                                    <div class="mood-rule-icon sad">
+                                        <i class="fas fa-frown"></i>
+                                    </div>
+                                </div>
+
+                                <div class="mood-rule-bar">
+                                    <div class="mood-rule-icon">
+                                        <i class="fas fa-smile"></i>
+                                    </div>
+                                    <div class="mood-rule-text">
+                                        <span>Mood below 50%</span>
+                                        <div class="mood-rule-meter">
+                                            <div class="mood-rule-fill mood-color" style="width: 50%;"></div>
+                                            <div class="mood-threshold-marker" style="left: 50%;"></div>
+                                        </div>
+                                    </div>
+                                    <div class="mood-rule-icon sad">
+                                        <i class="fas fa-frown"></i>
+                                    </div>
+                                </div>
+
+                                <div class="mood-rule-bar">
+                                    <div class="mood-rule-icon">
+                                        <i class="fas fa-tired"></i>
+                                    </div>
+                                    <div class="mood-rule-text">
+                                        <span>Fatigue above 80%</span>
+                                        <div class="mood-rule-meter">
+                                            <div class="mood-rule-fill fatigue-color" style="width: 80%;"></div>
+                                            <div class="mood-threshold-marker" style="left: 80%;"></div>
+                                        </div>
+                                    </div>
+                                    <div class="mood-rule-icon sad">
+                                        <i class="fas fa-frown"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <p class="mood-rule-summary">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                Any of these conditions will make your panda sad!
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Center panda area -->
+                    <div class="panda-center-area">
+                        <!-- Panda SVG area -->
+                        <div class="panda-info">
+                            <h2>My Red Panda</h2>
+                            <div class="little_panda-container" id="pandaContainer">
+                                <img src="/static/images/little_panda/tail.svg" class="little_panda-part" alt="tail">
+                                <img src="/static/images/little_panda/body.svg" class="little_panda-part" alt="body">
+                                <img src="/static/images/little_panda/head.svg" class="little_panda-part" alt="head">
+                                <img src="/static/images/little_panda/ear-left.svg" class="little_panda-part" alt="left-ear">
+                                <img src="/static/images/little_panda/ear-right.svg" class="little_panda-part" alt="right-ear">
+                                <img src="/static/images/little_panda/tears.svg" class="little_panda-part" alt="tears" style="display: none;">
+                                <img src="/static/images/little_panda/eyes.svg" class="little_panda-part" alt="eyes">
+                                <img src="/static/images/little_panda/mouth-happy.svg" class="little_panda-part" alt="mouth" id="pandaMouth">
+                            </div>
+                            <div id="pandaDetails" class="panda-details">
+                                <!-- Raccoon information will be filled through JavaScript -->
+                            </div>
+                            <div class="certificate-button-container">
+                                <button id="printCertificateBtn" class="certificate-btn">
+                                    <i class="fas fa-certificate"></i> Print Adoption Certificate
+                                </button>
+                            </div>
+                        </div>
+                        <!-- 交互按钮区域 -->
+                        <div class="panda-interaction">
+                            <div class="panda-actions">
+                                <button class="action-btn" id="feedBtn">
+                                    <i class="fas fa-apple-alt"></i> Feed
+                                </button>
+                                <button class="action-btn" id="playBtn">
+                                    <i class="fas fa-gamepad"></i> Play
+                                </button>
+                                <button class="action-btn" id="travelBtn">
+                                    <i class="fas fa-map-marked-alt"></i> Travel
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- 认养弹窗 -->
+    <div id="adoptModal" class="modal-a">
+        <div class="modal-a-content">
+            <span class="close" id="adoptCloseBtn">&times;</span>
+            <h2>Adopt a Red Panda</h2>
+            <div class="score-display">
+                <i class="fas fa-coins"></i> Current Points: <span id="currentScore">{{ score }}</span>
+            </div>
+            <p>Required Points: <strong>50</strong></p>
+            <p>Please give your red panda a cute name!</p>
+            <input type="text" id="pandaName" placeholder="Enter red panda's name" maxlength="20">
+            <button id="confirmAdopt" disabled>Confirm Adoption</button>
+        </div>
+    </div>
+
+    <!-- 认养证书模板 (隐藏) -->
+    <div id="certificateTemplate" style="display: none; position: fixed; left: -9999px; top: -9999px;">
+        <div class="certificate-container">
+            <div class="certificate">
+                <div class="certificate-header">
+                    <div class="certificate-badge">
+                        <i class="fas fa-award"></i>
+                    </div>
+                    <h1>Official Adoption Certificate</h1>
+                </div>
+                <div class="certificate-content">
+                    <!-- 将所有文字内容集中到顶部 -->
+                    <div class="certificate-text-block">
+                        <p class="certificate-text">This certificate confirms that</p>
+                        <p class="certificate-username"><span id="cert-username">USERNAME</span></p>
+                        <p class="certificate-text">has officially adopted</p>
+                        <p class="certificate-pandaname"><span id="cert-pandaname">PANDANAME</span></p>
+                        <p class="certificate-text">on <span id="cert-date">DATE</span></p>
+                    </div>
+
+                    <!-- 增大的熊猫SVG -->
+                    <div class="certificate-panda-image" id="certificate-panda-image">
+                        <!-- SVG图像将通过JavaScript复制 -->
+                    </div>
+
+                    <p class="certificate-pledge">By accepting this certificate, you pledge to care for your virtual red panda, ensuring its happiness and well-being in the digital world.</p>
+
+                    <div class="certificate-seal">
+                        <i class="fas fa-paw"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 添加食物选择弹窗 -->
+    <div id="foodSelectionModal" class="food-selection">
+        <div class="food-selection-content">
+            <h2>Select food for your panda</h2>
+            <!-- 添加分数显示 -->
+            <h1 class="score-display">My Score: {{ score }}</h1>
+            <div class="food-options">
+                <div class="food-option" data-food="bamboo">
+                    <div class="food-icon">🎋</div>
+                    <div class="food-name">Bamboo</div>
+                </div>
+                <div class="food-option" data-food="apple">
+                    <div class="food-icon">🍎</div>
+                    <div class="food-name">Apple</div>
+                </div>
+                <div class="food-option" data-food="meat">
+                    <div class="food-icon">🥩</div>
+                    <div class="food-name">Meat</div>
+                </div>
+                <div class="food-option" data-food="onion">
+                    <div class="food-icon">🧅</div>
+                    <div class="food-name">Onion</div>
+                </div>
+            </div>
+            <p class="score-cost-notice">Each feeding costs 5 score points</p>
+        </div>
+    </div>
+
+
+
+    <!-- 在main-content中添加旅行内容区域 -->
+    <div id="pandaTravelSection" style="display: none;">
+        <h2>Travel with Your Red Panda</h2>
+        <p class="text-gray-600">
+            Click on a province on the map to travel with your red panda across China!<br>
+            Each trip costs 10 points and lets you explore different landscapes and cultures 🗺️🐼✨
+        </p>
+        <div class="map-container animate-fade-in">
+            <div id="travelChart" class="chart" style="height: 650px;"></div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/echarts.js') }}"></script>
+<script>
+    // Add global animation state flag
+    let isAnimationInProgress = false;
+    let currentFoodType = null;
+
+    // Record visited provinces
+    let visitedProvinces = {};
+
+    // Check URL parameters and automatically scroll to the top of the page
+    function checkNewlyAdoptedAndScroll() {
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('newly_adopted') === 'true') {
+            // Scroll to the top of the page
+            window.scrollTo(0, 0);
+            // Remove URL parameters to prevent scrolling again after refresh
+            const newUrl = window.location.pathname;
+            window.history.replaceState({}, document.title, newUrl);
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        // Check if it's a newly adopted panda and scroll to the top
+        checkNewlyAdoptedAndScroll();
+
+        loadPandaDetails();
+        setupPandaActions();
+
+        // Initialize status update immediately
+        updatePandaStatus();
+
+        // Timer: update status every 10 seconds (improve real-time responsiveness)
+        setInterval(updatePandaStatus, 10000); // 10000 milliseconds = 10 seconds
+
+        // Set up map collection feature
+        setupMapCollection();
+    });
+
+    // Global variable indicating whether exploration is in progress
+    let isExploring = false;
+
+    // Add province travel recommendation rating and reason data
+    const provinceRecommendations = {
+  "北京": { "stars": "★", "reason": "Super urban jungle with hardly any panda-friendly green corners." },
+  "天津": { "stars": "★", "reason": "Too busy, too built-up — pandas would have to commute far for bamboo snacks." },
+  "河北": { "stars": "★★", "reason": "Some hills play hide-and-seek with forests, but pandas still feel the city buzz." },
+  "山西": { "stars": "★★", "reason": "Hills try their best, but the air's a bit too dry for panda spa days." },
+  "内蒙古": { "stars": "★", "reason": "Grasslands galore, but for pandas, it's more tumbleweed than bamboo breeze." },
+  "辽宁": { "stars": "★", "reason": "Industry overload, nature's hiding — pandas miss the leafy luxury." },
+  "吉林": { "stars": "★", "reason": "Chilly winters and pine forests, not the panda's warm bamboo dream." },
+  "黑龙江": { "stars": "★", "reason": "Freezing temps and lots of needles (pine trees), but no soft panda beds." },
+  "上海": { "stars": "★", "reason": "All city, no forest — pandas are totally lost here." },
+  "江苏": { "stars": "★★", "reason": "Water's nice, but panda pals prefer more forests, less concrete." },
+  "浙江": { "stars": "★★", "reason": "Warm and wet, but mostly flat and coastal — pandas crave more bamboo hills." },
+  "安徽": { "stars": "★★★", "reason": "Forests say hello! But the cities still crash the panda party." },
+  "福建": { "stars": "★★", "reason": "Warm and cozy, yet pandas wish for taller trees and denser bamboo." },
+  "江西": { "stars": "★★★", "reason": "Hills and forests invite pandas to play hide-and-seek all day!" },
+  "山东": { "stars": "★", "reason": "Lots of cities and plains — pandas snooze on the concrete beds here." },
+  "河南": { "stars": "★", "reason": "Flat lands with busy folks, panda naps come second." },
+  "湖北": { "stars": "★★", "reason": "Some woods, but too much hustle for peaceful panda strolls." },
+  "湖南": { "stars": "★★★", "reason": "Cozy hills and moist air — panda paradise in the making!" },
+  "广东": { "stars": "★★", "reason": "Warm and wet, but pandas wish for higher bamboo towers." },
+  "广西": { "stars": "★★★", "reason": "Mountains and magic karst make this a cool panda playground." },
+  "海南": { "stars": "☆", "reason": "Tropics are fun but way too hot for shy bamboo-eating bears." },
+  "重庆": { "stars": "★★★★", "reason": "Misty mountains and wet air — pandas' dream resort!" },
+  "四川": { "stars": "★★★★★", "reason": "Panda central! Ultimate bamboo buffet and cozy forest naps." },
+  "贵州": { "stars": "★★★★", "reason": "Rich forests invite pandas to explore and chill all day." },
+  "云南": { "stars": "★★★★★", "reason": "A jungle wonderland where pandas feel right at home." },
+  "西藏": { "stars": "★★", "reason": "High altitude antics — only some edges suit these bamboo lovers." },
+  "青海": { "stars": "★", "reason": "Cold and thin air — pandas prefer fluffier forests." },
+  "宁夏": { "stars": "☆", "reason": "Dry and sandy — pandas wave goodbye to this arid playground." },
+  "新疆": { "stars": "☆", "reason": "Deserts and mountains are cool, but not panda cool." },
+  "甘肃": { "stars": "★", "reason": "Dry lands with few forests — pandas find fewer bamboo treats here." },
+  "香港": { "stars": "★", "reason": "Too much city sparkle, too little panda nature sparkle." },
+  "澳门": { "stars": "★", "reason": "All lights, no leaves — panda naps not included." },
+  "台湾": { "stars": "★★★★", "reason": "Mountains and moist air make for a cozy panda hideout!"}
+
+    };
+
+    // Get modal elements
+    const modal = document.getElementById('adoptModal');
+    const adoptButton = document.getElementById('adoptButton');
+    const closeBtn = document.getElementById('adoptCloseBtn');
+    const pandaNameInput = document.getElementById('pandaName');
+    const confirmAdoptBtn = document.getElementById('confirmAdopt');
+
+    // Open modal
+    if (adoptButton) {
+        adoptButton.onclick = function() {
+            modal.style.display = "block";
+            setTimeout(() => {
+                document.querySelector('.modal-a-content').style.transform = "translateY(0)";
+                document.querySelector('.modal-a-content').style.opacity = "1";
+            }, 10);
+        }
+    }
+
+    // Close modal
+    if (closeBtn) {
+        closeBtn.onclick = function() {
+            document.querySelector('.modal-a-content').style.transform = "translateY(-20px)";
+            document.querySelector('.modal-a-content').style.opacity = "0";
+            setTimeout(() => {
+                modal.style.display = "none";
+            }, 300);
+        }
+    }
+
+    // Close when clicking outside the modal
+    window.onclick = function(event) {
+        if (event.target == modal) {
+            document.querySelector('.modal-a-content').style.transform = "translateY(-20px)";
+            document.querySelector('.modal-a-content').style.opacity = "0";
+            setTimeout(() => {
+                modal.style.display = "none";
+            }, 300);
+        }
+    }
+
+    // Monitor input field changes
+    if (pandaNameInput) {
+        pandaNameInput.oninput = function() {
+            confirmAdoptBtn.disabled = pandaNameInput.value.trim() === '';
+        }
+    }
+
+    // Handle confirm adoption button click event
+    if (confirmAdoptBtn) {
+        confirmAdoptBtn.onclick = async function() {
+            const name = pandaNameInput.value.trim();
+            if (name === '') {
+                alert('Please enter a name for your red panda');
+                return;
+            }
+
+            try {
+                const response = await fetch('/adopt_panda', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        name: name
+                    })
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    alert(data.message);
+                    // Add newly_adopted=true parameter to automatically scroll to the top of the page when loaded
+                    window.location.href = '/my_panda?newly_adopted=true';
+                } else {
+                    alert(data.message);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Adoption failed, please try again');
+            }
+        }
+    }
+
+    // Set up panda action buttons
+    function setupPandaActions() {
+        const feedBtn = document.getElementById('feedBtn');
+        const playBtn = document.getElementById('playBtn');
+        const travelBtn = document.getElementById('travelBtn');
+
+        // Feed button click event
+        if (feedBtn) {
+            feedBtn.addEventListener('click', function() {
+                // Show food selection modal
+                showFoodSelection();
+            });
+        }
+
+        // Play button click event
+        if (playBtn) {
+            playBtn.addEventListener('click', function() {
+                playWithPanda();
+            });
+        }
+
+        // Travel button click event
+        if (travelBtn) {
+            travelBtn.addEventListener('click', function() {
+                showTravelMap();
+            });
+        }
+
+        // Set up food selection
+        setupFoodSelection();
+    }
+
+    // Show food selection modal
+    function showFoodSelection() {
+        // Get user email prefix
+        const userEmailPrefix = "{{ session['user']['email'].split('@')[0] }}";
+
+        // Get user data directly from Firebase
+        const userRef = firebase.database().ref('users/' + userEmailPrefix);
+        userRef.once('value')
+            .then(function(snapshot) {
+                const userData = snapshot.val();
+                console.log("Retrieved user data:", userData);
+
+                if (userData && userData.score !== undefined) {
+                    // Update displayed score
+                    const scoreDisplays = document.querySelectorAll('.score-display');
+                    scoreDisplays.forEach(display => {
+                        if (display.innerHTML.includes('My Score:')) {
+                            display.innerHTML = `<i class="fas fa-coins"></i> My Score: ${userData.score}`;
+                        }
+                    });
+                }
+
+                // Continue showing food selection modal
+                const modal = document.getElementById('foodSelectionModal');
+                modal.style.display = "block";
+                setTimeout(() => {
+                    document.querySelector('.food-selection-content').style.transform = "translateY(0)";
+                    document.querySelector('.food-selection-content').style.opacity = "1";
+                }, 10);
+            })
+            .catch(function(error) {
+                console.error("Error getting user data:", error);
+
+                // Show modal even if there's an error
+                const modal = document.getElementById('foodSelectionModal');
+                modal.style.display = "block";
+                setTimeout(() => {
+                    document.querySelector('.food-selection-content').style.transform = "translateY(0)";
+                    document.querySelector('.food-selection-content').style.opacity = "1";
+                }, 10);
+            });
+    }
+
+    // Hide food selection modal
+    function hideFoodSelection() {
+        const modal = document.getElementById('foodSelectionModal');
+        document.querySelector('.food-selection-content').style.transform = "translateY(-20px)";
+        document.querySelector('.food-selection-content').style.opacity = "0";
+        setTimeout(() => {
+            modal.style.display = "none";
+        }, 300);
+    }
+
+    // Set up food selection events
+    function setupFoodSelection() {
+        // Close when clicking outside the modal
+        document.getElementById('foodSelectionModal').addEventListener('click', function(event) {
+            if (event.target === this) {
+                hideFoodSelection();
+            }
+        });
+
+        // Set up click events for each food option
+        document.querySelectorAll('.food-option').forEach(function(option) {
+            option.addEventListener('click', function() {
+                const foodType = this.getAttribute('data-food');
+                hideFoodSelection();
+                feedPanda(foodType);
+            });
+        });
+    }
+
+    // Show travel map
+    function showTravelMap() {
+        // Get travel area element
+        const travelSection = document.getElementById('pandaTravelSection');
+        // Get travel button element
+        const travelBtn = document.getElementById('travelBtn');
+
+        // Check if map is already displayed
+        if (travelSection.style.display === 'block') {
+            // If already shown, hide it
+            travelSection.style.display = 'none';
+            // Update button text
+            travelBtn.innerHTML = '<i class="fas fa-map-marked-alt"></i> Travel';
+            return;
+        }
+
+        // Show travel area at the bottom of the page
+        travelSection.style.display = 'block';
+        // Update button text
+        travelBtn.innerHTML = '<i class="fas fa-times-circle"></i> Hide Map';
+
+        // Scroll to travel area
+        travelSection.scrollIntoView({ behavior: 'smooth' });
+
+        // Load map
+        loadTravelMap();
+    }
+
+    // Load travel map
+    function loadTravelMap() {
+        // Initialize map
+        var travelChart = echarts.init(document.getElementById('travelChart'));
+
+        // Province map data URL passed from Flask
+        var provinces = JSON.parse('{{ provinces | tojson | safe }}');
+        var chinaMapUrl = '{{ china_map_url }}';
+
+        // Save map configuration to global variables for other functions to access
+        window.travelProvinces = provinces;
+        window.travelChart = travelChart;
+
+        // Load China map data
+        $.get(chinaMapUrl, function(chinaJson) {
+            echarts.registerMap('china', chinaJson);
+
+            var option = {
+                title: {
+                    text: 'Travel with Your Red Panda',
+                    left: 'center',
+                    textStyle: {
+                        fontSize: 28,
+                        fontWeight: 'bold',
+                        color: '#2E8B57',
+                        fontFamily: 'Montserrat, sans-serif'
+                    }
+                },
+                tooltip: {
+                    trigger: 'item',
+                    formatter: '{b}'
+                },
+                // Add zoom controls
+                toolbox: {
+                    show: true,
+                    orient: 'vertical',
+                    left: 'right',
+                    top: 'center',
+                    feature: {
+                        dataView: { readOnly: false },
+                        restore: {},
+                        saveAsImage: {}
+                    }
+                },
+                series: [{
+                    name: 'China',
+                    type: 'map',
+                    map: 'china',
+                    roam: true, // Enable panning and zooming
+                    zoom: 1.2, // Default zoom level
+                    scaleLimit: {
+                        min: 1,
+                        max: 5
+                    },
+                    emphasis: {
+                        label: {
+                            show: true
+                        },
+                        itemStyle: {
+                            areaColor: '#4CAF50'
+                        }
+                    },
+                    data: [
+                        {name: '北京', value: 9},
+                        {name: '天津', value: 8},
+                        {name: '上海', value: 3},
+                        {name: '重庆', value: 22},
+                        {name: '河北', value: 9},
+                        {name: '河南', value: 10},
+                        {name: '云南', value: 29},
+                        {name: '辽宁', value: 8},
+                        {name: '黑龙江', value: 13},
+                        {name: '湖南', value: 13},
+                        {name: '安徽', value: 14},
+                        {name: '山东', value: 13},
+                        {name: '新疆', value: 17},
+                        {name: '江苏', value: 10},
+                        {name: '浙江', value: 19},
+                        {name: '江西', value: 15},
+                        {name: '湖北', value: 18},
+                        {name: '广西', value: 18},
+                        {name: '甘肃', value: 25},
+                        {name: '山西', value: 8},
+                        {name: '内蒙古', value: 12},
+                        {name: '陕西', value: 15},
+                        {name: '吉林', value: 13},
+                        {name: '福建', value: 13},
+                        {name: '贵州', value: 18},
+                        {name: '广东', value: 15},
+                        {name: '青海', value: 16},
+                        {name: '西藏', value: 18},
+                        {name: '四川', value: 32},
+                        {name: '宁夏', value: 13},
+                        {name: '海南', value: 6},
+                        {name: '台湾', value: 4},
+                    ],
+                    itemStyle: {
+                        normal: {
+                            areaColor: '#e0f3f8',
+                            borderColor: '#2E8B57'
+                        }
+                    }
+                }]
+            };
+
+            // 使用配置项显示图表
+            travelChart.setOption(option);
+
+            // 窗口大小变化时自动调整地图大小
+            window.addEventListener('resize', function() {
+                travelChart.resize();
+            });
+
+            // 点击事件处理
+            travelChart.on('click', function(params) {
+                var name = params.name;
+                var mapCode = provinces[name];
+                if (!mapCode) {
+                    alert('无此区域地图数据');
+                    return;
+                }
+
+                // 直接开始旅行，让后端处理积分检查
+                travelToProvince(name);
+            });
+
+            // 地图初始化完成后，高亮显示已访问的省份
+            updateVisitedProvincesOnMap();
+        });
+    }
+
+    // 发送旅行请求
+    function travelToProvince(province) {
+        // 检查是否已经在旅行中
+        if (isExploring) {
+            alert('The red panda is exploring 🔍');
+            return;
+        }
+
+        // 设置旅行状态
+        isExploring = true;
+
+        // 获取倒计时元素
+        const countdownElement = document.getElementById('travelCountdown');
+        const countdownTimeElement = document.getElementById('countdownTime');
+
+        // 显示倒计时
+        countdownElement.style.display = 'block';
+        let timeLeft = 10;
+
+        // 高亮选中的省份
+        try {
+            const chart = window.travelChart;
+            if (chart) {
+                // 高亮探索中的省份
+                chart.dispatchAction({
+                    type: 'highlight',
+                    name: province
+                });
+
+                // 保存当前探索省份
+                window.currentExploringProvince = province;
+            }
+        } catch (e) {
+            console.error("Error highlighting province:", e);
+        }
+
+        // 开始倒计时
+        const timer = setInterval(() => {
+            timeLeft--;
+            countdownTimeElement.textContent = timeLeft;
+
+            // 倒计时结束
+            if (timeLeft <= 0) {
+                clearInterval(timer);
+
+                // 获取当前用户积分
+                const currentScore = parseInt("{{ score }}");
+
+                // 发送请求到服务器
+                fetch('/travel_to_province', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        province: province,
+                        user_score: currentScore
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    // 隐藏倒计时
+                    countdownElement.style.display = 'none';
+
+                    // 取消高亮
+                    if (window.travelChart) {
+                        window.travelChart.dispatchAction({
+                            type: 'downplay',
+                            name: province
+                        });
+                    }
+
+                    // 重置探索状态
+                    isExploring = false;
+                    window.currentExploringProvince = null;
+
+                    if (data.success) {
+                        // 显示省份评价弹窗
+                        showProvinceRating(province);
+
+                        // 更新已访问省份记录
+                        updateVisitedProvince(province);
+
+                        // 如果返回了饱食度数据，更新状态条
+                        if (data.fullness) {
+                            updateStatusBars(data.fullness, null);
+                        }
+
+                        // 增加疲劳值
+                        increaseFatigue(15);
+
+                        // 检查并更新熊猫表情
+                        checkAndUpdatePandaFace();
+
+                        // 更新积分显示
+                        if (data.score !== undefined) {
+                            // 更新右侧积分显示
+                            updateUserScore(data.score);
+                        }
+                    } else {
+                        alert(data.message || 'Travel failed, please try again later!');
+                    }
+                })
+                .catch(error => {
+                    // 隐藏倒计时
+                    countdownElement.style.display = 'none';
+
+                    // 取消高亮
+                    if (window.travelChart) {
+                        window.travelChart.dispatchAction({
+                            type: 'downplay',
+                            name: province
+                        });
+                    }
+
+                    // 重置探索状态
+                    isExploring = false;
+                    window.currentExploringProvince = null;
+
+                    console.error('Error:', error);
+                    alert('Travel request failed, please try again later!');
+                });
+            }
+        }, 1000);
+    }
+
+    // 更新所有积分显示的函数
+    function updateScoreDisplays(newScore) {
+        // 更新所有分数显示元素
+        const scoreDisplays = document.querySelectorAll('.score-display');
+        scoreDisplays.forEach(display => {
+            if (display.innerHTML.includes('My Score:')) {
+                display.innerHTML = `<i class="fas fa-coins"></i> My Score: ${newScore}`;
+            } else if (display.innerHTML.includes('Current Points:')) {
+                display.querySelector('#currentScore').textContent = newScore;
+            } else {
+                display.textContent = `Score: ${newScore}`;
+            }
+        });
+
+        // 更新全局变量中的分数（如果存在的话）
+        if (window.currentUserScore !== undefined) {
+            window.currentUserScore = newScore;
+        }
+    }
+
+    // 喂食小熊猫
+    function feedPanda(foodType) {
+        // 检查用户分数是否足够
+        const currentScore = parseInt("{{ score }}");
+        if (currentScore < 5) {
+            alert('Sorry, you has not got enough score to feed! you need 5 score at least QAQ');
+            return;
+        }
+
+        fetch('/feed_panda', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ foodType: foodType })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // 根据食物类型显示不同的反应
+                showFoodReaction(foodType);
+
+                // 立即更新状态条和表情
+                updateStatusBars(data.fullness, null);
+
+                // 增加疲劳值
+                increaseFatigue(5);
+
+                // 检查熊猫状态
+                checkAndUpdatePandaFace();
+
+                // 更新积分显示
+                if (data.score !== undefined) {
+                    // 更新右侧积分显示
+                    updateUserScore(data.score);
+                }
+
+                // 显示消息
+                setTimeout(() => {
+                    alert(data.message);
+                }, 300);
+            } else {
+                alert(data.message || 'Feeding failed, please try again');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Feeding failed, please try again');
+        });
+    }
+
+    // 根据食物类型显示不同的反应
+    function showFoodReaction(foodType) {
+        const tearsElement = document.querySelector('.little_panda-part[alt="tears"]');
+        const mouthElement = document.getElementById('pandaMouth');
+        const eyesElement = document.querySelector('.little_panda-part[alt="eyes"]');
+
+        // 保存当前状态
+        const currentTearState = tearsElement.style.display;
+        const currentMouthSrc = mouthElement.src;
+        const currentEyesSrc = eyesElement.src;
+
+        // 设置动画状态标志，防止其他状态更新影响动画
+        isAnimationInProgress = true;
+        currentFoodType = foodType;
+
+        // 根据食物类型设置不同的反应
+        switch(foodType) {
+            case 'bamboo':
+            case 'apple':
+                // 使用闭眼SVG替代不透明度变化
+                eyesElement.src = '/static/images/little_panda/eyes-close.svg';
+                // 确保没有眼泪且嘴巴为开心状态
+                tearsElement.style.display = 'none';
+                mouthElement.src = '/static/images/little_panda/mouth-happy.svg';
+                break;
+            case 'meat':
+                // 关闭嘴巴
+                mouthElement.src = '/static/images/little_panda/mouth-close.svg';
+                // 确保没有眼泪
+                tearsElement.style.display = 'none';
+                break;
+            case 'onion':
+                // 流泪但保持开心的嘴巴
+                mouthElement.src = '/static/images/little_panda/mouth-happy.svg';
+                tearsElement.style.display = 'block';
+                break;
+        }
+
+        // 触发尾巴摇动动画
+        animateTail();
+
+        // 2秒后恢复原状
+        setTimeout(() => {
+            if (foodType === 'bamboo' || foodType === 'apple') {
+                // 恢复眼睛状态
+                eyesElement.src = currentEyesSrc;
+                // 保持嘴巴开心状态
+                mouthElement.src = '/static/images/little_panda/mouth-happy.svg';
+            }
+            if (foodType === 'meat' || foodType === 'onion') {
+                mouthElement.src = currentMouthSrc;
+            }
+
+            // 重置动画状态标志
+            isAnimationInProgress = false;
+            currentFoodType = null;
+
+            // 重新检查熊猫状态
+            checkAndUpdatePandaFace();
+        }, 2000);
+    }
+
+    // 与小熊猫玩耍
+    function playWithPanda() {
+        fetch('/play_with_panda', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // 立即更新状态条和表情
+                updateStatusBars(null, data.mood);
+
+                // 增加疲劳值
+                increaseFatigue(15);
+
+                checkAndUpdatePandaFace();
+
+                // 触发耳朵动画
+                animateEars();
+
+                alert(data.message);
+            } else {
+                alert(data.message || 'Playing failed, please try again');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Playing failed, please try again');
+        });
+    }
+
+    // 更新小熊猫状态
+    function updatePandaStatus() {
+        fetch('/update_panda_status', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // 使用平滑过渡更新状态条
+                updateStatusBarsWithAnimation(data.fullness, data.mood);
+
+                // 如果返回了疲劳值，则更新
+                if (data.fatigue !== undefined) {
+                    const fatigueValue = document.getElementById('fatigueValue');
+                    const fatigueFill = document.getElementById('fatigueFill');
+
+                    if (fatigueValue && fatigueFill) {
+                        // 获取当前宽度
+                        const currentWidth = parseFloat(fatigueFill.style.width) || 0;
+                        // 目标宽度
+                        const targetWidth = data.fatigue;
+
+                        // 使用动画平滑过渡
+                        animateStatusBar(fatigueFill, currentWidth, targetWidth, fatigueValue);
+
+                        // 如果疲劳值高，添加高亮样式
+                        if (data.fatigue >= 80) {
+                            fatigueValue.classList.add('high-fatigue');
+                        } else {
+                            fatigueValue.classList.remove('high-fatigue');
+                        }
+                    }
+                }
+
+                // 检查是否需要显示悲伤表情
+                const needSadFace = data.needSadFace ||
+                                   (data.fatigue !== undefined && data.fatigue >= 80);
+                updatePandaFace(needSadFace);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+    }
+
+    // 带动画效果的状态条更新
+    function updateStatusBarsWithAnimation(fullness, mood) {
+        // 防止重复更新
+        if (window.isUpdatingStatus) return;
+        window.isUpdatingStatus = true;
+
+        try {
+            if (fullness !== null) {
+                const fullnessValue = document.getElementById('fullnessValue');
+                const fullnessFill = document.getElementById('fullnessFill');
+
+                if (fullnessValue && fullnessFill) {
+                    // 获取当前宽度并确保是有效数值
+                    const currentWidth = Math.min(Math.max(parseFloat(fullnessFill.style.width) || 0, 0), 100);
+                    // 确保目标宽度在0-100之间
+                    const targetWidth = Math.min(Math.max(fullness, 0), 100);
+
+                    // 使用动画平滑过渡
+                    animateStatusBar(fullnessFill, currentWidth, targetWidth, fullnessValue);
+                }
+            }
+
+            if (mood !== null) {
+                const moodValue = document.getElementById('moodValue');
+                const moodFill = document.getElementById('moodFill');
+
+                if (moodValue && moodFill) {
+                    // 获取当前宽度并确保是有效数值
+                    const currentWidth = Math.min(Math.max(parseFloat(moodFill.style.width) || 0, 0), 100);
+                    // 确保目标宽度在0-100之间
+                    const targetWidth = Math.min(Math.max(mood, 0), 100);
+
+                    // 使用动画平滑过渡
+                    animateStatusBar(moodFill, currentWidth, targetWidth, moodValue);
+                }
+            }
+        } finally {
+            // 确保更新完成后重置标志
+            setTimeout(() => {
+                window.isUpdatingStatus = false;
+            }, 300); // 与动画持续时间相同
+        }
+    }
+
+    // 状态条动画函数
+    function animateStatusBar(element, start, end, valueElement) {
+        // 确保起始值和结束值都在0-100之间
+        start = Math.min(Math.max(start, 0), 100);
+        end = Math.min(Math.max(end, 0), 100);
+
+        const duration = 300; // 动画持续时间
+        const startTime = performance.now();
+
+        function updateAnimation(currentTime) {
+            const elapsedTime = currentTime - startTime;
+            const progress = Math.min(elapsedTime / duration, 1);
+            const easeProgress = 1 - Math.pow(1 - progress, 3); // 缓动效果
+
+            const currentValue = start + (end - start) * easeProgress;
+            // 确保当前值在0-100之间
+            const validValue = Math.min(Math.max(currentValue, 0), 100);
+
+            element.style.width = `${validValue}%`;
+            valueElement.textContent = `${Math.round(validValue)}%`;
+
+            if (progress < 1) {
+                requestAnimationFrame(updateAnimation);
+            } else {
+                // 动画结束后检查是否需要更新表情
+                checkAndUpdatePandaFace();
+            }
+        }
+
+        requestAnimationFrame(updateAnimation);
+    }
+
+    // 普通状态条更新（无动画）
+    function updateStatusBars(fullness, mood) {
+        if (fullness !== null) {
+            const fullnessValue = document.getElementById('fullnessValue');
+            const fullnessFill = document.getElementById('fullnessFill');
+
+            if (fullnessValue && fullnessFill) {
+                // 确保数值在0-100之间
+                const validFullness = Math.min(Math.max(fullness, 0), 100);
+                fullnessValue.textContent = `${Math.round(validFullness)}%`;
+                fullnessFill.style.width = `${validFullness}%`;
+            }
+        }
+
+        if (mood !== null) {
+            const moodValue = document.getElementById('moodValue');
+            const moodFill = document.getElementById('moodFill');
+
+            if (moodValue && moodFill) {
+                // 确保数值在0-100之间
+                const validMood = Math.min(Math.max(mood, 0), 100);
+                moodValue.textContent = `${Math.round(validMood)}%`;
+                moodFill.style.width = `${validMood}%`;
+            }
+        }
+    }
+
+    // 检查并更新小熊猫表情
+    function checkAndUpdatePandaFace() {
+        const fullnessValue = parseFloat(document.getElementById('fullnessValue').textContent) || 0;
+        const moodValue = parseFloat(document.getElementById('moodValue').textContent) || 0;
+        const fatigueValue = parseFloat(document.getElementById('fatigueValue').textContent) || 0;
+
+        // 如果饱食度或心情低于50%，或者疲劳值高于80%，显示悲伤表情
+        updatePandaFace(fullnessValue < 50 || moodValue < 50 || fatigueValue >= 80);
+    }
+
+    // 更新小熊猫表情
+    function updatePandaFace(needSadFace) {
+        const tearsElement = document.querySelector('.little_panda-part[alt="tears"]');
+        const mouthElement = document.getElementById('pandaMouth');
+        const pandaContainer = document.getElementById('pandaContainer');
+
+        if (tearsElement && mouthElement) {
+            // 如果动画正在进行中，按照当前食物类型控制tears的显示
+            if (isAnimationInProgress) {
+                if (currentFoodType === 'onion') {
+                    tearsElement.style.display = 'block';
+                } else {
+                    tearsElement.style.display = 'none';
+                }
+                return; // 不进行其他表情更新
+            }
+
+            if (needSadFace) {
+                // 显示难过表情并添加抖动效果
+                tearsElement.style.display = 'block';
+                mouthElement.src = '/static/images/little_panda/mouth-close.svg';
+
+                // 悲伤时添加轻微抖动动画
+                pandaContainer.classList.add('panda-sad');
+            } else {
+                // 显示开心表情并移除抖动
+                tearsElement.style.display = 'none';
+                mouthElement.src = '/static/images/little_panda/mouth-happy.svg';
+
+                // 开心时移除抖动
+                pandaContainer.classList.remove('panda-sad');
+            }
+        }
+    }
+
+    function loadPandaDetails() {
+        // 通过后端API获取熊猫信息
+        fetch('/get_panda_info')
+            .then(response => response.json())
+            .then(data => {
+                if (data.success && data.panda_data) {
+                    const pandaData = data.panda_data;
+                    console.log("Retrieved panda data from API:", pandaData);
+
+                    // 如果API返回了用户积分，更新右侧显示
+                    if (data.user_score !== undefined) {
+                        updateUserScore(data.user_score);
+                    }
+
+                    // 格式化日期
+                    let adoptedDateText = 'Unknown date';
+                    if (pandaData.adopted_at) {
+                        try {
+                            const adoptedDate = new Date(pandaData.adopted_at);
+                            adoptedDateText = adoptedDate.toLocaleDateString();
+                        } catch (e) {
+                            console.error("Date formatting error:", e);
+                        }
+                    }
+
+                    // 更新熊猫信息
+                    const pandaDetails = document.getElementById('pandaDetails');
+                    pandaDetails.innerHTML = `
+                        <h3 class="panda-name">${pandaData.name}</h3>
+                        <p class="panda-date">Adoption date: ${adoptedDateText}</p>
+                    `;
+
+                    // 更新状态条
+                    if (pandaData.fullness !== undefined && pandaData.mood !== undefined) {
+                        updateStatusBars(pandaData.fullness, pandaData.mood);
+
+                        // 初始化疲劳值（如果有的话）
+                        if (pandaData.fatigue !== undefined) {
+                            const fatigueValue = document.getElementById('fatigueValue');
+                            const fatigueFill = document.getElementById('fatigueFill');
+
+                            if (fatigueValue && fatigueFill) {
+                                fatigueValue.textContent = `${Math.round(pandaData.fatigue)}%`;
+                                fatigueFill.style.width = `${pandaData.fatigue}%`;
+
+                                // 如果疲劳值高，添加高亮样式
+                                if (pandaData.fatigue >= 80) {
+                                    fatigueValue.classList.add('high-fatigue');
+                                }
+                            }
+                        }
+
+                        // 检查表情状态
+                        const needSadFace = pandaData.fullness < 50 || pandaData.mood < 50 ||
+                                          (pandaData.fatigue !== undefined && pandaData.fatigue >= 80);
+                        updatePandaFace(needSadFace);
+                    }
+                } else {
+                    console.error("API didn't return panda data:", data.message);
+
+                    // 显示错误信息
+                    const pandaDetails = document.getElementById('pandaDetails');
+                    pandaDetails.innerHTML = `<p class="text-red-500">Failed to load panda data. Please try refreshing the page.</p>`;
+                }
+            })
+            .catch(error => {
+                console.error("Error calling API:", error);
+
+                // 显示错误信息
+                const pandaDetails = document.getElementById('pandaDetails');
+                pandaDetails.innerHTML = `<p class="text-red-500">Error loading panda data: ${error.message}</p>`;
+            });
+    }
+
+    // 添加尾巴点击动画
+    document.getElementById('pandaContainer').addEventListener('click', function() {
+        animateTail();
+
+        // 随机选择一个动作（喂食或玩耍）
+        if (Math.random() > 0.5) {
+            animateEars();
+        }
+    });
+
+    // 触发尾巴摇动动画
+    function animateTail() {
+        const tail = document.querySelector('.little_panda-part[alt="tail"]');
+        tail.classList.remove('tail-wag');
+        // 强制重绘
+        void tail.offsetWidth;
+        tail.classList.add('tail-wag');
+    }
+
+    // 触发耳朵动画
+    function animateEars() {
+        const leftEar = document.querySelector('.little_panda-part[alt="left-ear"]');
+        const rightEar = document.querySelector('.little_panda-part[alt="right-ear"]');
+
+        // 暂时移除原有动画类
+        leftEar.classList.remove('ear-twitch');
+        rightEar.classList.remove('ear-twitch');
+
+        // 强制重绘
+        void leftEar.offsetWidth;
+        void rightEar.offsetWidth;
+
+        // 添加新的动画类
+        leftEar.classList.add('ear-twitch');
+        rightEar.classList.add('ear-twitch');
+    }
+
+    // 增加疲劳值函数
+    function increaseFatigue(amount) {
+        const fatigueValue = document.getElementById('fatigueValue');
+        const fatigueFill = document.getElementById('fatigueFill');
+
+        if (fatigueValue && fatigueFill) {
+            // 获取当前疲劳值
+            const currentFatigue = parseFloat(fatigueValue.textContent) || 0;
+            // 计算新的疲劳值，确保不超过100%
+            const newFatigue = Math.min(currentFatigue + amount, 100);
+
+            // 使用动画更新疲劳条
+            animateStatusBar(fatigueFill, currentFatigue, newFatigue, fatigueValue);
+
+            // 如果疲劳值高，添加高亮样式
+            if (newFatigue >= 80) {
+                fatigueValue.classList.add('high-fatigue');
+            } else {
+                fatigueValue.classList.remove('high-fatigue');
+            }
+
+            // 存储疲劳值到会话中
+            saveFatigue(newFatigue);
+        }
+    }
+
+    // 保存疲劳值到会话
+    function saveFatigue(value) {
+        fetch('/save_fatigue', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                fatigue: value
+            })
+        })
+        .catch(error => {
+            console.error('Error saving fatigue value:', error);
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        // 设置打印证书按钮点击事件
+        const printCertificateBtn = document.getElementById('printCertificateBtn');
+        if (printCertificateBtn) {
+            printCertificateBtn.addEventListener('click', function() {
+                generateCertificate();
+            });
+        }
+
+        // 设置旅行模态框关闭按钮
+        const travelCloseBtn = document.querySelector('.travel-close');
+        if (travelCloseBtn) {
+            travelCloseBtn.addEventListener('click', function() {
+                document.getElementById('travelMapModal').style.display = 'none';
+            });
+        }
+
+        // 点击旅行模态框外部关闭
+        const travelModal = document.getElementById('travelMapModal');
+        if (travelModal) {
+            travelModal.addEventListener('click', function(event) {
+                if (event.target === this) {
+                    travelModal.style.display = 'none';
+                }
+            });
+        }
+    });
+
+    // 修改生成证书函数，使用后端API获取数据
+    function generateCertificate() {
+        // 如果已经在打印，防止重复调用
+        if (window.isPrinting) {
+            return;
+        }
+        window.isPrinting = true;
+
+        // 使用后端API获取数据
+        fetch('/get_certificate_data')
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const { username, pandaName, adoptedDate } = data;
+
+                    // 填充证书信息
+                    document.getElementById('cert-username').textContent = username;
+                    document.getElementById('cert-pandaname').textContent = pandaName;
+                    document.getElementById('cert-date').textContent = adoptedDate;
+
+                    // 复制当前熊猫SVG到证书
+                    const pandaContainer = document.getElementById('pandaContainer');
+                    const certificatePandaImage = document.getElementById('certificate-panda-image');
+
+                    // 清空目标容器
+                    certificatePandaImage.innerHTML = '';
+
+                    // 复制SVG元素
+                    const svgClones = [];
+                    const svgElements = pandaContainer.querySelectorAll('.little_panda-part');
+
+                    svgElements.forEach(function(svg) {
+                        const clone = svg.cloneNode(true);
+
+                        // 设置位置和大小
+                        clone.style.position = 'absolute';
+                        clone.style.width = '100%';
+                        clone.style.height = '100%';
+                        clone.style.top = '0';
+                        clone.style.left = '0';
+
+                        // 如果是眼泪且当前不显示，则不添加到证书
+                        if (clone.alt === 'tears' && svg.style.display === 'none') {
+                            return;
+                        }
+
+                        svgClones.push(clone);
+                    });
+
+                    // 按顺序添加SVG元素
+                    svgClones.forEach(function(clone) {
+                        certificatePandaImage.appendChild(clone);
+                    });
+
+                    // 显示证书模板并打印
+                    const certificateTemplate = document.getElementById('certificateTemplate');
+
+                    // 把证书放到可见区域
+                    certificateTemplate.style.display = 'block';
+                    certificateTemplate.style.position = 'fixed';
+                    certificateTemplate.style.left = '0';
+                    certificateTemplate.style.top = '0';
+                    certificateTemplate.style.width = '100%';
+                    certificateTemplate.style.height = '100%';
+                    certificateTemplate.style.backgroundColor = 'white';
+                    certificateTemplate.style.zIndex = '9999';
+
+                    // 短暂延迟以确保元素完全渲染
+                    setTimeout(function() {
+                        window.print();
+
+                        // 打印完成后恢复原状
+                        setTimeout(function() {
+                            certificateTemplate.style.display = 'none';
+                            certificateTemplate.style.position = 'fixed';
+                            certificateTemplate.style.left = '-9999px';
+                            certificateTemplate.style.top = '-9999px';
+                            // 重置打印状态
+                            window.isPrinting = false;
+                        }, 500);
+                    }, 300);
+                } else {
+                    alert('Failed to get information: ' + (data.error || 'Unknown Mistakes'));
+                    window.isPrinting = false;
+                }
+            })
+            .catch(function(error) {
+                console.error("sth went wrong through creating certificate:", error);
+                alert('Failed to create certificate: ' + error.message);
+                window.isPrinting = false;
+            });
+    }
+
+    // 显示省份旅行评价弹窗
+    function showProvinceRating(province) {
+        // 获取省份数据
+        const provinceData = provinceRecommendations[province] || { stars: "?", reason: "No evaluation information available for this province." };
+
+        // 更新弹窗内容
+        document.getElementById('ratingProvince').textContent = province;
+        document.getElementById('ratingStars').textContent = provinceData.stars;
+        document.getElementById('ratingReason').textContent = provinceData.reason;
+
+        // 显示弹窗
+        const ratingModal = document.getElementById('travelRatingModal');
+        ratingModal.style.display = 'block';
+
+        // 点击"我知道了"按钮关闭
+        document.getElementById('closeRatingBtn').onclick = function() {
+            ratingModal.style.display = 'none';
+            // 在弹窗关闭后显示旅行结果
+            alert('Travel completed! Thank you for exploring ' + province + ' with your Red Panda.');
+        };
+
+        // 点击弹窗外部不关闭，必须点击按钮
+    }
+
+    // 省份适宜度评价
+    function getProvinceRating(province) {
+        const ratings = {
+            'Shanghai': {
+                rating: 2,
+                reason: "Too urban for red pandas; lacks bamboo forests. City has limited green spaces."
+            },
+            'Beijing': {
+                rating: 3,
+                reason: "Varied climate with mountains nearby, but high population density and pollution issues."
+            },
+            'Guangdong': {
+                rating: 4,
+                reason: "Warm climate and southern forests provide good resources, but high humidity can be challenging."
+            },
+            'Sichuan': {
+                rating: 5,
+                reason: "Perfect with abundant bamboo forests and ideal climate, the natural habitat of red pandas!"
+            },
+            'Tibet': {
+                rating: 5,
+                reason: "Excellent high-altitude forests and natural environment, with traditional protection of wildlife."
+            },
+            'Yunnan': {
+                rating: 5,
+                reason: "Biodiversity hotspot with temperate forests and bamboo groves, ideal for red pandas."
+            },
+            'Hainan': {
+                rating: 2,
+                reason: "Too tropical for red pandas, who prefer temperate climates and mountains."
+            },
+            'Zhejiang': {
+                rating: 4,
+                reason: "Good mountain forests and bamboo resources, relatively suitable climate."
+            },
+            'Jiangsu': {
+                rating: 3,
+                reason: "Moderate climate but limited natural forests and high development density."
+            },
+            'Fujian': {
+                rating: 4,
+                reason: "Mountainous terrain with bamboo resources and moderate climate, reasonably suitable."
+            },
+            'Heilongjiang': {
+                rating: 3,
+                reason: "Harsh winters are challenging, but forests provide some suitable habitat in warmer months."
+            },
+            'Inner Mongolia': {
+                rating: 2,
+                reason: "Grasslands and low forest coverage, dry climate not ideal for bamboo growth."
+            },
+            'Qinghai': {
+                rating: 4,
+                reason: "High altitude with suitable forests in some areas, cool climate matches red panda needs."
+            },
+            'Xinjiang': {
+                rating: 1,
+                reason: "Arid desert climate with little bamboo or forest coverage, not suitable for red pandas."
+            },
+            'Guangxi': {
+                rating: 4,
+                reason: "Southern forests and karst mountains provide good habitat with bamboo resources."
+            },
+            'Jiangxi': {
+                rating: 4,
+                reason: "Good forested areas with mountains and adequate bamboo resources, suitable climate."
+            },
+            'Henan': {
+                rating: 3,
+                reason: "Limited forest coverage and high population density, but some mountain areas could work."
+            },
+            'Anhui': {
+                rating: 3,
+                reason: "Mixed terrain with some mountain forests, but moderate development affects habitat."
+            },
+            'Shandong': {
+                rating: 2,
+                reason: "Highly developed with limited natural areas, not enough bamboo resources."
+            },
+            'Liaoning': {
+                rating: 2,
+                reason: "Industrial development has reduced natural habitats, with cold winters and limited forests."
+            },
+            'Jilin': {
+                rating: 3,
+                reason: "Northern forests provide some habitat, but cold winters are challenging for red pandas."
+            },
+            'Shaanxi': {
+                rating: 4,
+                reason: "Qinling Mountains provide excellent habitat with bamboo forests and suitable climate."
+            },
+            'Shanxi': {
+                rating: 2,
+                reason: "Dry climate with limited forests and bamboo resources, not ideal for red pandas."
+            },
+            'Hebei': {
+                rating: 2,
+                reason: "Heavy industrial development and limited forests, not optimal for red pandas."
+            },
+            'Hubei': {
+                rating: 4,
+                reason: "Good mountain forests in western regions with bamboo resources and suitable climate."
+            },
+            'Hunan': {
+                rating: 4,
+                reason: "Rich forests and mountains with bamboo resources, providing good red panda habitat."
+            },
+            'Chongqing': {
+                rating: 4,
+                reason: "Mountainous terrain with bamboo forests, similar to neighboring Sichuan province."
+            },
+            'Guizhou': {
+                rating: 4,
+                reason: "Karst mountain landscape with forests and moderate climate, suitable for red pandas."
+            },
+            'Gansu': {
+                rating: 3,
+                reason: "Southern parts have suitable forests, while northern areas are too dry for red pandas."
+            },
+            'Ningxia': {
+                rating: 1,
+                reason: "Arid climate with minimal forests and bamboo, not suitable for red pandas."
+            },
+            'Taiwan': {
+                rating: 4,
+                reason: "Mountain forests and suitable climate, good bamboo resources for red pandas."
+            },
+            'Hong Kong': {
+                rating: 2,
+                reason: "Limited natural space despite conservation efforts, high urban density."
+            },
+            'Macau': {
+                rating: 1,
+                reason: "Highly urbanized with almost no natural habitat for red pandas."
+            }
+        };
+
+        return ratings[province] || { rating: 0, reason: "Region information not available" };
+    }
+
+    // 添加熊猫日记功能
+    document.addEventListener('DOMContentLoaded', function() {
+        // 更新显示的用户积分
+        fetchUserScore();
+
+        // 设置当前日期
+        setCurrentDate();
+
+        // 熊猫日记按钮点击事件
+        const diaryButton = document.getElementById('diaryButton');
+        const diaryModal = document.getElementById('diaryModal');
+        const closeDiaryModalBtn = document.getElementById('closeDiaryModal');
+        const saveDiaryBtn = document.getElementById('saveDiaryBtn');
+
+        if (diaryButton) {
+            diaryButton.addEventListener('click', openDiaryModal);
+        }
+
+        if (closeDiaryModalBtn) {
+            closeDiaryModalBtn.addEventListener('click', function() {
+                closeDiaryModal();
+            });
+        }
+
+        if (diaryModal) {
+            diaryModal.addEventListener('click', function(event) {
+                if (event.target === diaryModal) {
+                    closeDiaryModal();
+                }
+            });
+        }
+
+        if (saveDiaryBtn) {
+            saveDiaryBtn.addEventListener('click', saveDiaryEntry);
+        }
+
+        // 加载日记条目
+        loadDiaryEntries();
+    });
+
+    // 打开日记弹窗
+    function openDiaryModal() {
+        const diaryModal = document.getElementById('diaryModal');
+        diaryModal.style.display = "block";
+        setTimeout(() => {
+            document.querySelector('.diary-modal-content').style.transform = "translateY(0)";
+            document.querySelector('.diary-modal-content').style.opacity = "1";
+        }, 10);
+    }
+
+    // 关闭日记弹窗
+    function closeDiaryModal() {
+        const diaryModal = document.getElementById('diaryModal');
+        document.querySelector('.diary-modal-content').style.transform = "translateY(-20px)";
+        document.querySelector('.diary-modal-content').style.opacity = "0";
+        setTimeout(() => {
+            diaryModal.style.display = "none";
+        }, 300);
+    }
+
+    // 设置当前日期
+    function setCurrentDate() {
+        const currentDateElement = document.getElementById('currentDate');
+        if (currentDateElement) {
+            const now = new Date();
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            currentDateElement.textContent = now.toLocaleDateString('en-US', options);
+        }
+    }
+
+    // 保存日记条目
+    function saveDiaryEntry() {
+        const title = document.getElementById('diaryTitle').value.trim();
+        const content = document.getElementById('diaryContent').value.trim();
+
+        if (!title || !content) {
+            alert('Please enter both title and content for your diary entry');
+            return;
+        }
+
+        const now = new Date();
+        const entry = {
+            id: 'diary_' + Date.now(),
+            title: title,
+            content: content,
+            date: now.toISOString(),
+            displayDate: now.toLocaleDateString('en-US')
+        };
+
+        // 获取现有条目
+        let entries = JSON.parse(localStorage.getItem('pandaDiaryEntries') || '[]');
+
+        // 添加新条目
+        entries.unshift(entry);
+
+        // 保存回本地存储
+        localStorage.setItem('pandaDiaryEntries', JSON.stringify(entries));
+
+        // 重置表单
+        document.getElementById('diaryTitle').value = '';
+        document.getElementById('diaryContent').value = '';
+
+        // 刷新条目列表
+        loadDiaryEntries();
+
+        alert('Diary entry saved successfully!');
+    }
+
+    // 加载日记条目
+    function loadDiaryEntries() {
+        const entriesList = document.getElementById('diaryEntriesList');
+        if (!entriesList) return;
+
+        // 清空现有列表
+        entriesList.innerHTML = '';
+
+        // 获取条目
+        const entries = JSON.parse(localStorage.getItem('pandaDiaryEntries') || '[]');
+
+        if (entries.length === 0) {
+            entriesList.innerHTML = '<div class="empty-entries">No diary entries yet. Start writing about your adventures with your panda!</div>';
+            return;
+        }
+
+        // 添加条目到列表
+        entries.forEach(entry => {
+            const entryElement = document.createElement('div');
+            entryElement.className = 'diary-entry-item';
+            entryElement.setAttribute('data-id', entry.id);
+
+            entryElement.innerHTML = `
+                <div class="diary-entry-title">${entry.title}</div>
+                <div class="diary-entry-date">${entry.displayDate}</div>
+            `;
+
+            entryElement.addEventListener('click', function() {
+                viewDiaryEntry(entry.id);
+            });
+
+            entriesList.appendChild(entryElement);
+        });
+    }
+
+    // 查看日记条目
+    function viewDiaryEntry(entryId) {
+        const entries = JSON.parse(localStorage.getItem('pandaDiaryEntries') || '[]');
+        const entry = entries.find(e => e.id === entryId);
+
+        if (entry) {
+            document.getElementById('diaryTitle').value = entry.title;
+            document.getElementById('diaryContent').value = entry.content;
+        }
+    }
+
+    // 获取用户积分
+    function fetchUserScore() {
+        fetch('/get_score')
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // 更新右侧显示的积分
+                    const userPointsElement = document.getElementById('user-points');
+                    if (userPointsElement) {
+                        userPointsElement.textContent = data.score;
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Failed to fetch score:', error);
+            });
+    }
+
+    // 设置地图收集功能
+    function setupMapCollection() {
+        // 获取地图收集按钮和弹窗元素
+        const mapCollectionBtn = document.getElementById('mapCollectionButton');
+        const mapCollectionModal = document.getElementById('mapCollectionModal');
+        const closeMapModalBtn = document.getElementById('closeMapModal');
+
+        // 从Firebase加载已访问的省份
+        loadVisitedProvinces();
+
+        // 设置打开弹窗事件
+        if (mapCollectionBtn) {
+            mapCollectionBtn.addEventListener('click', function() {
+                // 先获取最新的访问省份数据
+                fetch('/get_visited_provinces')
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // 更新全局变量
+                            visitedProvinces = data.visited_provinces || {};
+                            console.log("Successfully reloaded visited provinces:", visitedProvinces);
+
+                            // 加载省份列表
+                            renderProvinceList();
+
+                            // 打开弹窗
+                            mapCollectionModal.style.display = "block";
+                            setTimeout(() => {
+                                document.querySelector('.map-collection-content').style.transform = "translateY(0)";
+                                document.querySelector('.map-collection-content').style.opacity = "1";
+                            }, 10);
+                        } else {
+                            console.error("Failed to load province data:", data.message);
+                            alert("Unable to load province data, please try again later");
+                        }
+                    })
+                    .catch(error => {
+                        console.error("Error getting visited province data:", error);
+                        alert("Error retrieving data, please try again later");
+                    });
+            });
+        }
+
+        // 设置关闭弹窗事件
+        if (closeMapModalBtn) {
+            closeMapModalBtn.addEventListener('click', function() {
+                document.querySelector('.map-collection-content').style.transform = "translateY(-20px)";
+                document.querySelector('.map-collection-content').style.opacity = "0";
+                setTimeout(() => {
+                    mapCollectionModal.style.display = "none";
+                }, 300);
+            });
+        }
+
+        // 点击弹窗外部关闭
+        window.addEventListener('click', function(event) {
+            if (event.target == mapCollectionModal) {
+                document.querySelector('.map-collection-content').style.transform = "translateY(-20px)";
+                document.querySelector('.map-collection-content').style.opacity = "0";
+                setTimeout(() => {
+                    mapCollectionModal.style.display = "none";
+                }, 300);
+            }
+        });
+    }
+
+    // 从Firebase加载已访问的省份
+    function loadVisitedProvinces() {
+        // 从服务器获取已访问的省份数据
+        fetch('/get_visited_provinces')
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // 更新全局变量
+                    visitedProvinces = data.visited_provinces || {};
+                    console.log("Loaded visited provinces:", visitedProvinces);
+
+                    // 如果地图已加载，更新高亮显示
+                    if (window.travelChart) {
+                        updateVisitedProvincesOnMap();
+                    }
+                } else {
+                    console.error("Failed to load province data:", data.message);
+                }
+            })
+            .catch(error => {
+                console.error("Error getting visited province data:", error);
+            });
+    }
+
+    // 渲染省份列表
+    function renderProvinceList() {
+        const provinceListElement = document.getElementById('provinceList');
+        if (!provinceListElement) return;
+
+        // 清空现有内容
+        provinceListElement.innerHTML = '';
+
+        // 获取所有省份数据
+        Object.keys(provinceRecommendations).sort().forEach(province => {
+            const isVisited = visitedProvinces.hasOwnProperty(province);
+            const provinceData = provinceRecommendations[province];
+
+            // 创建省份项
+            const provinceItem = document.createElement('div');
+            provinceItem.className = `province-item ${isVisited ? 'visited' : ''}`;
+
+            // 设置省份内容
+            provinceItem.innerHTML = `
+                <div class="province-name">${province}</div>
+                <div class="province-rating">
+                    <strong>Stars:</strong> ${isVisited ? provinceData.stars : 'Unknown'}
+                </div>
+                <div class="province-reason">
+                    ${isVisited ? provinceData.reason : 'Go travelling to find more information~'}
+                </div>
+            `;
+
+            // 添加到列表
+            provinceListElement.appendChild(provinceItem);
+        });
+    }
+
+    // 更新已访问省份记录
+    function updateVisitedProvince(province) {
+        // 添加到已访问省份
+        visitedProvinces[province] = {
+            visitedAt: new Date().toISOString(),
+            stars: provinceRecommendations[province].stars,
+            reason: provinceRecommendations[province].reason
+        };
+
+        // 通过后端API更新到数据库
+        fetch('/update_visited_province', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                province: province,
+                visitedAt: new Date().toISOString(),
+                stars: provinceRecommendations[province].stars,
+                reason: provinceRecommendations[province].reason
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                console.log(`Successfully recorded visited province: ${province}`);
+            } else {
+                console.error(`Failed to record visited province: ${data.message}`);
+            }
+        })
+        .catch(error => {
+            console.error(`Failed to record visited province: ${error}`);
+        });
+    }
+
+    // 更新用户积分显示
+    function updateUserScore(score) {
+        // 更新右侧显示的积分
+        const userPointsElement = document.getElementById('user-points');
+        if (userPointsElement) {
+            userPointsElement.textContent = `My Score：${score}`;
+        }
+
+        // 同时更新所有积分显示区域
+        const scoreDisplays = document.querySelectorAll('.score-display');
+        scoreDisplays.forEach(display => {
+            if (display.innerHTML.includes('My Score:')) {
+                display.innerHTML = `<i class="fas fa-coins"></i> My Score: ${score}`;
+            } else if (display.innerHTML.includes('Current Points:')) {
+                const currentScoreElement = display.querySelector('#currentScore');
+                if (currentScoreElement) {
+                    currentScoreElement.textContent = score;
+                }
+            }
+        });
+    }
+
+    // 在地图上高亮显示已访问省份
+    function updateVisitedProvincesOnMap() {
+        if (!window.travelChart) return;
+
+        // 遍历已访问省份并高亮显示
+        Object.keys(visitedProvinces).forEach(province => {
+            window.travelChart.dispatchAction({
+                type: 'highlight',
+                name: province,
+                seriesIndex: 0
+            });
+        });
+    }
+</script>
+{% endblock %}

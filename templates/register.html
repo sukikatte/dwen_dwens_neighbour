@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - Dwen Dwen's Neighbour</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#2E7D32',
+                        secondary: '#8B4513',
+                        accent: '#FFA726'
+                    },
+                    borderRadius: {
+                        'none': '0px',
+                        'sm': '2px',
+                        DEFAULT: '4px',
+                        'md': '8px',
+                        'lg': '12px',
+                        'xl': '16px',
+                        '2xl': '20px',
+                        '3xl': '24px',
+                        'full': '9999px',
+                        'button': '8px'
+                    },
+                    animation: {
+                        'float': 'float 6s ease-in-out infinite',
+                        'fade-in': 'fadeIn 1s ease-in-out',
+                        'slide-in': 'slideIn 0.5s ease-out'
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-20px)' }
+                        },
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' }
+                        },
+                        slideIn: {
+                            '0%': { transform: 'translateX(-100%)' },
+                            '100%': { transform: 'translateX(0)' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            min-height: 1024px;
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #f6f8f9 0%, #e9ecef 100%);
+            position: relative;
+            overflow-x: hidden;
+        }
+        
+        /* 添加动态背景效果 */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 60 60' opacity='0.07'%3E%3Cpath d='M15,5 C17,9 20,10 25,10 C20,15 20,20 15,25 C10,20 10,15 5,10 C10,10 13,9 15,5 M45,5 C47,9 50,10 55,10 C50,15 50,20 45,25 C40,20 40,15 35,10 C40,10 43,9 45,5 M15,35 C17,39 20,40 25,40 C20,45 20,50 15,55 C10,50 10,45 5,40 C10,40 13,39 15,35 M45,35 C47,39 50,40 55,40 C50,45 50,50 45,55 C40,50 40,45 35,40 C40,40 43,39 45,35' fill='%232E7D32'/%3E%3C/svg%3E");
+            opacity: 0.04;
+            z-index: -2;
+        }
+        
+        /* 添加动态形状 */
+        .animated-shape {
+            position: absolute;
+            border-radius: 50%;
+            background: linear-gradient(135deg, rgba(46, 125, 50, 0.3) 0%, rgba(139, 195, 74, 0.1) 100%);
+            filter: blur(70px);
+            z-index: -1;
+            animation: float 15s ease-in-out infinite alternate;
+        }
+        
+        .shape1 {
+            width: 50vw;
+            height: 50vw;
+            top: -25vw;
+            right: -25vw;
+            animation-delay: 0s;
+        }
+        
+        .shape2 {
+            width: 30vw;
+            height: 30vw;
+            bottom: -15vw;
+            left: -15vw;
+            animation-delay: 5s;
+        }
+        
+        .shape3 {
+            width: 40vw;
+            height: 40vw;
+            bottom: 20vh;
+            right: -20vw;
+            animation-delay: 10s;
+            background: linear-gradient(135deg, rgba(139, 69, 19, 0.2) 0%, rgba(255, 167, 38, 0.1) 100%);
+        }
+        
+        .shape4 {
+            width: 25vw;
+            height: 25vw;
+            top: 30vh;
+            left: -10vw;
+            animation-delay: 7s;
+            background: linear-gradient(135deg, rgba(76, 175, 80, 0.2) 0%, rgba(139, 195, 74, 0.1) 100%);
+        }
+        
+        /* 添加漂浮的小元素 */
+        .floating-particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            pointer-events: none;
+            z-index: 0;
+        }
+        
+        .particle {
+            position: absolute;
+            background-color: rgba(46, 125, 50, 0.1);
+            border-radius: 50%;
+            animation: particle-float 20s linear infinite;
+            box-shadow: 0 0 10px rgba(46, 125, 50, 0.2);
+            backdrop-filter: blur(2px);
+        }
+        
+        @keyframes particle-float {
+            0% {
+                transform: translateY(0) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 0.8;
+                transform: translateY(-90vh) rotate(330deg);
+            }
+            100% {
+                transform: translateY(-100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        .main-container {
+            position: relative;
+            overflow: hidden;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            border-radius: 24px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            margin: 2rem;
+            z-index: 1;
+        }
+        
+        /* 修改右侧注册区域样式，优化容器层次 */
+        .register-form-container {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.7) 0%, rgba(255, 255, 255, 0.5) 100%);
+            backdrop-filter: blur(10px);
+            border-radius: 0 24px 24px 0;
+            transition: all 0.3s ease;
+            padding: 3rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .register-form {
+            width: 100%;
+            max-width: 400px;
+            animation: fadeIn 0.8s ease-out;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .form-header {
+            margin-bottom: 2.5rem;
+            position: relative;
+        }
+        
+        .form-header::after {
+            content: "";
+            position: absolute;
+            left: 0;
+            bottom: -12px;
+            height: 3px;
+            width: 40px;
+            background: #2E7D32;
+            border-radius: 3px;
+        }
+        
+        /* 替换旧的card样式 */
+        .card {
+            background: none;
+            padding: 0;
+            box-shadow: none;
+            border-radius: 0;
+            animation: none;
+            backdrop-filter: none;
+            border: none;
+        }
+        
+        .register-bg {
+            background-image: url('https://images.unsplash.com/photo-1564349683136-77e08dba1ef7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2072&q=80');
+            background-size: cover;
+            background-position: center;
+            position: relative;
+            overflow: hidden;
+            border-radius: 24px 0 0 24px;
+        }
+        .register-bg::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(46, 125, 50, 0.9) 0%, rgba(139, 69, 19, 0.8) 100%);
+            animation: fadeIn 1.5s ease-in-out;
+        }
+        .floating-elements {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+        .floating-element {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            animation: float 6s ease-in-out infinite;
+        }
+        .feature-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+        .feature-card:hover {
+            transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.2);
+        }
+        .input-group {
+            position: relative;
+            margin-bottom: 1.5rem;
+        }
+        .input-group input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            background: white;
+        }
+        .input-group input:focus {
+            border-color: #2E7D32;
+            box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.1);
+        }
+        .input-group i {
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #9ca3af;
+            transition: color 0.3s ease;
+        }
+        .input-group input:focus + i {
+            color: #2E7D32;
+        }
+        .btn-primary {
+            background: #2E7D32;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+        .btn-primary:hover {
+            background: #1b5e20;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(46, 125, 50, 0.2);
+        }
+        .logo {
+            font-family: 'Pacifico', cursive;
+            font-size: 2.5rem;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .logo i {
+            font-size: 2rem;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+    <div class="animated-shape shape1"></div>
+    <div class="animated-shape shape2"></div>
+    <div class="animated-shape shape3"></div>
+    <div class="animated-shape shape4"></div>
+    
+    <div class="floating-particles" id="particles-container">
+        <!-- 粒子将通过JavaScript动态生成 -->
+    </div>
+
+    <div class="main-container flex w-full max-w-7xl">
+        <div class="w-1/2 register-bg relative">
+            <div class="floating-elements">
+                <!-- 移除三个浮动元素 -->
+            </div>
+            <div class="relative z-10 p-16 text-white h-full flex flex-col justify-center">
+                <div class="logo mb-6 animate-fade-in">
+                    <i class="fas fa-paw"></i>
+                    <span>Dwen Dwen's Neighbour</span>
+                </div>
+                <p class="text-3xl font-light mb-6 animate-fade-in">Explore China's Rare Animals</p>
+                <p class="text-lg font-light max-w-md animate-fade-in">Join Chinese Animal Guardians on an amazing journey of animal protection.</p>
+
+                <div class="mt-8 grid grid-cols-2 gap-4">
+                    <div class="feature-card p-4 rounded-lg">
+                        <i class="fas fa-book text-2xl mb-2"></i>
+                        <p class="text-sm">Animal Encyclopedia</p>
+                    </div>
+                    <div class="feature-card p-4 rounded-lg">
+                        <i class="fas fa-gamepad text-2xl mb-2"></i>
+                        <p class="text-sm">Fun Games</p>
+                    </div>
+                    <div class="feature-card p-4 rounded-lg">
+                        <i class="fas fa-heart text-2xl mb-2"></i>
+                        <p class="text-sm">My Red Panda</p>
+                    </div>
+                    <div class="feature-card p-4 rounded-lg">
+                        <i class="fas fa-users text-2xl mb-2"></i>
+                        <p class="text-sm">Protection Community</p>
+                    </div>
+                    <div class="feature-card p-4 rounded-lg col-span-2">
+                        <i class="fas fa-hand-holding-heart text-2xl mb-2"></i>
+                        <p class="text-sm">Donation</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="w-1/2 register-form-container">
+            <div class="register-form">
+                <div class="form-header">
+                    <h2 class="text-3xl font-semibold text-gray-800">Create Account</h2>
+                    <p class="text-sm text-gray-600 mt-2">Sign up to start your animal protection journey</p>
+                </div>
+                <form id="registerForm" class="space-y-6">
+                    <div class="input-group">
+                        <input type="text" id="name" placeholder="Enter your name" required>
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="input-group">
+                        <input type="email" id="email" placeholder="Enter your email" required>
+                        <i class="fas fa-envelope"></i>
+                    </div>
+                    <div class="input-group">
+                        <input type="password" id="password" placeholder="Enter your password" required>
+                        <i class="fas fa-lock"></i>
+                    </div>
+                    <button type="submit" class="w-full btn-primary">
+                        Register
+                    </button>
+                    <p class="text-center text-sm text-gray-600">
+                        Already have an account?
+                        <a href="{{ url_for('login') }}" class="text-primary hover:text-primary/80 font-medium">Login here</a>
+                    </p>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 动态创建粒子的函数
+        function createParticles() {
+            const container = document.getElementById('particles-container');
+            const particleCount = 30; // 一次创建的粒子数量
+            
+            // 创建新的粒子（不清空容器，以保持持续效果）
+            for (let i = 0; i < particleCount; i++) {
+                setTimeout(() => {
+                    createParticle(container, i);
+                }, i * 300); // 每隔300毫秒创建一个粒子
+            }
+            
+            // 每10秒重新创建一批粒子
+            setTimeout(createParticles, 10000);
+        }
+        
+        function createParticle(container, index) {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            
+            // 随机大小 (15px - 35px)
+            const size = Math.floor(Math.random() * 20) + 15;
+            
+            // 随机位置 (0% - 100% 左侧位置)
+            const left = Math.floor(Math.random() * 100);
+            
+            // 随机动画持续时间 (15s - 30s)
+            const duration = Math.floor(Math.random() * 15) + 15;
+            
+            // 随机透明度 (0.05 - 0.15)
+            const opacity = (Math.random() * 0.1 + 0.05).toFixed(2);
+            
+            // 设置样式
+            particle.style.cssText = `
+                width: ${size}px;
+                height: ${size}px;
+                left: ${left}%;
+                top: 100%;
+                animation-duration: ${duration}s;
+                background-color: rgba(46, 125, 50, ${opacity});
+                box-shadow: 0 0 10px rgba(46, 125, 50, ${opacity * 2});
+            `;
+            
+            // 添加到容器
+            container.appendChild(particle);
+            
+            // 动画结束后移除粒子元素
+            particle.addEventListener('animationend', () => {
+                particle.remove();
+            });
+        }
+        
+        // 页面加载完成后开始创建粒子
+    </script>
+
+    <script type="module">
+    // 注册表单提交事件
+    document.getElementById("registerForm").addEventListener("submit", function(event) {
+        event.preventDefault(); // 阻止默认提交
+
+        const name = document.getElementById("name").value;
+        const email = document.getElementById("email").value;
+        const password = document.getElementById("password").value;
+
+        // 使用POST请求后端API注册
+        fetch('/register', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                name: name,
+                email: email,
+                password: password
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                alert("Registered successfully! Redirect to the login page ..");
+                window.location.href = data.redirect_url || "/login";
+            } else {
+                alert(data.message || "Registration failed, please try again");
+            }
+        })
+        .catch(error => {
+            console.error("Registration request error:", error);
+            alert("Registration failed, please try again");
+        });
+    });
+    </script>
+</body>
+</html>

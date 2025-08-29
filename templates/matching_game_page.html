@@ -1,0 +1,963 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Connect with the Correct Animal - Matching Game</title>
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    /* 全局样式 */
+    body {
+      background: linear-gradient(135deg, #f6f8f9 0%, #e9ecef 100%);
+      min-height: 100vh;
+      font-family: 'Poppins', sans-serif;
+      padding: 0;
+      margin: 0;
+      overflow-x: hidden;
+    }
+
+    /* 游戏容器 */
+    .game-wrapper {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 30px 20px;
+      position: relative;
+    }
+    
+    /* 游戏标题和用户信息布局 */
+    .header-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+      flex-wrap: wrap;
+    }
+    
+    /* 游戏标题 */
+    .game-title {
+      text-align: left;
+      margin-bottom: 0;
+      position: relative;
+      flex: 1;
+      display: flex;
+      align-items: center;
+    }
+    
+    .game-title h1 {
+      font-family: 'Pacifico', cursive;
+      font-size: 2.5rem;
+      color: #333;
+      margin-bottom: 0;
+      margin-right: 15px;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .game-title p {
+      font-size: 1rem;
+      color: #666;
+      max-width: 400px;
+      margin: 0;
+      padding-left: 15px;
+      border-left: 2px solid #eee;
+    }
+    
+    /* 用户信息区 */
+    .user-info {
+      display: flex;
+      align-items: center;
+      background: white;
+      padding: 10px 20px;
+      border-radius: 50px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+      margin-left: 20px;
+    }
+    
+    .user-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin-right: 10px;
+      border: 2px solid #fff;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    
+    .user-name {
+      font-weight: 600;
+      color: #333;
+      margin-right: 10px;
+      font-size: 0.9rem;
+    }
+    
+    .user-score {
+      background: linear-gradient(135deg, #1a56db, #3b82f6);
+      color: white;
+      padding: 3px 12px;
+      border-radius: 20px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      font-size: 0.9rem;
+    }
+    
+    /* 开始游戏按钮 */
+    .start-btn {
+      background: linear-gradient(135deg, #1a56db, #3b82f6);
+      color: white;
+      border: none;
+      padding: 12px 30px;
+      border-radius: 50px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      box-shadow: 0 10px 20px rgba(26, 86, 219, 0.3);
+      transition: all 0.3s ease;
+      display: block;
+      margin: 30px auto;
+      cursor: pointer;
+    }
+    
+    .start-btn:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 25px rgba(26, 86, 219, 0.4);
+    }
+
+    .start-btn i {
+      margin-right: 10px;
+    }
+
+    /* 游戏区域 */
+    .game-container {
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+      padding: 30px;
+      margin-top: 20px;
+      position: relative;
+      overflow: hidden;
+      width: 100%;
+      max-width: 1400px;
+      margin-left: auto;
+      margin-right: auto;
+      display: none;
+    }
+    
+    .game-instruction {
+      font-size: 1.5rem;
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: 20px;
+      color: #333;
+      position: relative;
+      padding-bottom: 10px;
+    }
+
+    .game-instruction::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 80%;
+      height: 3px;
+      background: linear-gradient(90deg, #1a56db, #3b82f6);
+      border-radius: 3px;
+    }
+
+    .game-tip {
+      font-size: 1rem;
+      color: #666;
+      text-align: center;
+      margin-bottom: 30px;
+      font-style: italic;
+    }
+
+    /* 动物图片和答案框 */
+    .animal-image {
+      width: 180px;
+      height: 180px;
+      object-fit: cover;
+      border-radius: 15px;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+      transition: all 0.3s ease;
+    }
+    
+    .animal-image:hover {
+      transform: scale(1.02);
+      box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+    }
+    
+    .answer-box {
+      width: 180px;
+      height: 50px;
+      background-color: #fff;
+      border: 2px dashed #ccc;
+      margin-top: 15px;
+      overflow: hidden;
+      border-radius: 12px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+      transition: all 0.3s ease;
+    }
+    
+    .answer-box:hover {
+      border-color: #1a56db;
+      box-shadow: 0 8px 20px rgba(26, 86, 219, 0.1);
+    }
+    
+    .animal-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: 30px;
+      width: 180px;
+    }
+    
+    /* 图片和答案框容器 */
+    .images-container {
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+      gap: 20px;
+      margin-bottom: 30px;
+      width: 100%;
+    }
+    
+    /* 答案框容器 */
+    .answers-container {
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+      gap: 20px;
+      margin-bottom: 30px;
+      width: 100%;
+    }
+    
+    /* 动物名字区域 */
+    .animal-names {
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+      gap: 15px;
+      width: 100%;
+      padding: 20px;
+      background-color: rgba(240, 240, 240, 0.5);
+      border: 2px dashed #ccc;
+      border-radius: 15px;
+      margin-top: 30px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    }
+    
+    /* 拖拽按钮 */
+    .name-btn {
+      width: 180px;
+      text-align: center;
+      padding: 12px 15px;
+      background-color: #fff;
+      border: 2px solid #eee;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-weight: 500;
+      color: #333;
+      transition: all 0.3s ease;
+      cursor: pointer;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    }
+    
+    .name-btn:hover {
+      background: #f8f9fa;
+      border-color: #1a56db;
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(26, 86, 219, 0.1);
+    }
+    
+    /* 按钮容器 */
+    .button-container {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      margin-top: 30px;
+    }
+    
+    /* 控制按钮 */
+    .control-btn {
+      padding: 10px 25px;
+      border-radius: 50px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      border: none;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+
+    .check-btn {
+      background: linear-gradient(135deg, #1a56db, #3b82f6);
+      color: white;
+      box-shadow: 0 5px 15px rgba(26, 86, 219, 0.3);
+    }
+
+    .check-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(26, 86, 219, 0.4);
+    }
+
+    .next-btn {
+      background: linear-gradient(135deg, #1a56db, #3b82f6);
+      color: white;
+      box-shadow: 0 5px 15px rgba(26, 86, 219, 0.3);
+    }
+
+    .next-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(26, 86, 219, 0.4);
+    }
+
+    .end-btn {
+      background: white;
+      color: #333;
+      border: 2px solid #eee;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    }
+
+    .end-btn:hover {
+      background: #f8f9fa;
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+    }
+    
+    /* 结果消息 */
+    .result-message {
+      text-align: center;
+      font-size: 1.3rem;
+      font-weight: 600;
+      margin: 20px 0;
+      min-height: 40px;
+      transition: all 0.3s ease;
+    }
+
+    .result-message.correct {
+      color: #4CAF50;
+      animation: fadeInUp 0.5s ease;
+    }
+
+    .result-message.incorrect {
+      color: #F44336;
+      animation: fadeInUp 0.5s ease;
+    }
+    
+    /* 动画效果 */
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+      20%, 40%, 60%, 80% { transform: translateX(5px); }
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    /* 得分动画 */
+    .score-animation {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 3rem;
+      font-weight: 700;
+      color: #4CAF50;
+      pointer-events: none;
+      animation: floatUp 1s ease-out forwards;
+      z-index: 1000;
+    }
+
+    @keyframes floatUp {
+      0% {
+        opacity: 1;
+        transform: translate(-50%, -50%);
+      }
+      100% {
+        opacity: 0;
+        transform: translate(-50%, -100%);
+      }
+    }
+
+    /* 背景装饰 */
+    .bg-decoration {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      overflow: hidden;
+    }
+
+    .bg-circle {
+      position: absolute;
+      border-radius: 50%;
+      opacity: 0.1;
+    }
+
+    .bg-circle:nth-child(1) {
+      width: 300px;
+      height: 300px;
+      background: linear-gradient(135deg, #1a56db, #3b82f6);
+      top: -100px;
+      right: -100px;
+    }
+
+    .bg-circle:nth-child(2) {
+      width: 200px;
+      height: 200px;
+      background: linear-gradient(135deg, #4f98e3, #276bdf);
+      bottom: -50px;
+      left: -50px;
+    }
+
+    .bg-circle:nth-child(3) {
+      width: 150px;
+      height: 150px;
+      background: linear-gradient(135deg, #3b82f6, #60a5fa);
+      top: 50%;
+      right: 10%;
+    }
+
+    /* 响应式调整 */
+    @media (max-width: 768px) {
+      .header-container {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      
+      .user-info {
+        margin-left: 0;
+        margin-top: 15px;
+      }
+      
+      .game-title h1 {
+        font-size: 2rem;
+      }
+      
+      .animal-image {
+        width: 140px;
+        height: 140px;
+      }
+      
+      .answer-box, .name-btn {
+        width: 140px;
+      }
+      
+      .animal-container {
+        width: 140px;
+      }
+      
+      .images-container, .answers-container {
+        gap: 10px;
+      }
+      
+      .animal-names {
+        flex-wrap: wrap;
+      }
+    }
+    
+    /* 返回按钮样式 */
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      padding: 8px 15px;
+      background: white;
+      border-radius: 50px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      color: #333;
+      font-weight: 500;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      margin-bottom: 15px;
+      margin-right: 10px;
+    }
+    
+    .back-btn:hover {
+      transform: translateX(-5px);
+      box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+      color: #1a56db;
+    }
+    
+    .back-btn i {
+      margin-right: 8px;
+      font-size: 1rem;
+    }
+ 
+    /* 语言切换按钮样式 */
+    .lang-toggle-btn {
+      display: inline-flex;
+      align-items: center;
+      background: white;
+      border: none;
+      padding: 8px 15px;
+      border-radius: 50px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      color: #333;
+      font-weight: 500;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      margin-bottom: 15px;
+      cursor: pointer;
+    }
+
+    .lang-toggle-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+      color: #1a56db;
+    }
+
+    .lang-toggle-btn i {
+      margin-right: 8px;
+      font-size: 1rem;
+    }
+    
+    /* 顶部按钮容器 */
+    .top-buttons {
+      display: flex;
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+<body>
+  <!-- 背景装饰 -->
+  <div class="bg-decoration">
+    <div class="bg-circle"></div>
+    <div class="bg-circle"></div>
+    <div class="bg-circle"></div>
+  </div>
+
+  <!-- 游戏主体 -->
+  <div class="game-wrapper">
+    <!-- 顶部按钮区域 -->
+    <div class="top-buttons">
+      <!-- 返回按钮 -->
+      <a href="/qna" class="back-btn">
+        <i class="fas fa-arrow-left"></i>
+        <span>Return</span>
+      </a>
+      
+      <!-- 语言切换按钮 -->
+      <button id="toggle-lang" class="lang-toggle-btn">
+        <i class="fas fa-language"></i>
+        <span id="lang-text">English</span>
+      </button>
+    </div>
+    
+    <!-- 游戏标题和用户信息 -->
+    <div class="header-container">
+      <div class="game-title">
+        <h1>Matching！</h1>
+        <p>Match the animal images with their names!</p>
+      </div>
+      
+      <div class="user-info">
+        <img class="user-avatar" src="{{ user_info['avatar'] }}" alt="User Avatar">
+        <span class="user-name">{{ user_info['display_name'] }}</span>
+        <div class="user-score">
+          <i class="fas fa-star"></i>
+          <span id="user-score">{{ user_info['score'] }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 开始游戏按钮 -->
+    <button class="start-btn" id="start-game-btn">
+      <i class="fas fa-play"></i> Start Game
+    </button>
+
+    <!-- 游戏区域 -->
+    <div class="game-container" id="game-container">
+      <div class="game-instruction" id="game-instruction">Drag and drop the animal names to match with the correct images!</div>
+      <div class="game-tip">If you need to modify your answers after filling all boxes, drag them back to the answer container. </div>
+      
+      <!-- 图片容器 -->
+      <div class="images-container" id="images-container">
+        <!-- 动物图片将动态加载 -->
+      </div>
+      
+      <!-- 答案框容器 -->
+      <div class="answers-container" id="answers-container">
+        <!-- 答案框将动态加载 -->
+      </div>
+      
+      <!-- 动物名字 -->
+      <div id="animal-names" class="animal-names" ondragover="allowDrop(event)" ondrop="drop(event)">
+        <!-- 动物名字将动态加载 -->
+        <!-- 占位符，当没有其他内容时显示 -->
+        <div class="placeholder" style="height: 50px; visibility: hidden;"></div>
+      </div>
+      
+      <!-- 游戏反馈 -->
+      <div class="result-message" id="result-message"></div>
+      
+      <!-- 按钮 -->
+      <div class="button-container">
+        <button id="check-btn" class="control-btn check-btn">Check</button>
+        <button id="next-btn" class="control-btn next-btn hidden">Try Next</button>
+        <button id="end-game" class="control-btn end-btn">End Game</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- jQuery -->
+  <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+  <script>
+    $(document).ready(function () {
+      let currentGameData = null;
+      let languageMode = "cn"; // 默认显示中文
+      
+      // 语言切换点击事件
+      $('#toggle-lang').click(function() {
+        // 循环切换语言：中文 -> 英文 -> 学名 -> 中文
+        switch(languageMode) {
+          case "cn":
+            languageMode = "en";
+            $('#lang-text').text('Scientific'); // 显示下一个要切换的语言
+            break;
+          case "en":
+            languageMode = "latin";
+            $('#lang-text').text('Chinese'); // 显示下一个要切换的语言
+            break;
+          case "latin":
+            languageMode = "cn";
+            $('#lang-text').text('English'); // 显示下一个要切换的语言
+            break;
+        }
+        
+        // 如果游戏已开始，则更新当前界面的名称
+        if ($('#game-container').is(':visible') && currentGameData) {
+          updateLanguage();
+        }
+      });
+      
+      // 初始化时设置按钮显示下一个语言（英文）
+      $('#lang-text').text('English');
+      
+      // 根据当前语言更新显示
+      function updateLanguage() {
+        // 为每个名称按钮更新文本，而不是重新创建它们
+        $('.name-btn').each(function() {
+          const currentText = $(this).text().trim();
+          
+          // 找到对应的动物对象
+          const animal = findAnimalByName(currentText);
+          
+          if (animal) {
+            // 更新按钮文本和ID
+            let newText;
+            switch(languageMode) {
+              case "cn":
+                newText = animal.cn;
+                break;
+              case "en":
+                newText = animal.en;
+                break;
+              case "latin":
+                newText = animal.name;
+                break;
+            }
+            $(this).text(newText);
+            $(this).attr('id', newText);
+          }
+        });
+        
+        // 更新答案框的data属性
+        $('.answer-box').each(function(index) {
+          if (index < currentGameData.animals.length) {
+            let animalName;
+            switch(languageMode) {
+              case "cn":
+                animalName = currentGameData.animals[index].cn;
+                break;
+              case "en":
+                animalName = currentGameData.animals[index].en;
+                break;
+              case "latin":
+                animalName = currentGameData.animals[index].name;
+                break;
+            }
+            $(this).attr('data-animal-name', animalName);
+          }
+        });
+      }
+      
+      // 根据名称查找动物对象
+      function findAnimalByName(name) {
+        // 在所有可能的名称字段中查找
+        return currentGameData.animals.find(animal => 
+          animal.name === name || 
+          animal.cn === name || 
+          animal.en === name
+        );
+      }
+      
+      // 数组洗牌函数
+      function shuffleArray(array) {
+        let shuffled = [...array];
+        for (let i = shuffled.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+        }
+        return shuffled;
+      }
+
+      // 开始游戏事件
+      $('#start-game-btn').click(function () {
+        $(this).fadeOut(300, function() {
+          $('#game-container').fadeIn(500);
+          // 获取匹配游戏数据
+          $.get('/get_matching_game_data', function (data) {
+            if (data.status === "success") {
+              currentGameData = data;
+              // 显示动物图片
+              data.animals.forEach(animal => {
+                $('#images-container').append(`
+                  <div class="animal-container">
+                    <img src="${animal.photo}" alt="${animal.cn}" class="animal-image">
+                  </div>
+                `);
+              });
+              
+              // 显示答案框
+              data.animals.forEach(animal => {
+                let animalName;
+                switch(languageMode) {
+                  case "cn":
+                    animalName = animal.cn;
+                    break;
+                  case "en":
+                    animalName = animal.en;
+                    break;
+                  case "latin":
+                    animalName = animal.name;
+                    break;
+                }
+                $('#answers-container').append(`
+                  <div class="answer-box" data-animal-name="${animalName}" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+                `);
+              });
+              
+              // 根据当前语言显示动物名字
+              let names;
+              switch(languageMode) {
+                case "cn":
+                  names = data.names; // 数据库返回的中文名字
+                  break;
+                case "en":
+                  names = data.animals.map(animal => animal.en);
+                  break;
+                case "latin":
+                  names = data.animals.map(animal => animal.name);
+                  break;
+              }
+              
+              // 打乱顺序
+              names = shuffleArray(names);
+              
+              // 显示动物名字
+              names.forEach(name => {
+                $('#animal-names').append(`
+                  <div class="animal-name">
+                    <button id="${name}" class="name-btn" draggable="true" ondragstart="drag(event)">
+                      ${name}
+                    </button>
+                  </div>
+                `);
+              });
+            }
+          });
+        });
+      });
+
+      // 允许拖拽目标
+      window.allowDrop = function(ev) {
+        ev.preventDefault();
+      }
+
+      // 拖拽开始，设置传输数据为被拖拽的按钮 id
+      window.drag = function(ev) {
+        ev.dataTransfer.setData("text", ev.target.id);
+      }
+
+      // Drop 事件：允许在答案框和动物名字区域之间拖放
+      window.drop = function(ev) {
+        ev.preventDefault();
+        let draggedId = ev.dataTransfer.getData("text");
+        let draggedElem = document.getElementById(draggedId);
+        let dropTarget = ev.target;
+        // 如果目标不是答案框或动物名字区域，则寻找最近的容器
+        if (!dropTarget.classList.contains("answer-box") && dropTarget.id !== "animal-names") {
+          dropTarget = dropTarget.closest(".answer-box") || document.getElementById("animal-names");
+        }
+        // 如果放入答案框，且答案框为空，则添加；如果放回动物名字区域，则直接添加到该区域末尾
+        if (dropTarget.classList.contains("answer-box")) {
+          if ($(dropTarget).children().length === 0) {
+            dropTarget.appendChild(draggedElem);
+          }
+        } else if (dropTarget.id === "animal-names") {
+          $('#animal-names').append(draggedElem);
+        }
+      }
+
+      // 修改 Check 按钮逻辑：判断每个答案框中的动物名字是否正确
+      $('#check-btn').click(function () {
+        let correct = true;
+        // 遍历每个答案框
+        $('.answer-box').each(function() {
+          let expectedName = $(this).data('animal-name');
+          let droppedElem = $(this).children().first();
+
+          // 如果答案框为空，视为错误
+          if (!droppedElem.length) {
+            correct = false;
+            return false;
+          }
+          
+          let givenName = droppedElem.text().trim();
+          
+          // 根据当前语言比较
+          if (givenName !== expectedName) {
+            correct = false;
+            return false;
+          }
+        });
+
+        if (correct) {
+          $('#result-message').text("You answered correctly! +1 points").addClass('correct').removeClass('incorrect');
+          updateScore(5);
+          $('#check-btn').hide();
+          $('#next-btn').show();
+          
+          // 创建得分动画
+          createScoreAnimation();
+        } else {
+          $('#result-message').text("Try again!").addClass('incorrect').removeClass('correct');
+        }
+      });
+      
+      // 创建得分动画
+      function createScoreAnimation() {
+        const $scoreAnim = $('<div class="score-animation">+1</div>');
+        $('body').append($scoreAnim);
+        
+        // 动画结束后移除元素
+        setTimeout(function() {
+          $scoreAnim.remove();
+        }, 1000);
+      }
+
+      // Try Next 按钮，重置游戏
+      $('#next-btn').click(function () {
+        $('#result-message').text('').removeClass('correct incorrect');
+        $('#check-btn').show();
+        $('#next-btn').hide();
+        $('#images-container').empty();
+        $('#answers-container').empty();
+        $('#animal-names').empty();
+        // 重新获取数据
+        $.get('/get_matching_game_data', function (data) {
+          if (data.status === "success") {
+            currentGameData = data;
+            // 显示动物图片
+            data.animals.forEach(animal => {
+              $('#images-container').append(`
+                <div class="animal-container">
+                  <img src="${animal.photo}" alt="${animal.cn}" class="animal-image">
+                </div>
+              `);
+            });
+            
+            // 显示答案框
+            data.animals.forEach(animal => {
+              let animalName;
+              switch(languageMode) {
+                case "cn":
+                  animalName = animal.cn;
+                  break;
+                case "en":
+                  animalName = animal.en;
+                  break;
+                case "latin":
+                  animalName = animal.name;
+                  break;
+              }
+              $('#answers-container').append(`
+                <div class="answer-box" data-animal-name="${animalName}" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+              `);
+            });
+            
+            // 根据当前语言显示动物名字
+            let names;
+            switch(languageMode) {
+              case "cn":
+                names = data.names; // 数据库返回的中文名字
+                break;
+              case "en":
+                names = data.animals.map(animal => animal.en);
+                break;
+              case "latin":
+                names = data.animals.map(animal => animal.name);
+                break;
+            }
+            
+            // 打乱顺序
+            names = shuffleArray(names);
+            
+            // 显示动物名字
+            names.forEach(name => {
+              $('#animal-names').append(`
+                <div class="animal-name">
+                  <button id="${name}" class="name-btn" draggable="true" ondragstart="drag(event)">
+                    ${name}
+                  </button>
+                </div>
+              `);
+            });
+          }
+        });
+      });
+
+      // End Game 按钮
+      $('#end-game').click(function () {
+        window.location.href = '/qna';
+      });
+
+      // 更新后台分数
+      function updateScore(points) {
+        $.post('/add_score', { points: points }, function (data) {
+          if (data.status === 'success') {
+            $('#user-score').text(data.score);
+          }
+        });
+      }
+    });
+  </script>
+</body>
+</html>

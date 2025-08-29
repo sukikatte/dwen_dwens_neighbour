@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <title>王子桐 - 个人简历</title>
+  <style>
+    @page {
+      size: A4;
+      margin: 2cm;
+    }
+
+    body {
+      font-family: 'Microsoft YaHei UI', 'Segoe UI', sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #fdfdfd;
+      color: #333;
+    }
+
+    .container {
+      width: 210mm;
+      min-height: 297mm;
+      margin: auto;
+      padding: 20mm;
+      box-sizing: border-box;
+      border: 2.5px solid #005b96;
+      border-radius: 12px;
+      background-color: #ffffff;
+      box-shadow: 0 0 12px rgba(0, 0, 0, 0.08);
+      position: relative;
+    }
+
+    h1 {
+      text-align: center;
+      color: #1e3f66;
+      font-size: 26px;
+      margin-bottom: -20px;
+    }
+
+    h2 {
+      color: #1e3f66;
+      border-bottom: 2px solid #005b96;
+      padding-bottom: 4px;
+      margin-top: 24px;
+    }
+
+    p, li {
+      line-height: 1.6;
+      font-size: 14px;
+      margin: 6px 0;
+    }
+
+    ul {
+      padding-left: 20px;
+    }
+
+    .contact {
+      text-align: center;
+      font-size: 14px;
+      margin-bottom: 10px;
+      margin-top: 10mm;
+    }
+
+    .section {
+      margin-bottom: 20px;
+    }
+
+    .highlight {
+      color: #004e8c;
+      font-weight: bold;
+    }
+
+    .keyword {
+      background-color: #e6f2ff;
+      padding: 1px 4px;
+      border-radius: 4px;
+    }
+
+    .tech-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 6px;
+      padding-left: 0;
+      list-style: none;
+    }
+
+    .tech-grid li::before {
+      content: '✅';
+      margin-right: 6px;
+      color: #005b96;
+    }
+
+    .profile-photo {
+      position: absolute;
+      top: 15mm;
+      right: 20mm;
+      width: 35mm;
+      height: 45mm;
+      object-fit: cover;
+      border-radius: 8px;
+      border: 1.5px solid #999;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <img src="/static/images/111.jpg" alt="头像" class="profile-photo">
+    <h1>王子桐 - 个人简历</h1>
+    <div class="contact">
+      电话：18518599155 | 邮箱：chloe041018@163.com<br>
+      求职意向：<strong>后端开发实习岗</strong>
+    </div>
+
+    <div class="section">
+      <h2>技术优势概览</h2>
+      <ul class="tech-grid">
+        <li><span class="highlight">系统与架构能力：</span> 理解微服务架构与模块解耦，具备并发控制与性能调优经验</li>
+        <li><span class="highlight">后端开发能力：</span> 熟练使用 Flask 开发 RESTful API，支持异步任务调度、缓存机制及跨域安全通信</li>
+        <li><span class="highlight">设计模式应用：</span> 掌握策略模式 / 工厂模式 / 单例模式提升模块可维护性与可扩展性</li>
+      </ul>
+    </div>
+
+    <div class="section">
+      <h2>项目经历</h2>
+      <p><strong>1. 中国动物保护网站</strong><br>
+        <span class="keyword">Python</span> <span class="keyword">Flask</span> <span class="keyword">Firebase</span> <span class="keyword">ECharts</span> <span class="keyword">Web Crawler</span><br>
+        • 基于 Flask 设计 RESTful API，实现动态数据交互；配置 CORS 跨域策略，保障前后端安全通信<br>
+        • 通过Firebase缓存机制减少重复请求并实现实时内容更新；采用WSGI+Gunicorn方案部署Flask应用<br>
+        • 基于Requests+BeautifulSoup实现网页爬取与解析，集成Flask路由系统实现按需数据获取<br>
+      </p>
+      <p><strong>2. 音乐类安卓应用</strong><br>
+        <span class="keyword">Java</span> <span class="keyword">Android Studio</span> <span class="keyword">Firebase</span> <span class="keyword">阿里云 OSS</span><br>
+        • 实现云端音频存储与访问控制，采用阿里云 OSS 预签名 URL 限时访问，提升安全性与访问效率 <br>
+        • 引入多线程音频缓存模块，使用生产者-消费者模型，优化播放前缓冲流程 <br>
+        • 设计本地索引映射表，加速歌曲 URI 定位，支持随机播放等功能模块拆分  <br>
+
+      </p>
+      <p><strong>3. 多身份票务管理系统</strong><br>
+        <span class="keyword">Java</span> <span class="keyword">IntelliJ</span> <span class="keyword">MySQL</span> <span class="keyword">UML</span><br>
+        • 基于 OOP 原则设计多角色权限系统，绘制 UML 时序图明确模块交互<br>
+        • 设计系统中间层，实现 Controller-Service-Repository 分层，使用策略模式封装用户行为分析策略
+      </p>
+    </div>
+
+    <div class="section">
+      <h2>教育背景</h2>
+      <p><strong>北京工业大学 & 都柏林大学（双学位）</strong><br>
+        2022.09 - 2026.07 | 软件工程（工学 / 理学学士）<br>
+        • 主修课程：<span class="highlight">操作系统、数据库原理、分布式系统、软件体系结构、计算机网络、数据结构与算法</span><br>
+        • 剑桥大学暑期研究：参与 AI 模型微调项目，接触 Transformer 架构与特征提取策略  <br>
+      </p>
+    </div>
+
+
+<div class="section">
+  <h2>技能清单</h2>
+  <ul>
+    <li><span class="highlight">编程语言：</span>Java（主力，掌握 OOP 与多线程）| Python（用于 Flask 后端开发）</li>
+    <li><span class="highlight">后端技术：</span>RESTful API | Firebase / MySQL | 并发控制</li>
+    <li><span class="highlight">开发工具：</span>IntelliJ IDEA / PyCharm | Android Studio</li>
+    <li><span class="highlight">系统与建模：</span>阿里云 OSS 文件服务 | UML | Linux 基础</li>
+  </ul>
+</div>
+
+
+  </div>
+</body>
+</html>

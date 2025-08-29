@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Guess Who - Dwen Dwen's Neighbour</title>
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    /* 全局样式 */
+    body {
+      background: linear-gradient(135deg, #f6f8f9 0%, #e9ecef 100%);
+      min-height: 100vh;
+      font-family: 'Poppins', sans-serif;
+      padding: 0;
+      margin: 0;
+      overflow-x: hidden;
+    }
+
+    /* 游戏容器 */
+    .game-wrapper {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 30px 20px;
+      position: relative;
+    }
+    
+    /* 游戏标题和用户信息布局 */
+    .header-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+      flex-wrap: wrap;
+    }
+    
+    /* 游戏标题 */
+    .game-title {
+      text-align: left;
+      margin-bottom: 0;
+      position: relative;
+      flex: 1;
+      display: flex;
+      align-items: center;
+    }
+    
+    .game-title h1 {
+      font-family: 'Pacifico', cursive;
+      font-size: 2.5rem;
+      color: #333;
+      margin-bottom: 0;
+      margin-right: 15px;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .game-title p {
+      font-size: 1rem;
+      color: #666;
+      max-width: 400px;
+      margin: 0;
+      padding-left: 15px;
+      border-left: 2px solid #eee;
+    }
+    
+    /* 用户信息区 */
+    .user-info {
+      display: flex;
+      align-items: center;
+      background: white;
+      padding: 10px 20px;
+      border-radius: 50px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+      margin-left: 20px;
+    }
+    
+    .user-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin-right: 10px;
+      border: 2px solid #fff;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    
+    .user-name {
+      font-weight: 600;
+      color: #333;
+      margin-right: 10px;
+      font-size: 0.9rem;
+    }
+    
+    .user-score {
+      background: linear-gradient(135deg, #6939d6, #ed70ae);
+      color: white;
+      padding: 3px 12px;
+      border-radius: 20px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      font-size: 0.9rem;
+    }
+    
+    /* 开始游戏按钮 */
+    .start-btn {
+      background: linear-gradient(135deg, #6939d6, #ed70ae);
+      color: white;
+      border: none;
+      padding: 12px 30px;
+      border-radius: 50px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      box-shadow: 0 10px 20px rgba(105, 57, 214, 0.3);
+      transition: all 0.3s ease;
+      display: block;
+      margin: 30px auto;
+      cursor: pointer;
+    }
+    
+    .start-btn:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 25px rgba(105, 57, 214, 0.4);
+    }
+
+    .start-btn i {
+      margin-right: 10px;
+    }
+
+    /* 游戏区域 */
+    .game-container {
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+      padding: 30px;
+      margin-top: 20px;
+      display: none;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .game-instruction {
+      font-size: 1.5rem;
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: 20px;
+      color: #333;
+      position: relative;
+      padding-bottom: 10px;
+    }
+
+    .game-instruction::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 80%;
+      height: 3px;
+      background: linear-gradient(90deg, #6939d6, #ed70ae);
+      border-radius: 3px;
+    }
+
+    /* 问题图片 */
+    .question-image-container {
+      text-align: center;
+      margin-bottom: 30px;
+      position: relative;
+    }
+    
+    .question-image {
+      width: 250px;
+      height: 250px;
+      object-fit: cover;
+      border-radius: 15px;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+      transition: all 0.3s ease;
+      margin: 0 auto;
+      display: block;
+    }
+    
+    .question-image:hover {
+      transform: scale(1.02);
+      box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+    }
+    
+    /* 答案选项 */
+    .answer-options {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+    
+    .answer-btn {
+      background: white;
+      border: 2px solid #eee;
+      border-radius: 12px;
+      padding: 12px 15px;
+      font-size: 1rem;
+      font-weight: 500;
+      color: #333;
+      transition: all 0.3s ease;
+      cursor: pointer;
+      text-align: center;
+    }
+    
+    .answer-btn:hover {
+      background: #f8f9fa;
+      border-color: #6939d6;
+      transform: translateY(-3px);
+      box-shadow: 0 5px 15px rgba(105, 57, 214, 0.1);
+    }
+
+    .answer-btn.correct {
+      background: linear-gradient(135deg, #4CAF50, #8BC34A);
+      color: white;
+      border: none;
+      animation: pulse 0.5s ease;
+    }
+
+    .answer-btn.incorrect {
+      background: linear-gradient(135deg, #F44336, #FF5722);
+      color: white;
+      border: none;
+      animation: shake 0.5s ease;
+    }
+
+    /* 结果消息 */
+    .result-message {
+      text-align: center;
+      font-size: 1.3rem;
+      font-weight: 600;
+      margin: 20px 0;
+      min-height: 40px;
+      transition: all 0.3s ease;
+    }
+
+    .result-message.correct {
+      color: #4CAF50;
+      animation: fadeInUp 0.5s ease;
+    }
+
+    .result-message.incorrect {
+      color: #F44336;
+      animation: fadeInUp 0.5s ease;
+    }
+
+    /* 游戏控制按钮 */
+    .game-controls {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      margin-top: 20px;
+    }
+    
+    .control-btn {
+      padding: 10px 25px;
+      border-radius: 50px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      border: none;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+
+    .next-btn {
+      background: linear-gradient(135deg, #6939d6, #ed70ae);
+      color: white;
+      box-shadow: 0 5px 15px rgba(105, 57, 214, 0.3);
+    }
+
+    .next-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(105, 57, 214, 0.4);
+    }
+
+    .end-btn {
+      background: white;
+      color: #333;
+      border: 2px solid #eee;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    }
+
+    .end-btn:hover {
+      background: #f8f9fa;
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+    }
+
+    /* 动画效果 */
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+      20%, 40%, 60%, 80% { transform: translateX(5px); }
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    /* 得分动画 */
+    .score-animation {
+      position: absolute;
+      font-size: 2rem;
+      font-weight: 700;
+      color: #4CAF50;
+      pointer-events: none;
+      animation: floatUp 1s ease-out forwards;
+      z-index: 10;
+    }
+
+    @keyframes floatUp {
+      0% {
+        opacity: 1;
+        transform: translateY(0);
+      }
+      100% {
+        opacity: 0;
+        transform: translateY(-50px);
+      }
+    }
+
+    /* 背景装饰 */
+    .bg-decoration {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      overflow: hidden;
+    }
+
+    .bg-circle {
+      position: absolute;
+      border-radius: 50%;
+      opacity: 0.1;
+    }
+
+    .bg-circle:nth-child(1) {
+      width: 300px;
+      height: 300px;
+      background: linear-gradient(135deg, #6939d6, #ed70ae);
+      top: -100px;
+      right: -100px;
+    }
+
+    .bg-circle:nth-child(2) {
+      width: 200px;
+      height: 200px;
+      background: linear-gradient(135deg, #4f98e3, #276bdf);
+      bottom: -50px;
+      left: -50px;
+    }
+
+    .bg-circle:nth-child(3) {
+      width: 150px;
+      height: 150px;
+      background: linear-gradient(135deg, #f83a9a, #2fdfca);
+      top: 50%;
+      right: 10%;
+    }
+
+    /* 响应式调整 */
+    @media (max-width: 768px) {
+      .header-container {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      
+      .user-info {
+        margin-left: 0;
+        margin-top: 15px;
+      }
+      
+      .game-title h1 {
+        font-size: 2rem;
+      }
+      
+      .answer-options {
+        grid-template-columns: 1fr;
+      }
+      
+      .question-image {
+        width: 220px;
+        height: 220px;
+      }
+    }
+
+    /* 返回按钮样式 */
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      padding: 8px 15px;
+      background: white;
+      border-radius: 50px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      color: #333;
+      font-weight: 500;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      margin-bottom: 15px;
+      margin-right: 10px;
+    }
+    
+    .back-btn:hover {
+      transform: translateX(-5px);
+      box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+      color: #6939d6;
+    }
+    
+    .back-btn i {
+      margin-right: 8px;
+      font-size: 1rem;
+    }
+
+    /* 语言切换按钮样式 */
+    .lang-toggle-btn {
+      display: inline-flex;
+      align-items: center;
+      background: white;
+      border: none;
+      padding: 8px 15px;
+      border-radius: 50px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      color: #333;
+      font-weight: 500;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      margin-bottom: 15px;
+      cursor: pointer;
+    }
+    
+    .lang-toggle-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+      color: #6939d6;
+    }
+
+    .lang-toggle-btn i {
+      margin-right: 8px;
+      font-size: 1rem;
+    }
+    
+    /* 顶部按钮容器 */
+    .top-buttons {
+      display: flex;
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+<body>
+  <!-- 背景装饰 -->
+  <div class="bg-decoration">
+    <div class="bg-circle"></div>
+    <div class="bg-circle"></div>
+    <div class="bg-circle"></div>
+  </div>
+
+  <!-- 游戏主体 -->
+  <div class="game-wrapper">
+    <!-- 顶部按钮区域 -->
+    <div class="top-buttons">
+      <!-- 返回按钮 -->
+      <a href="/qna" class="back-btn">
+        <i class="fas fa-arrow-left"></i>
+        <span>Return</span>
+      </a>
+      
+      <!-- 语言切换按钮 -->
+      <button id="toggle-lang" class="lang-toggle-btn">
+        <i class="fas fa-language"></i>
+        <span id="lang-text">Chinese</span>
+      </button>
+    </div>
+    
+    <!-- 游戏标题和用户信息 -->
+    <div class="header-container">
+      <div class="game-title">
+        <h1>Guess Who</h1>
+        <p>Identify the animal based on the picture and earn points!</p>
+      </div>
+      
+      <div class="user-info">
+        <img class="user-avatar" src="{{ user_info['avatar'] }}" alt="User Avatar">
+        <span class="user-name">{{ user_info['display_name'] }}</span>
+        <div class="user-score">
+          <i class="fas fa-star"></i>
+          <span id="user-score">{{ user_info['score'] }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 开始游戏按钮 -->
+    <button class="start-btn" id="start-game-btn">
+      <i class="fas fa-play"></i> Start Game
+    </button>
+
+    <!-- 游戏区域 -->
+    <div class="game-container" id="game-container">
+      <div class="game-instruction" id="game-instruction">Look at my picture, guess who I am!</div>
+      
+      <div class="question-image-container">
+        <img id="question-image" class="question-image" src="" alt="Animal Image">
+      </div>
+      
+      <div class="answer-options">
+        <button id="answer1" class="answer-btn">Option 1</button>
+        <button id="answer2" class="answer-btn">Option 2</button>
+        <button id="answer3" class="answer-btn">Option 3</button>
+        <button id="answer4" class="answer-btn">Option 4</button>
+      </div>
+
+      <div class="result-message" id="result-message"></div>
+
+      <div class="game-controls">
+        <button id="next-question" class="control-btn next-btn">Next Question</button>
+        <button id="end-game" class="control-btn end-btn">End Game</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- jQuery, Popper.js, Bootstrap JS -->
+  <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+  <script>
+    $(document).ready(function () {
+      let currentAnimal, correctAnswer, currentOptions;
+      let languageMode = "cn"; // 默认显示中文
+
+      // 语言切换点击事件
+      $('#toggle-lang').click(function() {
+        // 循环切换语言：中文 -> 英文 -> 学名 -> 中文
+        switch(languageMode) {
+          case "cn":
+            languageMode = "en";
+            $('#lang-text').text('Scientific'); // 显示下一个要切换的语言
+            break;
+          case "en":
+            languageMode = "latin";
+            $('#lang-text').text('Chinese'); // 显示下一个要切换的语言
+            break;
+          case "latin":
+            languageMode = "cn";
+            $('#lang-text').text('English'); // 显示下一个要切换的语言
+            break;
+        }
+        
+        // 如果游戏已开始，则更新当前界面的选项
+        if ($('#game-container').is(':visible') && currentAnimal) {
+          updateOptionsLanguage();
+        }
+      });
+      
+      // 初始化时设置按钮显示下一个语言（英文）
+      $('#lang-text').text('English');
+      
+      // 根据当前语言更新选项
+      function updateOptionsLanguage() {
+        // 获取正确答案（根据当前语言）
+        switch(languageMode) {
+          case "cn":
+            correctAnswer = currentAnimal.cn;
+            break;
+          case "en":
+            correctAnswer = currentAnimal.en;
+            break;
+          case "latin":
+            correctAnswer = currentAnimal.name;
+            break;
+        }
+        
+        // 更新选项文本
+        $('#answer1').text(getNameByLanguage(currentOptions[0]));
+        $('#answer2').text(getNameByLanguage(currentOptions[1]));
+        $('#answer3').text(getNameByLanguage(currentOptions[2]));
+        $('#answer4').text(getNameByLanguage(currentOptions[3]));
+      }
+      
+      // 根据当前语言模式获取相应的名称
+      function getNameByLanguage(name) {
+        // 查找对应动物
+        let animal = findAnimalByAnyName(name);
+        if (!animal) return name; // 如果找不到，返回原始值
+        
+        // 返回当前语言模式下的名称
+        switch(languageMode) {
+          case "cn": 
+            return animal.cn;
+          case "en": 
+            return animal.en;
+          case "latin": 
+            return animal.name;
+          default: 
+            return name;
+        }
+      }
+      
+      // 通过任何名称查找动物对象
+      function findAnimalByAnyName(name) {
+        if (!window.allAnimals) return null;
+        
+        for (let animal of window.allAnimals) {
+          if (animal.name === name || animal.cn === name || animal.en === name) {
+            return animal;
+          }
+        }
+        return null;
+      }
+
+      // 开始游戏事件
+      $('#start-game-btn').click(function () {
+        $(this).fadeOut(300, function() {
+          $('#game-container').fadeIn(500);
+          getQuestion(); // 加载第一题
+          // 确保游戏一开始就显示下一题按钮
+          $('#next-question').show();
+        });
+      });
+
+      // 获取问题及选项
+      function getQuestion() {
+        $.get('/get_random_animal', function (data) {
+          if (data.status === 'success' && data.animals.length > 0) {
+            // 存储所有动物数据以便于语言切换时查询
+            window.allAnimals = data.animals;
+            
+            const randomIndex = Math.floor(Math.random() * data.animals.length);
+            currentAnimal = data.animals[randomIndex];
+
+            // 设置图片
+            $('#question-image').attr('src', currentAnimal.photo);
+
+            // 根据当前语言设置正确答案
+            switch(languageMode) {
+              case "cn":
+                correctAnswer = currentAnimal.cn;
+                break;
+              case "en":
+                correctAnswer = currentAnimal.en;
+                break;
+              case "latin":
+                correctAnswer = currentAnimal.name;
+                break;
+            }
+
+            // 获取三个错误答案
+            let incorrectAnswers = [];
+            while (incorrectAnswers.length < 3) {
+              const randomAnimal = data.animals[Math.floor(Math.random() * data.animals.length)];
+              // 根据当前语言选择答案
+              let randomAnswer;
+              switch(languageMode) {
+                case "cn":
+                  randomAnswer = randomAnimal.cn;
+                  break;
+                case "en":
+                  randomAnswer = randomAnimal.en;
+                  break;
+                case "latin":
+                  randomAnswer = randomAnimal.name;
+                  break;
+              }
+              
+              if (!incorrectAnswers.includes(randomAnswer) && randomAnswer !== correctAnswer) {
+                incorrectAnswers.push(randomAnswer);
+              }
+            }
+
+            // 打乱答案顺序
+            currentOptions = [correctAnswer, ...incorrectAnswers];
+            currentOptions = currentOptions.sort(() => Math.random() - 0.5);
+
+            // 显示选项
+            $('#answer1').text(currentOptions[0]);
+            $('#answer2').text(currentOptions[1]);
+            $('#answer3').text(currentOptions[2]);
+            $('#answer4').text(currentOptions[3]);
+
+            // 重置结果提示
+            $('#result-message').empty().removeClass('correct incorrect');
+
+            // 重置按钮样式
+            $('.answer-btn').removeClass('correct incorrect').prop('disabled', false);
+            
+            // 确保下一题按钮始终可见
+            $('#next-question').show();
+          }
+        });
+      }
+
+      // 答案选择处理
+      $('.answer-btn').click(function () {
+        const selectedAnswer = $(this).text();
+        const isCorrect = selectedAnswer === correctAnswer;
+        const $resultMessage = $('#result-message');
+
+        // 禁用所有按钮
+        $('.answer-btn').prop('disabled', true);
+
+        if (isCorrect) {
+          // 正确答案效果
+          $(this).addClass('correct');
+          $resultMessage.text("You answered correctly! +1 points").addClass('correct');
+
+          // 创建得分动画
+          createScoreAnimation($(this));
+
+          // 更新分数
+          updateScore(5);
+        } else {
+          // 错误答案效果
+          $(this).addClass('incorrect');
+          
+          // 根据当前语言获取正确的动物名称
+          let correctName;
+          switch(languageMode) {
+            case "cn":
+              correctName = currentAnimal.cn;
+              break;
+            case "en":
+              correctName = currentAnimal.en;
+              break;
+            case "latin":
+              correctName = currentAnimal.name;
+              break;
+          }
+          
+          $resultMessage.text(`Oh no! This is the "${correctName}"`).addClass('incorrect');
+
+          // 高亮正确答案
+          $('.answer-btn').each(function() {
+            if ($(this).text() === correctAnswer) {
+              $(this).addClass('correct');
+            }
+          });
+        }
+
+      });
+
+      // 创建得分动画
+      function createScoreAnimation($button) {
+        const $scoreAnim = $('<div class="score-animation">+1</div>');
+        const buttonPos = $button.offset();
+
+        $scoreAnim.css({
+          left: buttonPos.left + $button.width() / 2,
+          top: buttonPos.top
+        });
+
+        $('body').append($scoreAnim);
+
+        // 动画结束后移除元素
+        setTimeout(function() {
+          $scoreAnim.remove();
+        }, 1000);
+      }
+
+      // 下一题事件
+      $('#next-question').click(function () {
+        getQuestion();
+      });
+
+      // 结束游戏事件
+      $('#end-game').click(function () {
+        window.location.href = '/qna';
+      });
+
+      // 更新后台分数
+      function updateScore(points) {
+        $.post('/add_score', { points: points }, function (data) {
+          if (data.status === 'success') {
+            $('#user-score').text(data.score);
+          }
+        });
+      }
+    });
+  </script>
+</body>
+</html>

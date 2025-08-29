@@ -1,0 +1,2319 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Posts  - Dwen Dwen's Neighbour{% endblock %}
+
+{% set nav_section = 'community' %}
+
+{% block request_path %}/community{% endblock %}
+
+{% set current_page = 'community' %}
+
+{% block nav_active %}community{% endblock %}
+
+{% block head %}
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&display=swap');
+    
+    /* 基础样式 */
+    body {
+        font-family: 'Poppins', sans-serif;
+        background-color: #F8F9FF;
+        color: #333333;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+    }
+
+    /* 侧边栏样式 */
+    .sidebar {
+        position: fixed;
+        left: 20px;
+        top: 90px;
+        width: 200px;
+        background: transparent;
+        padding: 0;
+        z-index: 40;
+    }
+
+    .sidebar-item {
+        display: flex;
+        align-items: center;
+        margin-bottom: 15px;
+        padding: 15px 20px;
+        color: #555;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+        border-radius: 16px;
+        background: white;
+        border: 3px solid #333;
+        box-shadow: 5px 5px 0 rgba(0,0,0,0.15);
+        text-decoration: none;
+    }
+
+    .sidebar-item:hover {
+        transform: translateY(-3px);
+        box-shadow: 7px 7px 0 rgba(0,0,0,0.12);
+        color: #FF6B6B;
+    }
+
+    .sidebar-item.active {
+        background: #FF6B6B;
+        color: white;
+    }
+
+    .sidebar-item i {
+        margin-right: 12px;
+        font-size: 1.3rem;
+    }
+
+    /* 主内容区域样式 */
+    .main-content {
+        margin-left: 240px;
+        padding: 20px;
+        max-width: 1200px;
+    }
+
+    /* 笔记列表样式 */
+    .post-list {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        overflow: hidden;
+        padding: 0;
+        margin: 0;
+    }
+
+    .post-item {
+        display: flex;
+        padding: 20px;
+        border-bottom: 1px solid #eee;
+        transition: all 0.3s;
+        background: white;
+        margin-bottom: 15px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+
+    .post-item:last-child {
+        margin-bottom: 0;
+        border-bottom: none;
+    }
+
+    .post-item:hover {
+        background: #f8f9fa;
+    }
+
+    .post-media {
+        width: 200px;
+        height: 150px;
+        border-radius: 8px;
+        overflow: hidden;
+        margin-right: 20px;
+        flex-shrink: 0;
+        position: relative;
+        border: 1px solid #eee;
+        background: #f8f8f8;
+    }
+
+    .post-media img,
+    .post-media video {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+    }
+
+    .post-media .no-media {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #999;
+        font-size: 0.9rem;
+    }
+
+    .post-content {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        margin-left: 20px;
+    }
+
+    .post-header {
+        margin-bottom: 10px;
+    }
+
+    .post-title {
+        margin: 0 0 8px 0;
+        font-size: 1.2rem;
+        color: #333;
+    }
+
+    .post-time {
+        font-size: 0.85rem;
+        color: #666;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .published-text {
+        color: #888;
+        font-weight: 500;
+    }
+
+    .post-footer {
+        margin-top: auto;
+        padding-top: 15px;
+        border-top: 1px solid #eee;
+    }
+
+    .post-stats {
+        display: flex;
+        gap: 20px;
+        margin-bottom: 15px;
+    }
+
+    .stat-item {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        color: #666;
+    }
+
+    .post-actions {
+        display: flex;
+        gap: 10px;
+        justify-content: flex-end;
+    }
+
+    .action-btn {
+        padding: 8px 16px;
+        border: none;
+        border-radius: 6px;
+        background: none;
+        color: #666;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .action-btn:hover {
+        background: #f0f0f0;
+        color: #333;
+    }
+
+    .action-btn i {
+        font-size: 1rem;
+    }
+
+    .media-count {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        background: rgba(0, 0, 0, 0.6);
+        color: white;
+        padding: 4px 8px;
+        border-radius: 12px;
+        font-size: 12px;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .media-count i {
+        font-size: 10px;
+    }
+
+    /* 编辑模态框样式 */
+    .edit-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 1000;
+        background: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(3px);
+        display: none;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .edit-modal-content {
+        width: 90%;
+        max-width: 1200px;
+        height: 90vh;
+        background: white;
+        border-radius: 20px;
+        position: relative;
+        overflow: hidden;
+        border: 3px solid #333;
+        box-shadow: 10px 10px 0 rgba(0,0,0,0.1);
+        margin: 20px auto;
+        display: flex;
+        flex-direction: column;
+    }
+
+    /* 编辑窗口的滚动条样式 */
+    .edit-modal-content::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    .edit-modal-content::-webkit-scrollbar-track {
+        background: rgba(0, 0, 0, 0.05);
+        border-radius: 4px;
+    }
+
+    .edit-modal-content::-webkit-scrollbar-thumb {
+        background: rgba(255, 107, 107, 0.5);
+        border-radius: 4px;
+    }
+
+    .edit-modal-content::-webkit-scrollbar-thumb:hover {
+        background: rgba(255, 107, 107, 0.7);
+    }
+
+    .create-post-card {
+        padding: 35px;
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        position: relative;
+        background-image: url('/static/images/ink_panda_bg.jpg');
+        background-size: cover;
+        background-position: center;
+        background-attachment: scroll;
+        display: flex;
+        flex-direction: column;
+        border-radius: 24px;
+        overflow-y: auto;
+    }
+
+    .create-post-card::before {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(1px);
+        -webkit-backdrop-filter: blur(1px);
+        z-index: 0;
+    }
+
+    .create-post-card > * {
+        position: relative;
+        z-index: 1;
+    }
+
+    #editPostForm {
+        position: relative;
+        z-index: 1;
+        margin: 0;
+        padding: 0;
+        min-height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .form-group {
+        margin-bottom: 25px;
+        position: relative;
+        z-index: 1;
+    }
+
+    .form-group:last-of-type {
+        margin-bottom: 40px;
+    }
+
+    .form-textarea {
+        min-height: 200px;
+        resize: vertical;
+    }
+
+    .media-upload-container {
+        border: 2px dashed rgba(0, 0, 0, 0.15);
+        border-radius: 20px;
+        padding: 40px;
+        text-align: center;
+        background: rgba(255, 255, 255, 0.5);
+        backdrop-filter: blur(5px);
+        -webkit-backdrop-filter: blur(5px);
+        transition: all 0.3s ease;
+        cursor: pointer;
+        margin: 20px 0;
+    }
+
+    .media-upload-container:hover {
+        background: rgba(255, 255, 255, 0.6);
+        border-color: rgba(0, 0, 0, 0.25);
+    }
+
+    .media-upload-icon {
+        font-size: 3rem;
+        color: #FF6B6B;
+        margin-bottom: 15px;
+        opacity: 0.8;
+    }
+
+    .media-upload-text {
+        color: #444;
+        margin-bottom: 10px;
+        font-weight: 600;
+        font-size: 1.1rem;
+    }
+
+    .media-upload-hint {
+        font-size: 0.9rem;
+        color: #666;
+        margin-bottom: 20px;
+    }
+
+    .media-preview-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 15px;
+        margin-top: 20px;
+        padding: 15px;
+        background: rgba(255, 255, 255, 0.5);
+        backdrop-filter: blur(5px);
+        -webkit-backdrop-filter: blur(5px);
+        border-radius: 16px;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .form-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 20px;
+        padding-top: 40px;
+        padding-bottom: 20px;
+        position: relative;
+        z-index: 2;
+    }
+
+    .btn {
+        padding: 12px 28px;
+        border-radius: 12px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .btn-secondary {
+        background: rgba(255, 255, 255, 0.8);
+        color: #666;
+        border: 1px solid rgba(0, 0, 0, 0.1);
+        backdrop-filter: blur(5px);
+        -webkit-backdrop-filter: blur(5px);
+    }
+
+    .btn-secondary:hover {
+        background: rgba(255, 255, 255, 0.9);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    }
+
+    .btn-primary {
+        background: linear-gradient(45deg, #FF6B6B, #FFB88C);
+        color: white;
+        border: none;
+        box-shadow: 0 4px 15px rgba(255, 107, 107, 0.2);
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(255, 107, 107, 0.25);
+    }
+
+    .close-modal {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        font-size: 24px;
+        cursor: pointer;
+        color: #666;
+    }
+
+    /* 确认删除对话框样式 */
+    .delete-confirm {
+        display: none;
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: white;
+        padding: 30px;
+        border-radius: 16px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        z-index: 1001;
+        text-align: center;
+    }
+
+    .delete-confirm-buttons {
+        display: flex;
+        justify-content: center;
+        gap: 20px;
+        margin-top: 20px;
+    }
+
+    .delete-confirm-buttons button {
+        padding: 10px 20px;
+        border-radius: 8px;
+        border: none;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+
+    .confirm-delete {
+        background: #FF6B6B;
+        color: white;
+    }
+
+    .cancel-delete {
+        background: #eee;
+        color: #666;
+    }
+
+    .page-title {
+        font-size: 28px;
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 20px;
+        padding-left: 10px;
+    }
+
+    /* Background Elements */
+    .bg-decoration {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: -1;
+        overflow: hidden;
+    }
+
+    .bg-pattern {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: url("data:image/svg+xml,%3Csvg width='52' height='26' viewBox='0 0 52 26' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ff6b6b' fill-opacity='0.05'%3E%3Cpath d='M10 10c0-2.21-1.79-4-4-4-3.314 0-6-2.686-6-6h2c0 2.21 1.79 4 4 4 3.314 0 6 2.686 6 6 0 2.21 1.79 4 4 4 3.314 0 6 2.686 6 6 0 2.21 1.79 4 4 4v2c-3.314 0-6-2.686-6-6 0-2.21-1.79-4-4-4-3.314 0-6-2.686-6-6zm25.464-1.95l8.486 8.486-1.414 1.414-8.486-8.486 1.414-1.414z' /%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        opacity: 0.8;
+    }
+
+    .bg-gradient {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: 
+            radial-gradient(circle at 20% 20%, rgba(255, 107, 107, 0.08) 0%, transparent 40%),
+            radial-gradient(circle at 80% 80%, rgba(130, 205, 255, 0.08) 0%, transparent 40%),
+            radial-gradient(circle at 10% 90%, rgba(255, 193, 107, 0.06) 0%, transparent 30%);
+    }
+
+    /* Decoration Elements */
+    .decoration {
+        position: fixed;
+        pointer-events: none;
+        z-index: -1;
+    }
+
+    .decoration-1 {
+        top: 10%;
+        right: 5%;
+        font-size: 100px;
+        opacity: 0.07;
+        transform: rotate(15deg);
+    }
+
+    .decoration-2 {
+        bottom: 10%;
+        left: 25%;
+        font-size: 120px;
+        opacity: 0.05;
+        transform: rotate(-10deg);
+    }
+
+    .decoration-3 {
+        top: 30%;
+        left: 8%;
+        font-size: 80px;
+        opacity: 0.07;
+        transform: rotate(5deg);
+    }
+
+    /* Empty state styles */
+    .empty-state {
+        width: 100%;
+        padding: 60px 20px;
+        text-align: center;
+        background: white;
+        border-radius: 16px;
+        border: 3px solid #333;
+        box-shadow: 5px 5px 0 rgba(0,0,0,0.1);
+        margin-top: 20px;
+    }
+
+    .empty-state-content {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 20px;
+    }
+
+    .empty-state-content i {
+        font-size: 48px;
+        color: #ccc;
+    }
+
+    .empty-state-content p {
+        font-size: 1.2rem;
+        color: #666;
+        margin: 0;
+        font-weight: 500;
+    }
+
+    #postsContainer {
+        margin: 0;
+        padding: 0;
+    }
+
+    .create-post-card h2 {
+        position: relative;
+        display: inline-block;
+        margin-bottom: 30px;
+        font-weight: 700;
+        color: #444;
+        font-size: 1.8rem;
+        width: fit-content;
+    }
+
+    .create-post-card h2::after {
+        content: '';
+        position: absolute;
+        bottom: -8px;
+        left: 0;
+        width: 100%;
+        height: 3px;
+        background: linear-gradient(to right, #FF6B6B, #FFB88C);
+        border-radius: 3px;
+    }
+
+    .form-label {
+        display: block;
+        margin-bottom: 12px;
+        font-weight: 600;
+        color: #333;
+        font-size: 1.1rem;
+        letter-spacing: 0.5px;
+        text-shadow: 1px 1px 3px rgba(255, 255, 255, 0.9);
+    }
+
+    .form-input,
+    .form-textarea {
+        width: 100%;
+        padding: 15px 20px;
+        border: 1px solid rgba(0, 0, 0, 0.1);
+        border-radius: 16px;
+        font-size: 1.1rem;
+        transition: all 0.3s;
+        background: rgba(255, 255, 255, 0.85);
+        backdrop-filter: blur(5px);
+        -webkit-backdrop-filter: blur(5px);
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    }
+
+    .form-input:focus,
+    .form-textarea:focus {
+        background: rgba(255, 255, 255, 0.95);
+        border-color: rgba(0, 0, 0, 0.2);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .file-input {
+        display: none;
+    }
+
+    .file-input-button {
+        background: linear-gradient(45deg, #FF6B6B, #FFB88C);
+        color: white;
+        padding: 12px 24px;
+        border-radius: 12px;
+        border: none;
+        cursor: pointer;
+        font-size: 0.95rem;
+        font-weight: 600;
+        transition: all 0.3s;
+        box-shadow: 0 4px 15px rgba(255, 107, 107, 0.2);
+    }
+
+    .file-input-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(255, 107, 107, 0.25);
+    }
+
+    .media-item {
+        position: relative;
+        border-radius: 12px;
+        overflow: hidden;
+        aspect-ratio: 1;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s;
+        border: 1px solid rgba(255, 255, 255, 0.5);
+    }
+
+    .media-item:hover {
+        transform: translateY(-3px) scale(1.02);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    }
+
+    .media-item img,
+    .media-item video {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: all 0.3s;
+    }
+
+    .media-item-remove {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        width: 26px;
+        height: 26px;
+        background: rgba(255, 255, 255, 0.9);
+        color: #FF6B6B;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s;
+        backdrop-filter: blur(5px);
+        -webkit-backdrop-filter: blur(5px);
+        border: 1px solid rgba(255, 107, 107, 0.2);
+        font-size: 16px;
+        z-index: 2;
+    }
+
+    .media-item-remove:hover {
+        background: #FF6B6B;
+        color: white;
+        transform: scale(1.1);
+    }
+
+    .error-message {
+        color: #FF6B6B;
+        background: rgba(255, 107, 107, 0.1);
+        padding: 10px 15px;
+        border-radius: 8px;
+        margin-top: 10px;
+        font-size: 0.9rem;
+        backdrop-filter: blur(5px);
+        -webkit-backdrop-filter: blur(5px);
+        border: 1px solid rgba(255, 107, 107, 0.2);
+        display: none;
+    }
+
+    /* Header Section Style */
+    .header-section {
+        display: flex;
+        justify-content: flex-start;
+        align-items: center;
+        margin-bottom: 40px;
+        padding: 0 20px;
+        position: relative;
+    }
+
+    .page-title {
+        font-family: 'Dancing Script', cursive;
+        font-size: 2.8rem;
+        font-weight: 700;
+        color: #333;
+        margin: 0;
+        text-align: left;
+        position: relative;
+        padding-bottom: 20px;
+        display: inline-block;
+    }
+
+    .page-title::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 3px;
+        background: linear-gradient(to right, 
+            #FF6B6B 0%, 
+            #FF6B6B 100%
+        );
+        border-radius: 3px;
+        box-shadow: 0 2px 4px rgba(255, 107, 107, 0.2);
+    }
+
+    .modal-media {
+        width: 55%;
+        height: 100%;
+        background: #F8F9FF;
+        position: relative;
+        overflow: hidden;
+        border-right: 3px solid #333;
+    }
+    .modal-content-section {
+        width: 45%;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        position: relative;
+        background: #fff;
+    }
+    .note-header-fixed {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 24px 24px 0 24px;
+        position: sticky;
+        top: 0;
+        background: #fff;
+        z-index: 2;
+        border-bottom: none;
+    }
+    .note-detail-scroll {
+        flex: 1;
+        overflow-y: auto;
+        padding: 16px 24px 16px 24px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .note-title,
+    .note-time,
+    .comment-count-label,
+    .comments-list {
+      text-align: left;
+    }
+    .note-time,
+    .comment-count-label {
+      margin-left: 0;
+      padding-left: 0;
+    }
+
+    .note-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: #333;
+      word-break: break-all;
+    }
+
+    /* 笔记内容样式 */
+    .note-content {
+      padding: 18px;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      text-align: left;
+    }
+
+    .note-content {
+      font-size: 1.05rem;
+      color: #444;
+      margin-bottom: 4px;
+      white-space: pre-line;
+      word-break: break-all;
+    }
+
+    .note-time {
+      font-size: 0.95rem;
+      color: #999;
+      margin-bottom: 4px;
+    }
+
+    .note-divider {
+      border: none;
+      border-top: 1.5px solid #eee;
+      margin: 8px 0 4px 0;
+    }
+
+    .comment-count-label {
+      font-size: 1rem;
+      color: #666;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .comments-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .note-footer-fixed {
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 0;
+      padding: 12px 24px 8px 24px;
+      border-top: 1.5px solid #eee;
+      background: #fff;
+      position: sticky;
+      bottom: 0;
+      z-index: 2;
+      min-height: 64px;
+      transition: min-height 0.2s;
+    }
+
+    .footer-input-wrap {
+      position: relative;
+      flex: 1;
+      display: flex;
+      align-items: flex-end;
+      min-width: 0;
+    }
+
+    .footer-btn-row {
+      display: flex;
+      flex-direction: row;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 8px;
+      margin-bottom: 0;
+    }
+
+    .comment-input {
+      width: 220px;
+      min-height: 40px;
+      max-height: 200px;
+      padding: 10px 16px;
+      border: 1.5px solid #ddd;
+      border-radius: 24px;
+      font-size: 1rem;
+      background: #F8F9FF;
+      margin-right: 8px;
+      resize: none;
+      overflow: hidden;
+      transition: box-shadow 0.2s, border-color 0.2s, width 0.2s;
+      box-sizing: border-box;
+      outline: none;
+      line-height: 1.6;
+      display: block;
+    }
+
+    .comment-input:focus {
+      border-color: #FF6B6B;
+      box-shadow: 0 0 0 2px rgba(255,107,107,0.08);
+      background: #fff;
+      width: 100%;
+      margin-right: 0;
+    }
+
+    .footer-input-wrap.focused .comment-input {
+      width: 100%;
+      margin-right: 0;
+    }
+
+    .footer-actions {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-right: 8px;
+      transition: opacity 0.2s;
+    }
+
+    .footer-input-wrap.focused ~ .footer-actions {
+      display: none !important;
+    }
+
+    .send-cancel-group {
+      display: flex;
+      flex-direction: row;
+      gap: 10px;
+      align-items: center;
+      z-index: 2;
+      transition: opacity 0.2s;
+    }
+
+    .footer-input-wrap:not(.focused) .send-cancel-group {
+      display: none !important;
+    }
+
+    .footer-input-wrap.focused .send-cancel-group {
+      display: flex !important;
+    }
+
+    .send-comment-btn {
+      padding: 8px 24px;
+      background: #FF6B6B;
+      color: #fff;
+      border: none;
+      border-radius: 24px;
+      font-size: 1.1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .send-comment-btn:hover {
+      background: #ff5252;
+    }
+
+    .cancel-comment-btn {
+      padding: 8px 24px;
+      background: #fff;
+      color: #888;
+      border: 2px solid #eee;
+      border-radius: 24px;
+      font-size: 1.1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s;
+    }
+
+    .cancel-comment-btn:hover {
+      background: #f5f5f5;
+      color: #FF6B6B;
+    }
+
+    .like-btn, .comment-btn {
+      display: flex;
+      align-items: center;
+      color: #777;
+      font-size: 0.9rem;
+      font-weight: 600;
+      transition: all 0.3s;
+    }
+
+    .like-btn:hover, .comment-btn:hover {
+      color: #FF6B6B;
+      transform: scale(1.1);
+    }
+
+    .like-btn.active {
+      color: #FF6B6B;
+    }
+
+    .like-btn i, .comment-btn i {
+      margin-right: 5px;
+      font-size: 1.1rem;
+    }
+
+    .like-count, .footer-comment-count {
+        font-size: 0.95em;
+        font-weight: 400;
+        margin-left: 2px;
+    }
+
+    /* 仅影响初始状态的底部栏横向布局和大号图标 */
+    .note-footer-fixed:not(.input-focused) {
+      flex-direction: row !important;
+      align-items: flex-end !important;
+      gap: 0 !important;
+    }
+    .note-footer-fixed:not(.input-focused) .footer-input-wrap {
+      flex: 1 1 auto !important;
+      display: flex !important;
+      align-items: flex-end !important;
+      min-width: 0 !important;
+    }
+    .note-footer-fixed:not(.input-focused) .comment-input {
+      width: 320px !important;
+      min-width: 0 !important;
+      max-width: 100% !important;
+    }
+    .note-footer-fixed:not(.input-focused) .footer-actions {
+      display: flex !important;
+      align-items: center !important;
+      gap: 16px !important;
+      margin-left: 10px !important;
+      margin-bottom: 6px !important;
+      font-size: 1rem !important;
+      flex-shrink: 0 !important;
+    }
+    .note-footer-fixed:not(.input-focused) .like-btn i,
+    .note-footer-fixed:not(.input-focused) .comment-btn i {
+      font-size: 1.4em !important;
+      vertical-align: middle;
+      font-weight: 400 !important;
+      font-family: 'Font Awesome 5 Free', 'Font Awesome 6 Free', 'FontAwesome', Arial, sans-serif !important;
+    }
+    .note-footer-fixed:not(.input-focused) .like-btn,
+    .note-footer-fixed:not(.input-focused) .comment-btn {
+      font-size: 1rem !important;
+      gap: 4px !important;
+    }
+    .note-footer-fixed:not(.input-focused) .like-count,
+    .note-footer-fixed:not(.input-focused) .footer-comment-count {
+      font-size: 0.95em !important;
+      font-weight: 400 !important;
+      margin-left: 2px !important;
+    }
+
+    /* 加载动画样式 */
+    .loading-animation {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        padding: 60px 20px;
+        background: white;
+        border-radius: 16px;
+        border: 3px solid #333;
+        box-shadow: 5px 5px 0 rgba(0,0,0,0.1);
+        margin-top: 20px;
+    }
+
+    .hourglass-container {
+        position: relative;
+        width: 100px;
+        height: 120px;
+        margin-bottom: 20px;
+    }
+
+    .hourglass {
+        position: relative;
+        width: 60px;
+        height: 80px;
+        margin: 0 auto;
+        background: transparent;
+        animation: hourglass-rotate 2s linear infinite;
+    }
+
+    .hourglass:before,
+    .hourglass:after {
+        content: '';
+        position: absolute;
+        width: 60px;
+        height: 40px;
+        background: #FF6B6B;
+        border-radius: 5px 5px 30px 30px;
+    }
+
+    .hourglass:before {
+        top: 0;
+        animation: sand-fall 2s linear infinite;
+    }
+
+    .hourglass:after {
+        bottom: 0;
+        border-radius: 30px 30px 5px 5px;
+        background: #FFB88C;
+        animation: sand-receive 2s linear infinite;
+    }
+
+    @keyframes hourglass-rotate {
+        0% { transform: rotate(0deg); }
+        25% { transform: rotate(0deg); }
+        50% { transform: rotate(180deg); }
+        75% { transform: rotate(180deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    @keyframes sand-fall {
+        0% { height: 40px; top: 0; }
+        25% { height: 0; top: 0; }
+        50% { height: 0; top: 0; }
+        75% { height: 40px; top: 0; }
+        100% { height: 40px; top: 0; }
+    }
+
+    @keyframes sand-receive {
+        0% { height: 0; bottom: 0; }
+        25% { height: 40px; bottom: 0; }
+        50% { height: 40px; bottom: 0; }
+        75% { height: 0; bottom: 0; }
+        100% { height: 0; bottom: 0; }
+    }
+
+    .loading-text {
+        font-size: 1.2rem;
+        color: #666;
+        font-weight: 600;
+        margin: 0;
+        text-align: center;
+    }
+
+    .loading-animation::after {
+        content: '🏮';
+        font-size: 24px;
+        display: block;
+        margin-top: 15px;
+        animation: swing 2s ease-in-out infinite;
+    }
+
+    @keyframes swing {
+        0%, 100% { transform: rotate(-10deg); }
+        50% { transform: rotate(10deg); }
+    }
+
+    /* 刷新按钮样式 */
+    .refresh-btn {
+        position: absolute;
+        right: 20px;
+        top: 15px;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: #fff;
+        border: 2px solid #333;
+        color: #333;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        box-shadow: 3px 3px 0 rgba(0,0,0,0.1);
+        transition: all 0.3s;
+    }
+
+    .refresh-btn:hover {
+        transform: rotate(180deg);
+        background: #FF6B6B;
+        color: #fff;
+    }
+
+    .refresh-btn i {
+        font-size: 1.2rem;
+    }
+
+    /* 加载指示器 */
+    .loading-indicator {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        color: #FF6B6B;
+        font-size: 3rem;
+    }
+    
+    .loading-indicator i {
+        animation: spin 1s linear infinite;
+    }
+    
+    .error-message {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        color: #FF6B6B;
+        font-size: 1.5rem;
+        background: #f8f8f8;
+    }
+    
+    .error-message:before {
+        content: '😢';
+        font-size: 3rem;
+        margin-bottom: 20px;
+    }
+    
+    /* 确保模态框中的加载指示器垂直居中 */
+    .modal-media {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* 添加 @keyframes spin 动画定义 */
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    /* Modal styles */
+    .modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 1000;
+        background: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(3px);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.3s, visibility 0.3s;
+        overflow-y: auto;
+    }
+
+    .modal.active {
+        opacity: 1;
+        visibility: visible;
+        display: flex;
+    }
+
+    .modal-content {
+        width: 90%;
+        max-width: 1200px;
+        height: 90vh;
+        background: white;
+        border-radius: 20px;
+        position: relative;
+        overflow: hidden;
+        border: 3px solid #333;
+        box-shadow: 10px 10px 0 rgba(0,0,0,0.1);
+        transform: scale(0.9);
+        transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        margin: 20px auto;
+    }
+
+    .modal.active .modal-content {
+        transform: scale(1);
+    }
+
+    .modal-close {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: #FF6B6B;
+        color: white;
+        border: 2px solid #333;
+        font-size: 20px;
+        cursor: pointer;
+        z-index: 10;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s;
+        box-shadow: 2px 2px 0 rgba(0,0,0,0.2);
+    }
+
+    .modal-close:hover {
+        transform: rotate(90deg);
+        background: #FF4B4B;
+    }
+
+    .modal-body {
+        height: 100%;
+        display: flex;
+    }
+
+    /* Left side media area */
+    .modal-media {
+        width: 55%;
+        height: 100%;
+        background: #F8F9FF;
+        position: relative;
+        overflow: hidden;
+        border-right: 3px solid #333;
+    }
+
+    .swiper {
+        width: 100%;
+        height: 100%;
+        position: absolute;
+        left: 0;
+        top: 0;
+    }
+
+    .swiper-wrapper {
+        width: 100%;
+        height: 100%;
+    }
+
+    .swiper-slide {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        height: 100%;
+        background: #F8F9FF;
+        overflow: hidden;
+        position: relative;
+    }
+
+    .swiper-slide img,
+    .swiper-slide video {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+    }
+
+    .user-avatar {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 2px solid #333;
+        box-shadow: 2px 2px 0 rgba(0,0,0,0.1);
+        transition: opacity 0.3s ease;
+    }
+
+    .user-name {
+        font-weight: 700;
+        font-size: 1.2rem;
+        color: #333;
+    }
+
+    .note-title {
+        font-weight: 700;
+        margin-bottom: 8px;
+        line-height: 1.4;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        font-size: 1.15rem;
+        color: #333;
+        text-align: left;
+    }
+
+    .note-content {
+        padding: 18px;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        text-align: left;
+    }
+
+    .comment-item {
+        margin-bottom: 20px;
+        padding-bottom: 20px;
+        border-bottom: 2px dashed #eee;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .comment-item::before {
+        content: '💬';
+        position: absolute;
+        left: -15px;
+        top: 0;
+        font-size: 12px;
+        opacity: 0.5;
+    }
+
+    .comment-user {
+        display: flex;
+        align-items: flex-start;
+        margin-bottom: 0;
+    }
+
+    .comment-avatar {
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        border: 2px solid #333;
+        margin-right: 10px;
+        box-shadow: 2px 2px 0 rgba(0,0,0,0.1);
+        flex-shrink: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .comment-info {
+        display: flex;
+        flex-direction: column;
+        margin-right: 10px;
+    }
+
+    .comment-username {
+        font-weight: 600;
+        margin-bottom: 2px;
+        line-height: 1.2;
+    }
+
+    .comment-time {
+        font-size: 0.8rem;
+        color: #777;
+    }
+
+    .comment-content {
+        background: #F5F5FF;
+        padding: 12px;
+        border-radius: 12px;
+        font-size: 0.95rem;
+        line-height: 1.5;
+        border: 1px solid #eee;
+        margin-top: 5px;
+        position: relative;
+        margin-left: 48px;
+        text-align: left;
+    }
+
+    .comment-content::before {
+        content: '';
+        position: absolute;
+        top: -6px;
+        left: 20px;
+        width: 12px;
+        height: 12px;
+        background: #F5F5FF;
+        transform: rotate(45deg);
+        border-left: 1px solid #eee;
+        border-top: 1px solid #eee;
+    }
+
+    /* Navigation buttons */
+    .swiper-button-prev,
+    .swiper-button-next {
+        --swiper-navigation-color: #fff;
+        --swiper-navigation-size: 20px;
+        width: 45px;
+        height: 45px;
+        background: rgba(0, 0, 0, 0.3);
+        border-radius: 50%;
+    }
+
+    .swiper-pagination-bullet {
+        background: white;
+        opacity: 0.5;
+    }
+
+    .swiper-pagination-bullet-active {
+        opacity: 1;
+    }
+
+    /* 无媒体内容的占位样式 */
+    .no-media-placeholder {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        height: 100%;
+        color: #999;
+        font-size: 1rem;
+        text-align: center;
+        padding: 20px;
+    }
+
+    /* 媒体加载器样式 */
+    .media-loader {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(248, 249, 255, 0.7);
+        z-index: 1;
+        font-size: 2rem;
+        color: #FF6B6B;
+    }
+
+    .media-loader i {
+        animation: spin 1.5s linear infinite;
+    }
+
+    /* 加载状态样式 */
+    .loading-state {
+        display: inline-block;
+        position: relative;
+        width: 80px;
+        height: 13px;
+    }
+    .loading-state div {
+        position: absolute;
+        top: 0;
+        width: 13px;
+        height: 13px;
+        border-radius: 50%;
+        background: #FF6B6B;
+        animation-timing-function: cubic-bezier(0, 1, 1, 0);
+    }
+    .loading-state div:nth-child(1) {
+        left: 8px;
+        animation: loading-state1 0.6s infinite;
+    }
+    .loading-state div:nth-child(2) {
+        left: 8px;
+        animation: loading-state2 0.6s infinite;
+    }
+    .loading-state div:nth-child(3) {
+        left: 32px;
+        animation: loading-state2 0.6s infinite;
+    }
+    .loading-state div:nth-child(4) {
+        left: 56px;
+        animation: loading-state3 0.6s infinite;
+    }
+    @keyframes loading-state1 {
+        0% { transform: scale(0); }
+        100% { transform: scale(1); }
+    }
+    @keyframes loading-state3 {
+        0% { transform: scale(1); }
+        100% { transform: scale(0); }
+    }
+    @keyframes loading-state2 {
+        0% { transform: translate(0, 0); }
+        100% { transform: translate(24px, 0); }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Background Decoration -->
+<div class="bg-decoration">
+    <div class="bg-pattern"></div>
+    <div class="bg-gradient"></div>
+</div>
+
+<!-- Decoration Elements -->
+<div class="decoration decoration-1">🐼</div>
+<div class="decoration decoration-2">🦊</div>
+<div class="decoration decoration-3">🐯</div>
+
+<!-- Left Sidebar -->
+<div class="sidebar">
+    <a href="/community" class="sidebar-item">
+        <i class="fas fa-compass"></i>
+        <span>Discover</span>
+    </a>
+    <a href="/create_post" class="sidebar-item">
+        <i class="fas fa-plus-circle"></i>
+        <span>Post</span>
+    </a>
+    <a href="/manage_posts" class="sidebar-item active">
+        <i class="fas fa-tasks"></i>
+        <span>Manage</span>
+    </a>
+    <a href="/chat_list" class="sidebar-item">
+        <i class="fas fa-comments"></i>
+        <span>Chat</span>
+    </a>
+</div>
+
+<!-- Main Content -->
+<div class="main-content">
+    <div class="header-section">
+    <h2 class="page-title">All Posts</h2>
+    </div>
+    <div id="postsContainer">
+        <!-- 加载动画 -->
+        <div class="loading-animation" id="loadingAnimation" style="display: flex;">
+            <div class="hourglass-container">
+                <div class="hourglass"></div>
+            </div>
+            <p class="loading-text">Loading your posts, please wait ...</p>
+        </div>
+        <div class="post-list" style="display: none;"></div>
+        <div class="empty-state" style="display: none;">
+            <div class="empty-state-content">
+                <i class="fas fa-edit" style="font-size: 48px; margin-bottom: 15px; color: #FF6B6B;"></i>
+                <p>You haven't posted any notes yet.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Detail Modal -->
+<div class="modal" id="noteDetailModal">
+    <div class="modal-content">
+        <button class="modal-close" id="closeModal">&times;</button>
+        <div class="modal-body">
+            <!-- Left: Media Display Area -->
+            <div class="modal-media">
+                <!-- Swiper -->
+                <div class="swiper">
+                    <div class="swiper-wrapper" id="modalMediaWrapper">
+                        <!-- Images/videos will be dynamically loaded through JavaScript -->
+                    </div>
+                    <!-- Pagination -->
+                    <div class="swiper-pagination"></div>
+                    <!-- Navigation Buttons -->
+                    <div class="swiper-button-prev"></div>
+                    <div class="swiper-button-next"></div>
+                </div>
+            </div>
+            <!-- Right: Content Area -->
+            <div class="modal-content-section">
+                <!-- 顶部：头像和用户名 -->
+                <div class="note-header-fixed">
+                    <img class="user-avatar" src="" alt="User Avatar">
+                    <span class="user-name"></span>
+                </div>
+                <!-- 滚动内容区 -->
+                <div class="note-detail-scroll">
+                    <div class="note-title"></div>
+                    <div class="note-content"></div>
+                    <div class="note-time"></div>
+                    <hr class="note-divider">
+                    <div class="comment-count-label"></div>
+                    <div class="comments-list"></div>
+                </div>
+                <!-- 底部固定：输入框+点赞+评论数 -->
+                <div class="note-footer-fixed">
+                    <div class="footer-input-wrap">
+                        <textarea class="comment-input" placeholder="Say something..." rows="1"></textarea>
+                    </div>
+                    <div class="footer-btn-row">
+                        <div class="send-cancel-group" style="display:none;">
+                            <button class="send-comment-btn">Send</button>
+                            <button class="cancel-comment-btn">Cancel</button>
+                        </div>
+                    </div>
+                    <div class="footer-actions">
+                        <div class="like-btn" tabindex="0">
+                            <i class="fa-regular fa-heart"></i>
+                            <span class="like-count">0</span>
+                        </div>
+                        <div class="comment-btn" tabindex="0">
+                            <i class="fa-regular fa-comment"></i>
+                            <span class="footer-comment-count">0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirm Dialog -->
+<div class="delete-confirm" id="deleteConfirm">
+    <h3>Delete Post</h3>
+    <p>Are you sure you want to delete this post? This action cannot be undone.</p>
+    <div class="delete-confirm-buttons">
+        <button class="cancel-delete">Cancel</button>
+        <button class="confirm-delete">Delete</button>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // 初始化显示加载动画
+    const loadingAnimation = document.getElementById('loadingAnimation');
+    const postList = document.querySelector('.post-list');
+    const emptyState = document.querySelector('.empty-state');
+    
+    loadingAnimation.style.display = 'flex';
+    postList.style.display = 'none';
+    emptyState.style.display = 'none';
+    
+    // 加载用户帖子
+    loadUserPosts();
+    
+    // 设置事件监听器
+    setupEventListeners();
+});
+
+function loadUserPosts() {
+    const loadingAnimation = document.getElementById('loadingAnimation');
+    const postList = document.querySelector('.post-list');
+    const emptyState = document.querySelector('.empty-state');
+    const noteModal = document.getElementById('noteDetailModal');
+    
+    // 确保模态框隐藏
+    if (noteModal) {
+        noteModal.style.display = 'none';
+        noteModal.classList.remove('active');
+    }
+    
+    // 显示加载动画
+    loadingAnimation.style.display = 'flex';
+    postList.style.display = 'none';
+    emptyState.style.display = 'none';
+    
+    // 添加缓存破坏参数，避免浏览器缓存
+    const timestamp = new Date().getTime();
+    
+    // 使用Promise.race添加超时机制
+    const fetchPromise = fetch(`/get_user_posts?_=${timestamp}`);
+    const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Request timeout')), 15000)
+    );
+    
+    Promise.race([fetchPromise, timeoutPromise])
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Abnormal network response');
+            }
+            return response.json();
+        })
+        .then(data => {
+            // 延迟100ms再隐藏加载动画，让用户能够看到加载过程
+            setTimeout(() => {
+                // 隐藏加载动画
+                loadingAnimation.style.display = 'none';
+                
+                if (data.status === 'success') {
+                    renderPosts(data.posts);
+                } else {
+                    console.error('Failed to load post:', data.message);
+                    showEmptyState();
+                }
+            }, 100);
+        })
+        .catch(error => {
+            console.error('Loading post error:', error);
+            
+            // 隐藏加载动画
+            loadingAnimation.style.display = 'none';
+            
+            // 显示错误信息
+            emptyState.querySelector('p').textContent = 'Error loading post, please refresh the page and try again';
+            emptyState.querySelector('i').className = 'fas fa-exclamation-circle';
+            emptyState.style.display = 'block';
+        });
+}
+
+function setupEventListeners() {
+    // 注册详情模态框关闭按钮事件
+    const closeModalBtn = document.getElementById('closeModal');
+    if (closeModalBtn) {
+        closeModalBtn.addEventListener('click', function() {
+            const modal = document.getElementById('noteDetailModal');
+            modal.classList.remove('active');
+            setTimeout(() => {
+                modal.style.display = 'none';
+                document.body.classList.remove('modal-open');
+            }, 300);
+            if (window.noteSwiper) {
+                window.noteSwiper.destroy();
+            }
+        });
+    }
+    
+    // 处理删除确认对话框关闭
+    const cancelDeleteBtn = document.querySelector('.cancel-delete');
+    if (cancelDeleteBtn) {
+        cancelDeleteBtn.onclick = () => {
+            document.getElementById('deleteConfirm').style.display = 'none';
+        };
+    }
+    
+    // 添加刷新按钮事件
+    if (document.querySelector('.header-section')) {
+        const refreshBtn = document.createElement('button');
+        refreshBtn.className = 'refresh-btn';
+        refreshBtn.innerHTML = '<i class="fas fa-sync-alt"></i>';
+        refreshBtn.title = 'Refresh the list of posts';
+        refreshBtn.onclick = loadUserPosts;
+        
+        document.querySelector('.header-section').appendChild(refreshBtn);
+    }
+    
+    // 点击模态框背景关闭
+    document.getElementById('noteDetailModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            this.classList.remove('active');
+            setTimeout(() => {
+                this.style.display = 'none';
+                document.body.classList.remove('modal-open');
+            }, 300);
+            if (window.noteSwiper) {
+                window.noteSwiper.destroy();
+            }
+        }
+    });
+    
+    // ESC键关闭模态框
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            const modal = document.getElementById('noteDetailModal');
+            if (modal.classList.contains('active')) {
+                modal.classList.remove('active');
+                setTimeout(() => {
+                    modal.style.display = 'none';
+                    document.body.classList.remove('modal-open');
+                }, 300);
+                if (window.noteSwiper) {
+                    window.noteSwiper.destroy();
+                }
+            }
+        }
+    });
+}
+
+function renderPosts(posts) {
+    const postList = document.querySelector('.post-list');
+    const emptyState = document.querySelector('.empty-state');
+
+    if (!posts || posts.length === 0) {
+        postList.style.display = 'none';
+        emptyState.style.display = 'block';
+        return;
+    }
+
+    // 重置内容并显示列表
+    postList.innerHTML = '';
+    postList.style.display = 'block';
+    emptyState.style.display = 'none';
+
+    // 优化：分批渲染帖子以避免页面卡顿
+    const batchSize = 5; // 每批渲染5个帖子
+    const batches = Math.ceil(posts.length / batchSize);
+    
+    function renderBatch(batchIndex) {
+        if (batchIndex >= batches) return;
+        
+        const startIdx = batchIndex * batchSize;
+        const endIdx = Math.min(startIdx + batchSize, posts.length);
+        const fragment = document.createDocumentFragment();
+        
+        for (let i = startIdx; i < endIdx; i++) {
+            const post = posts[i];
+            const postItem = createPostElement(post);
+            fragment.appendChild(postItem);
+        }
+        
+        postList.appendChild(fragment);
+        
+        // 使用requestAnimationFrame渲染下一批
+        if (batchIndex + 1 < batches) {
+            requestAnimationFrame(() => renderBatch(batchIndex + 1));
+        }
+    }
+    
+    // 开始渲染第一批
+    requestAnimationFrame(() => renderBatch(0));
+}
+
+function createPostElement(post) {
+    // 创建帖子元素
+    const postItem = document.createElement('div');
+    postItem.className = 'post-item';
+    postItem.dataset.postId = post.post_id;
+    
+    // 获取媒体预览HTML
+    const mediaHtml = getPostMediaHtml(post);
+    
+    // 使用文档片段优化DOM操作
+    const template = document.createElement('template');
+    template.innerHTML = `
+        ${mediaHtml}
+        <div class="post-content">
+            <div class="post-header">
+                <h3 class="post-title">${post.title || 'No Title'}</h3>
+                <div class="post-time">
+                    <span class="published-text">Published</span>
+                    ${formatDate(post.timestamp)}
+                </div>
+            </div>
+            <div class="post-footer">
+                <div class="post-stats">
+                    <div class="stat-item">
+                        <i class="far fa-heart"></i>
+                        <span>${post.like || 0}</span>
+                    </div>
+                    <div class="stat-item">
+                        <i class="far fa-comment"></i>
+                        <span>${post.comments?.length || 0}</span>
+                    </div>
+                </div>
+                <div class="post-actions">
+                    <button class="action-btn view-btn">
+                        <i class="far fa-eye"></i>
+                        <span>View</span>
+                    </button>
+                    <button class="action-btn delete-btn">
+                        <i class="far fa-trash-alt"></i>
+                        <span>Delete</span>
+                    </button>
+                </div>
+            </div>
+        </div>`;
+    
+    postItem.appendChild(template.content);
+    
+    // 添加事件监听器
+    postItem.querySelector('.view-btn').addEventListener('click', () => {
+        viewPost(post.post_id);
+    });
+    
+    postItem.querySelector('.delete-btn').addEventListener('click', () => {
+        confirmDelete(post.post_id);
+    });
+    
+    return postItem;
+}
+
+function getPostMediaHtml(post) {
+    // 获取第一个媒体项（如果存在）
+    const firstMedia = post.media && post.media.length > 0 ? post.media[0] : null;
+    
+    if (firstMedia) {
+        const isVideo = firstMedia.match(/\.(mp4|mov|avi)$/i);
+        return `
+            <div class="post-media">
+                ${isVideo
+                    ? `<video src="${firstMedia}" controls muted>
+                         <source src="${firstMedia}" type="video/${firstMedia.split('.').pop()}">
+                         Your browser does not support video playback.
+                       </video>`
+                    : `<img src="${firstMedia}" alt="Post Media" onerror="this.src='/static/images/default-avatar.jpeg'">`}
+                ${post.media.length > 1 ? `
+                    <div class="media-count">
+                        <i class="fas fa-plus"></i>${post.media.length - 1}
+                    </div>` : ''}
+            </div>`;
+    } else {
+        return `
+            <div class="post-media">
+                <div class="no-media">No media</div>
+            </div>`;
+    }
+}
+
+function showEmptyState() {
+    const postList = document.querySelector('.post-list');
+    const emptyState = document.querySelector('.empty-state');
+    
+    postList.style.display = 'none';
+    emptyState.style.display = 'block';
+    
+    // 恢复默认文本
+    emptyState.querySelector('p').textContent = 'You have not posted any notes yet.';
+    emptyState.querySelector('i').className = 'fas fa-edit';
+}
+
+function formatDate(dateStr) {
+    const date = new Date(dateStr);
+    const now = new Date();
+    const diff = now - date;
+
+    if (diff < 60000) {
+        return 'Just now';
+    }
+    if (diff < 3600000) {
+        return Math.floor(diff / 60000) + ' minutes ago';
+    }
+    if (diff < 86400000) {
+        return Math.floor(diff / 3600000) + ' hours ago';
+    }
+    if (diff < 2592000000) {
+        return Math.floor(diff / 86400000) + ' days ago';
+    }
+    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+}
+
+function viewPost(postId) {
+    const detailModal = document.getElementById('noteDetailModal');
+    detailModal.style.display = 'block';  // 显示详情窗口
+    detailModal.classList.add('active');
+    document.body.classList.add('modal-open');
+    currentPostId = postId;
+    fetchPostDetail(postId);
+}
+
+function confirmDelete(postId) {
+    const deleteConfirm = document.getElementById('deleteConfirm');
+    deleteConfirm.style.display = 'block';
+
+    const confirmBtn = document.querySelector('.confirm-delete');
+    const cancelBtn = document.querySelector('.cancel-delete');
+
+    // 移除旧的事件监听器，避免多次绑定
+    confirmBtn.replaceWith(confirmBtn.cloneNode(true));
+    cancelBtn.replaceWith(cancelBtn.cloneNode(true));
+
+    // 重新添加事件监听器
+    document.querySelector('.confirm-delete').addEventListener('click', function() {
+        deletePost(postId);
+    });
+    document.querySelector('.cancel-delete').addEventListener('click', function() {
+        deleteConfirm.style.display = 'none';
+    });
+}
+
+function deletePost(postId) {
+    fetch(`/delete_post/${postId}`, { method: 'DELETE' })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                document.getElementById('deleteConfirm').style.display = 'none';
+                loadUserPosts();
+            } else {
+                alert('Delete failed:' + (data.message || 'Unknown error'));
+            }
+        })
+        .catch(error => {
+            console.error('Delete failed:', error);
+            alert('An error occurred while deleting the post, please try again');
+        });
+}
+
+function fetchPostDetail(postId) {
+    // 清空之前的内容并显示加载状态
+    document.getElementById('modalMediaWrapper').innerHTML = '';
+    document.querySelector('.modal-media').innerHTML = `
+        <div class="loading-indicator"><i class="fas fa-spinner fa-spin"></i></div>
+        <div class="swiper" style="display:none">
+            <div class="swiper-wrapper" id="modalMediaWrapper"></div>
+            <div class="swiper-pagination"></div>
+            <div class="swiper-button-prev"></div>
+            <div class="swiper-button-next"></div>
+        </div>
+    `;
+
+    // 预先设置用户信息区域为加载状态
+    document.querySelector('.user-avatar').src = '/static/images/default-avatar.jpeg';
+    document.querySelector('.user-name').textContent = 'Loading...';
+    document.querySelector('.note-title').textContent = '';
+    document.querySelector('.note-content').textContent = '';
+    document.querySelector('.note-time').textContent = '';
+    document.querySelector('.comment-count-label').textContent = '';
+    document.querySelector('.comments-list').innerHTML = '';
+
+    fetch(`/get_post_detail/${postId}`)
+        .then(response => response.json())
+        .then(response => {
+            if (response.status === "success") {
+                renderNoteDetail(response.post);
+            } else {
+                document.querySelector('.modal-media').innerHTML = '<div class="error-message">Failed to load</div>';
+            }
+        })
+        .catch(error => {
+            console.error('Error getting post details:', error);
+            document.querySelector('.modal-media').innerHTML = '<div class="error-message">Network error</div>';
+        });
+}
+
+function renderNoteDetail(post) {
+    // 先渲染用户信息
+    const userAvatar = document.querySelector('.user-avatar');
+    userAvatar.style.opacity = '0';
+    userAvatar.onload = function() {
+        this.style.opacity = '1';
+    };
+    userAvatar.onerror = function() {
+        this.src = '/static/images/default-avatar.jpeg';
+        this.style.opacity = '1';
+    };
+    // 设置新的头像URL
+    userAvatar.src = post.avatar || '/static/images/default-avatar.jpeg';
+
+    document.querySelector('.user-name').textContent = post.username || 'User';
+
+    // 渲染帖子内容
+    document.querySelector('.note-title').textContent = post.title || '';
+    document.querySelector('.note-content').textContent = post.content || '';
+    document.querySelector('.note-time').textContent = formatDate(post.timestamp);
+
+    // 渲染评论数量
+    const commentCount = post.comments ? post.comments.length : 0;
+    document.querySelector('.comment-count-label').textContent = `${commentCount} Comments`;
+    document.querySelector('.footer-comment-count').textContent = commentCount;
+
+    // 渲染点赞数量和状态
+    const likeCount = post.like || 0;
+    document.querySelector('.like-count').textContent = likeCount;
+
+    // 更新点赞按钮状态
+    const likeBtn = document.querySelector('.like-btn');
+    if (post.liked) {
+        likeBtn.classList.add('active');
+        likeBtn.querySelector('i').classList.remove('fa-regular');
+        likeBtn.querySelector('i').classList.add('fa-solid');
+    } else {
+        likeBtn.classList.remove('active');
+        likeBtn.querySelector('i').classList.remove('fa-solid');
+        likeBtn.querySelector('i').classList.add('fa-regular');
+    }
+
+    // 渲染评论
+    let commentsHtml = '';
+    if (post.comments && post.comments.length > 0) {
+        post.comments.forEach(comment => {
+            commentsHtml += `
+                <div class="comment-item">
+                    <div class="comment-user">
+                        <img class="comment-avatar" src="${comment.avatar || '/static/images/default-avatar.jpeg'}"
+                             alt="${comment.username || 'User'}"
+                             onerror="this.src='/static/images/default-avatar.jpeg'; this.style.opacity='1';"
+                             onload="this.style.opacity='1';"
+                             style="opacity: 0; transition: opacity 0.3s ease;">
+                        <div class="comment-info">
+                            <div class="comment-username">${comment.username || 'User'}</div>
+                            <div class="comment-time">${formatDate(comment.timestamp)}</div>
+                        </div>
+                    </div>
+                    <div class="comment-content">${comment.content}</div>
+                </div>`;
+        });
+    }
+    document.querySelector('.comments-list').innerHTML = commentsHtml;
+
+    // 处理所有评论头像的加载
+    setTimeout(() => {
+        const commentAvatars = document.querySelectorAll('.comment-avatar');
+        commentAvatars.forEach(avatar => {
+            if (avatar.complete) {
+                avatar.style.opacity = '1';
+            }
+        });
+    }, 100);
+
+    // 准备Swiper容器
+    document.querySelector('.modal-media').innerHTML = `
+        <div class="swiper">
+            <div class="swiper-wrapper" id="modalMediaWrapper"></div>
+            <div class="swiper-pagination"></div>
+            <div class="swiper-button-prev"></div>
+            <div class="swiper-button-next"></div>
+        </div>
+    `;
+
+    // 渲染媒体内容
+    const modalMediaWrapper = document.getElementById('modalMediaWrapper');
+    if (post.media && post.media.length > 0) {
+        post.media.forEach((mediaUrl, index) => {
+            const isVideo = mediaUrl.match(/\.(mp4|mov|avi)$/i);
+            const slideDiv = document.createElement('div');
+            slideDiv.className = 'swiper-slide';
+            slideDiv.dataset.index = index;
+
+            if (isVideo) {
+                slideDiv.innerHTML = `<video src="${mediaUrl}" controls playsinline></video>`;
+            } else {
+                slideDiv.innerHTML = `
+                    <div class="media-loader">
+                        <i class="fas fa-spinner fa-spin"></i>
+                    </div>
+                    <img src="${mediaUrl}"
+                         alt="${post.title || 'Post Image'}"
+                         onerror="this.src='/static/images/default-avatar.jpeg'; this.parentNode.querySelector('.media-loader').style.display='none';"
+                         onload="this.style.opacity='1'; this.parentNode.querySelector('.media-loader').style.display='none';"
+                         style="opacity: 0; transition: opacity 0.5s ease;">`;
+            }
+
+            modalMediaWrapper.appendChild(slideDiv);
+        });
+    } else {
+        const slideDiv = document.createElement('div');
+        slideDiv.className = 'swiper-slide';
+        slideDiv.innerHTML = `
+            <div class="no-media-placeholder">
+                <i class="fas fa-image" style="font-size: 48px;"></i>
+                <p style="margin-top: 16px;">No media content</p>
+            </div>
+        `;
+        modalMediaWrapper.appendChild(slideDiv);
+    }
+
+    // 初始化Swiper
+    if (window.noteSwiper) {
+        window.noteSwiper.destroy(true, true);
+        window.noteSwiper = null;
+    }
+
+    setTimeout(() => {
+        if (post.media && post.media.length > 1) {
+            window.noteSwiper = new Swiper('.swiper', {
+                slidesPerView: 1,
+                spaceBetween: 30,
+                centeredSlides: true,
+                loop: false,
+                pagination: {
+                    el: '.swiper-pagination',
+                    clickable: true,
+                },
+                navigation: {
+                    nextEl: '.swiper-button-next',
+                    prevEl: '.swiper-button-prev',
+                },
+                observer: true,
+                observeParents: true,
+            });
+
+            document.querySelector('.swiper-pagination').style.display = 'block';
+            document.querySelector('.swiper-button-prev').style.display = 'block';
+            document.querySelector('.swiper-button-next').style.display = 'block';
+        } else {
+            document.querySelector('.swiper-pagination').style.display = 'none';
+            document.querySelector('.swiper-button-prev').style.display = 'none';
+            document.querySelector('.swiper-button-next').style.display = 'none';
+        }
+    }, 0);
+}
+
+// 输入框交互逻辑
+document.addEventListener('DOMContentLoaded', function() {
+    const commentInput = document.querySelector('.comment-input');
+    const footerInputWrap = document.querySelector('.footer-input-wrap');
+    const footerBtnRow = document.querySelector('.footer-btn-row');
+    const noteFooterFixed = document.querySelector('.note-footer-fixed');
+    const sendCancelGroup = document.querySelector('.send-cancel-group');
+    const cancelCommentBtn = document.querySelector('.cancel-comment-btn');
+    
+    function resetCommentInput() {
+        commentInput.value = '';
+        commentInput.style.height = '40px';
+        footerInputWrap.classList.remove('focused');
+        sendCancelGroup.style.display = 'none';
+        noteFooterFixed.classList.remove('input-focused');
+    }
+    
+    if (commentInput) {
+        commentInput.addEventListener('focus', function() {
+            footerInputWrap.classList.add('focused');
+            sendCancelGroup.style.display = 'flex';
+            noteFooterFixed.classList.add('input-focused');
+            autoGrow(this);
+        });
+        
+        commentInput.addEventListener('blur', function() {
+            if (!this.value) {
+                setTimeout(resetCommentInput, 100); // 延迟以防止按钮点击被阻断
+            }
+        });
+        
+        commentInput.addEventListener('input', function() {
+            autoGrow(this);
+        });
+    }
+    
+    function autoGrow(element) {
+        element.style.height = '40px';
+        element.style.height = (element.scrollHeight) + 'px';
+    }
+    
+    if (cancelCommentBtn) {
+        cancelCommentBtn.addEventListener('click', function() {
+            resetCommentInput();
+            commentInput.blur();
+        });
+    }
+    
+    // 保证初始时图标class为fa-regular
+    function setFooterIconRegular() {
+        const likeBtnIcon = document.querySelector('.note-footer-fixed:not(.input-focused) .like-btn i');
+        const commentBtnIcon = document.querySelector('.note-footer-fixed:not(.input-focused) .comment-btn i');
+        
+        if (likeBtnIcon) likeBtnIcon.classList.replace('fa-solid', 'fa-regular');
+        if (commentBtnIcon) commentBtnIcon.classList.replace('fa-solid', 'fa-regular');
+    }
+    
+    setFooterIconRegular();
+});
+
+// 添加这个变量来跟踪当前帖子ID
+let currentPostId = null;
+</script>
+
+<!-- Import Swiper JS -->
+<link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css" />
+<script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
+{% endblock %} 

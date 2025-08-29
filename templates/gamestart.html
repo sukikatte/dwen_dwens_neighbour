@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Game Start - Multiplayer Draw Game</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <style>
+    body {
+      background: linear-gradient(to right, #fbc2eb, #a6c1ee);
+      min-height: 100vh;
+      padding-bottom: 50px;
+    }
+    .navbar {
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    .container {
+      background-color: rgba(255, 255, 255, 0.95);
+      padding: 2rem;
+      margin-top: 3rem;
+      border-radius: 10px;
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+      max-width: 800px;
+    }
+    h3, #question-text {
+      font-size: 20px;
+      color: #555;
+    }
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 15px;
+      margin-top: 30px;
+    }
+    .card {
+      position: relative;
+      padding-top: 100%; /* maintains square shape */
+      cursor: pointer;
+      border-radius: 10px;
+      background-color: blue; /* card back color */
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    .card img {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 10px;
+    }
+    .card.flipped {
+      background-color: #fff;
+    }
+    .hidden {
+      /* Used to hide card images, leaving the blue back visible */
+      visibility: hidden;
+    }
+    .info-panel, .btn-panel {
+      margin-top: 20px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <a class="navbar-brand" href="/">Dwen Dwen's Neighbor</a>
+    <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+      <ul class="navbar-nav">
+        <li class="nav-item"><a class="nav-link" href="/profile">Profile</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Game Room Content -->
+  <div class="container">
+    <h3>Game Room: {{ room_data['room_name'] }}</h3>
+    <h3>Players & Scores:</h3>
+    <ul id="playerList">
+      {% for player_id, player in room_data['players'].items() %}
+        <li id="player_{{ player_id }}">
+          <img src="{{ player['avatar'] }}" width="30" class="rounded-circle">
+          <strong>{{ player['username'] }}</strong>
+          <span class="badge badge-primary">
+            Score: <span id="score_{{ player_id }}">{{ player.get('gamescore', 0) }}</span>
+          </span>
+        </li>
+      {% endfor %}
+    </ul>
+
+    <button class="btn btn-danger" onclick="leaveGame('{{ room_id }}')">End Game</button>
+
+    <!-- Game Area (Card Grid) -->
+    <div id="game-container" style="display:none;">
+      <div class="info-panel">
+        Turns Taken: <span id="flip-count">0</span>
+      </div>
+
+      <div class="card-grid" id="card-grid">
+        <!-- Cards will be dynamically generated here -->
+      </div>
+
+      <div class="btn-panel">
+        <!-- Optional: A "Restart" button if needed -->
+      </div>
+
+      <div class="text-center mt-3" id="result-message"></div>
+    </div>
+  </div>
+
+  <!-- jQuery, Popper.js, Bootstrap JS -->
+  <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+  <script>
+    let roomData = {{ room_data|tojson }};
+    let currentPlayer = "{{ session['user']['display_name'] }}";
+    let currentTurn = 0; // 0-based index for current player's turn
+    let cards = [];
+    let firstCard = null, secondCard = null;
+    let flipCount = 0;
+    let matchesFound = 0;
+    let lockBoard = false;
+
+    // Helper function to shuffle an array
+    function shuffle(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+      return array;
+    }
+
+    // Fetch animal data and set up the cards for each player
+    function loadCards() {
+      $.get('/get_animals', function(response) {
+        if (response.status === 'success' && response.animals.length > 0) {
+          // Select 4 random animals
+          let animals = shuffle(response.animals.slice(0, 4));
+          cards = [];
+          animals.forEach(animal => {
+            cards.push({ id: animal.id, img: animal.photo, name: animal.name });
+            cards.push({ id: animal.id, img: animal.photo, name: animal.name });
+          });
+          cards = shuffle(cards); // Shuffle cards
+          renderCards();
+          // Pre-preview: Show all card faces for 10 seconds, then flip back unmatched cards
+          setTimeout(() => {
+            $(".card").each(function() {
+              if (!$(this).data('matched')) {
+                $(this).removeClass('flipped');
+                $(this).find('img').addClass('hidden');
+              }
+            });
+          }, 10000);
+        }
+      }).fail(function() {
+        console.error("Error fetching animal data.");
+      });
+    }
+
+    // Render cards in the grid
+    function renderCards() {
+      const grid = $("#card-grid");
+      grid.empty();
+      cards.forEach((card, index) => {
+        const cardElement = $(`
+          <div class="card" data-index="${index}" data-matched="false">
+            <img src="${card.img}" class="" alt="${card.name}">
+          </div>
+        `);
+        grid.append(cardElement);
+      });
+    }
+
+    // Flip card to reveal its image
+    function flipCard(cardElement) {
+      cardElement.addClass('flipped');
+      cardElement.find('img').removeClass('hidden');
+      return cardElement;
+    }
+
+    // Handle card clicks (flip and check for match)
+    $("#card-grid").on('click', '.card', function() {
+      if (lockBoard) return;
+      const clickedCard = $(this);
+      if (clickedCard.hasClass('flipped') || clickedCard.data('matched') === 'true') return;
+
+      flipCard(clickedCard);
+      flipCount++;
+      $("#flip-count").text(flipCount);
+
+      if (!firstCard) {
+        firstCard = clickedCard;
+      } else if (firstCard && !secondCard && clickedCard[0] !== firstCard[0]) {
+        secondCard = clickedCard;
+        lockBoard = true;
+        const firstIndex = firstCard.data('index');
+        const secondIndex = secondCard.data('index');
+        if (cards[firstIndex].id === cards[secondIndex].id) {
+          firstCard.data('matched', true);
+          secondCard.data('matched', true);
+          matchesFound++;
+
+          // Call the /increase_score endpoint to add 1 point for correct match
+          $.post('/increase_score', { room_id: roomData.room_id }, function(res) {
+            if (res.status === 'success') {
+              // Update the displayed score in real-time
+              $(`#score_${res.player_id}`).text(res.new_score);
+            }
+          });
+
+          resetTurn();
+
+          if (matchesFound === 4) {
+            $("#result-message").text("Game Over! All pairs matched!").css('color', 'green');
+          }
+        } else {
+          setTimeout(() => {
+            firstCard.removeClass('flipped').find('img').addClass('hidden');
+            secondCard.removeClass('flipped').find('img').addClass('hidden');
+            resetTurn();
+          }, 1000);
+        }
+      }
+    });
+
+    // Reset turn state and advance to next player's turn
+    function resetTurn() {
+      [firstCard, secondCard] = [null, null];
+      lockBoard = false;
+      const playerCount = Object.keys(roomData.players).length;
+      if (playerCount > 1) {
+        currentTurn = (currentTurn + 1) % playerCount;
+      }
+      updateTurnDisplay();
+    }
+
+    // Update the UI to display the current player's turn
+    function updateTurnDisplay() {
+      $("#result-message").text(`${Object.values(roomData.players)[currentTurn].username}'s turn`);
+    }
+
+    // Periodically update scores from the backend
+    function fetchScores() {
+      fetch(`/get_room/{{ room_id }}`)
+        .then(response => response.json())
+        .then(data => {
+          if (data.status === "success") {
+            Object.entries(data.room_data.players).forEach(([playerId, player]) => {
+              $(`#score_${playerId}`).text(player.gamescore || 0);
+            });
+            roomData = data.room_data;
+          }
+        });
+    }
+    setInterval(fetchScores, 3000);
+
+    // Automatically start the game on page load
+    $(document).ready(function() {
+      startGame('{{ room_id }}');
+    });
+
+    // Start game: send request to initialize game state, then load cards
+    function startGame(roomId) {
+      $.ajax({
+        url: '/start_game',
+        type: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify({ room_id: roomId }),
+        success: function(data) {
+          if (data.status === "success") {
+            loadCards();
+            $("#game-container").show();
+            updateTurnDisplay();
+          } else {
+            alert("Error: " + data.message);
+          }
+        },
+        error: function(err) {
+          console.error("Error starting game", err);
+        }
+      });
+    }
+
+    // Leave game: when End Game is clicked, remove the player from the room and redirect to QnA
+    function leaveGame(roomId) {
+      fetch('/leave_room', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ room_id: roomId })
+      }).then(() => {
+        window.location.href = "/qna";
+      });
+    }
+  </script>
+</body>
+</html>

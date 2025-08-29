@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>{% block title %}Dwen Dwen's Neighbour{% endblock %}</title>
+  
+  <!-- 统一字体和图标 -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-database-compat.js"></script>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#2E8B57',
+            secondary: '#4CAF50',
+            accent: '#FFA726',
+            blue: '#3B82F6',
+            purple: '#8B5CF6',
+            pink: '#EC4899',
+            orange: '#F97316',
+            teal: '#14B8A6'
+          },
+          borderRadius: {
+            'none': '0px',
+            'sm': '2px',
+            DEFAULT: '4px',
+            'md': '8px',
+            'lg': '12px',
+            'xl': '16px',
+            '2xl': '20px',
+            '3xl': '24px',
+            'full': '9999px',
+            'button': '4px'
+          },
+          animation: {
+            'float': 'float 6s ease-in-out infinite',
+            'fade-in': 'fadeIn 1s ease-in-out',
+            'slide-in': 'slideIn 0.5s ease-out',
+            'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite'
+          },
+          keyframes: {
+            float: {
+              '0%, 100%': { transform: 'translateY(0)' },
+              '50%': { transform: 'translateY(-10px)' }
+            },
+            fadeIn: {
+              '0%': { opacity: '0' },
+              '100%': { opacity: '1' }
+            },
+            slideIn: {
+              '0%': { transform: 'translateX(-100%)' },
+              '100%': { transform: 'translateX(0)' }
+            },
+            pulse: {
+              '0%, 100%': { opacity: '1' },
+              '50%': { opacity: '0.7' }
+            }
+          }
+        }
+      }
+    }
+  </script>
+  
+
+  <!-- 自定义样式 -->
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      margin: 0;
+    }
+    
+    main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    /* 导航栏样式 */
+    .nav-container {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    .nav-brand {
+      font-family: 'Pacifico', cursive;
+      font-size: 1.35rem;
+      color: #1a1a1a;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-left: -1rem;
+    }
+
+    .nav-brand i {
+      font-size: 1.5rem;
+      color: #2E8B57;
+    }
+
+    .nav-menu {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .nav-item {
+      position: relative;
+      padding: 0.5rem 0.875rem;
+      border-radius: 8px;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 1rem;
+      font-weight: 500;
+      color: #4a5568;
+      text-decoration: none;
+    }
+
+    .nav-item i {
+      font-size: 1.1rem;
+      transition: transform 0.3s ease;
+    }
+
+    .nav-item:hover {
+      background-color: rgba(46, 139, 87, 0.08);
+      color: #2E8B57;
+      text-decoration: none;
+    }
+
+    .nav-item:hover i {
+      transform: scale(1.2);
+    }
+
+    .nav-item:hover span {
+      text-decoration: underline;
+      text-decoration-thickness: 2px;
+      text-underline-offset: 4px;
+    }
+
+    .nav-item.active {
+      background-color: rgba(46, 139, 87, 0.12);
+      color: #2E8B57;
+    }
+
+    .nav-item.active::after {
+      content: '';
+      position: absolute;
+      bottom: -2px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 30px;
+      height: 2px;
+      background-color: #2E8B57;
+      border-radius: 4px;
+    }
+
+    
+    /* 社交媒体图标样式 */
+    .social-links {
+      display: flex;
+      gap: 15px;
+    }
+    
+    .social-links a {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 50%;
+      color: white;
+      transition: all 0.3s ease;
+    }
+    
+    .social-links a:hover {
+      background: #4CAF50;
+      transform: translateY(-3px);
+    }
+    
+    /* 弹窗样式 */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.7);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .modal-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .modal-content {
+      background-color: white;
+      border-radius: 12px;
+      width: 90%;
+      max-width: 400px;
+      padding: 30px;
+      text-align: center;
+      position: relative;
+      transform: translateY(-20px);
+      transition: all 0.3s ease;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    }
+
+    .modal-overlay.active .modal-content {
+      transform: translateY(0);
+    }
+
+    .modal-header {
+      margin-bottom: 20px;
+      border-bottom: 2px solid #f0f0f0;
+      padding-bottom: 15px;
+    }
+
+    .modal-header h3 {
+      color: #2B7A0B;
+      font-size: 1.5rem;
+      margin: 0;
+    }
+
+    .modal-body {
+      margin-bottom: 20px;
+      color: #333;
+    }
+    
+    .account-id {
+      font-weight: bold;
+      font-size: 1.2rem;
+      margin: 10px 0;
+      color: #2E8B57;
+    }
+    
+    .modal-close {
+      position: absolute;
+      top: 10px;
+      right: 15px;
+      font-size: 24px;
+      color: #999;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0;
+      line-height: 1;
+    }
+    
+    .btn-close {
+      background-color: #2E8B57;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-weight: 500;
+    }
+    
+    .btn-close:hover {
+      background-color: #226644;
+    }
+    
+    /* 微信二维码样式 */
+    .wechat-qrcode {
+      max-width: 150px;
+      width: 100%;
+      height: auto;
+      margin: 0 auto 15px;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+  </style>
+  
+  {% block head %}{% endblock %}
+</head>
+<body>
+  <!-- 导航栏 -->
+  <nav class="nav-container">
+    <div class="max-w-[1440px] mx-auto px-10 h-[70px] flex items-center justify-between">
+      <!-- 左侧：LOGO与标题 -->
+      <div class="nav-brand">
+        <i class="fas fa-paw"></i>
+        <span>Dwen Dwen's Neighbour</span>
+      </div>
+
+      <!-- 右侧：导航菜单 (大屏显示) -->
+      <div class="hidden md:flex nav-menu">
+        <a href="/knowledge" class="nav-item {% if request.path == '/knowledge' %}active{% endif %}">
+          <i class="fa-solid fa-book"></i>
+          <span>Encyclopedia</span>
+        </a>
+        <a href="/qna" class="nav-item {% if request.path == '/qna' %}active{% endif %}">
+          <i class="fas fa-gamepad"></i>
+          <span>Games</span>
+        </a>
+        <a href="/my_panda" class="nav-item {% if request.path == '/my_panda' %}active{% endif %}">
+          <i class="fas fa-heart"></i>
+          <span>My Red Panda</span>
+        </a>
+        <a href="/community" class="nav-item {% if request.path == '/community' or nav_section == 'community' %}active{% endif %}">
+          <i class="fas fa-users"></i>
+          <span>Community</span>
+        </a>
+        <a href="/donation" class="nav-item {% if request.path == '/donation' %}active{% endif %}">
+          <i class="fas fa-hand-holding-heart"></i>
+          <span>Donation</span>
+        </a>
+        <a href="/profile" class="nav-item {% if request.path == '/profile' %}active{% endif %}">
+          <i class="fas fa-user"></i>
+          <span>Profile</span>
+        </a>
+      </div>
+
+      <!-- 移动端折叠按钮 (小屏显示) -->
+      <button class="md:hidden flex items-center justify-center w-10 h-10 text-gray-800">
+        <i class="fas fa-bars text-xl"></i>
+      </button>
+    </div>
+  </nav>
+
+  <!-- 主要内容区域 -->
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- 页脚 -->
+  <footer class="bg-gradient-to-r from-primary/90 to-secondary/90 text-white border-t border-white/10 py-8">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex flex-col md:flex-row justify-between items-center gap-6">
+        <div class="text-center md:text-left  backdrop-blur-sm p-4 ">
+          <div class="flex items-center justify-center md:justify-start gap-2 mb-2">
+            <i class="fas fa-paw text-white"></i>
+            <span class="font-bold text-lg">Dwen Dwen's Neighbour</span>
+          </div>
+          <p class="text-white/90 text-sm">Join Chinese Animal Guardians on an amazing journey of animal protection.</p>
+        </div>
+        
+        <div class="social-links">
+          <a href="#" class="weixin-link"><i class="fab fa-weixin"></i></a>
+          <a href="#" class="weibo-link"><i class="fab fa-weibo"></i></a>
+          <a href="#" class="qq-link"><i class="fab fa-qq"></i></a>
+          <a href="#" class="bilibili-link"><i class="fab fa-bilibili"></i></a>
+        </div>
+      </div>
+      
+      <div class="mt-8 pt-6 border-t border-white/20 text-center text-white/80 text-sm">
+        &copy; Copyright: Dwen Dwen's Neighbor
+      </div>
+    </div>
+  </footer>
+
+  <!-- 社交媒体弹窗 -->
+  <div class="modal-overlay" id="socialModal">
+    <div class="modal-content">
+      <button class="modal-close" onclick="closeModal()">&times;</button>
+      <div class="modal-header">
+        <h3 id="modalTitle">Platform Contact Information</h3>
+      </div>
+      <div class="modal-body" id="modalBody">
+        <!-- Content will be dynamically generated through JavaScript -->
+      </div>
+      <button class="btn-close" onclick="closeModal()">Close</button>
+    </div>
+  </div>
+
+  <script>
+    // 社交媒体弹窗数据
+    const socialData = {
+      'weixin': {
+        title: 'WeChat Official Account',
+        content: `
+          <img src="static/images/wechat.jpg" alt="WeChat QR Code" class="wechat-qrcode">
+          <p>Scan the QR code or search for our official account</p>
+          <div class="account-id">Chinese Animal Guardians</div>
+          <p>Follow us for more information about animal protection</p>
+        `
+      },
+      'weibo': {
+        title: 'Weibo Official Account',
+        content: `
+          <p>Follow our Weibo for latest updates</p>
+          <div class="account-id">@uni海胆炒饭</div>
+          <p>Followers: 97,328 | Updates: Daily</p>
+        `
+      },
+      'qq': {
+        title: 'QQ Group',
+        content: `
+          <p>Join our QQ discussion group</p>
+          <div class="account-id">Group Number: 453062736</div>
+          <p>Connect with fellow animal lovers</p>
+        `
+      },
+      'bilibili': {
+        title: 'Bilibili Official Account',
+        content: `
+          <p>Follow our Bilibili official account</p>
+          <div class="account-id">Chinese Animal Guardians</div>
+          <p>UID: 262369066 | Followers: 73,654</p>
+          <p>Regular educational videos about animal protection</p>
+        `
+      }
+    };
+
+    // 初始化社交媒体链接点击事件
+    document.addEventListener('DOMContentLoaded', function() {
+      // 微信链接
+      document.querySelector('.weixin-link').addEventListener('click', function(e) {
+        e.preventDefault();
+        openModal('weixin');
+      });
+      
+      // 微博链接
+      document.querySelector('.weibo-link').addEventListener('click', function(e) {
+        e.preventDefault();
+        openModal('weibo');
+      });
+      
+      // QQ链接
+      document.querySelector('.qq-link').addEventListener('click', function(e) {
+        e.preventDefault();
+        openModal('qq');
+      });
+      
+      // 哔哩哔哩链接
+      document.querySelector('.bilibili-link').addEventListener('click', function(e) {
+        e.preventDefault();
+        openModal('bilibili');
+      });
+      
+      // 点击模态框外部关闭
+      document.getElementById('socialModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+          closeModal();
+        }
+      });
+    });
+
+    // 打开社交媒体弹窗
+    function openModal(platform) {
+      if (socialData[platform]) {
+        document.getElementById('modalTitle').textContent = socialData[platform].title;
+        document.getElementById('modalBody').innerHTML = socialData[platform].content;
+        document.getElementById('socialModal').classList.add('active');
+        // 禁止背景滚动
+        document.body.style.overflow = 'hidden';
+      }
+    }
+
+    // 关闭社交媒体弹窗
+    function closeModal() {
+      document.getElementById('socialModal').classList.remove('active');
+      // 恢复背景滚动
+      document.body.style.overflow = 'auto';
+    }
+  </script>
+
+  <!-- 自定义脚本 -->
+  {% block scripts %}
+  {% endblock %}
+</body>
+</html> 

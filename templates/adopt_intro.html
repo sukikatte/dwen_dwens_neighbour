@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>My Red Panda - intro</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+  <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+
+  <style>
+    :root {
+      --primary-color: #FF6B6B;
+      --secondary-color: #4ECDC4;
+      --accent-color: #FFD166;
+      --text-color: #333333;
+      --light-bg: #FFF9E6;
+      --white: #FFFFFF;
+      --purple: #A866FF;
+      --pink: #7deed3;
+      --green: #66FF8D;
+    }
+    /* 页面背景 */
+    body {
+      background: linear-gradient(135deg, #f6f8f9 0%, #e9ecef 100%);
+      min-height: 100vh;
+      font-family: 'Poppins', sans-serif;
+    }
+
+
+    /* 背景装饰 */
+    .bg-decoration {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      overflow: hidden;
+    }
+
+    .bg-pattern {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%232E8B57' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    }
+
+    .bg-gradient {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle at 20% 20%, rgba(46, 139, 87, 0.1) 0%, transparent 50%),
+                  radial-gradient(circle at 80% 80%, rgba(76, 175, 80, 0.1) 0%, transparent 50%);
+    }
+
+
+
+    .handwriting {
+      font-family: 'Bubblegum Sans', cursive;
+    }
+
+    .header {
+      position: relative;
+      padding: 5rem 0;
+      margin-bottom: 4rem;
+      overflow: hidden;
+      background: linear-gradient(135deg, #19681f 0%, #08a4dd 50%, #ff8fd8 100%);
+      border-radius: 0 0 0 0;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+      clip-path: polygon(0 0, 100% 0, 100% 80%, 0 100%);
+    }
+
+    .header::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 40%;
+      height: 100%;
+      background: url('/static/images/red_panda/3.jpeg') no-repeat;
+      background-size: cover;
+      background-position: center;
+      z-index: 2;
+      border-radius: 0 0 0 0;
+      box-shadow: 10px 0 15px rgba(0, 0, 0, 0.1);
+      mask-image: linear-gradient(to right, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 1) 80%, rgba(0, 0, 0, 0) 100%);
+      -webkit-mask-image: linear-gradient(to right, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 1) 80%, rgba(0, 0, 0, 0) 100%);
+    }
+
+    .header .container {
+      position: relative;
+      z-index: 3;
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      min-height: 250px;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .header .text-content {
+      width: 60%;
+      text-align: left;
+      padding: 2.5rem 3rem;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 30px;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+      backdrop-filter: blur(5px);
+      border: 3px dashed rgba(255, 255, 255, 0.4);
+      position: relative;
+      overflow: hidden;
+      animation: float 5s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    .header .text-content::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 8px;
+      height: 100%;
+      background: linear-gradient(to bottom, #ffffff, rgba(255, 255, 255, 0.5));
+      border-radius: 4px;
+    }
+
+    .header h1 {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      letter-spacing: 1px;
+      color: #ffffff;
+      font-weight: 700;
+      text-shadow: 3px 3px 0 rgba(0, 0, 0, 0.2);
+    }
+
+    .header p {
+      font-size: 1.8rem;
+      color: rgba(255, 255, 255, 0.95);
+      line-height: 1.6;
+      margin-bottom: 1rem;
+      text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.2);
+    }
+
+    .bubble-speech {
+      position: relative;
+      background: white;
+      border-radius: 25px;
+      padding: 15px 25px;
+      margin-top: 25px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+      animation: bounce 3s ease-in-out infinite;
+      float: right;
+      display: inline-block;
+      max-width: 80%;
+      clear: both;
+      margin-left: auto;
+    }
+
+    .bubble-speech:after {
+      content: '';
+      position: absolute;
+      top: -20px;
+      right: 30px;
+      border-width: 0 20px 20px;
+      border-style: solid;
+      border-color: white transparent;
+    }
+
+    @keyframes bounce {
+      0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+      40% { transform: translateY(-10px); }
+      60% { transform: translateY(-5px); }
+    }
+
+    .content-section {
+      background: var(--white);
+      border-radius: 30px;
+      padding: 3rem;
+      margin-bottom: 3rem;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+      transition: transform 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .content-section::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 5px;
+      background: linear-gradient(90deg, var(--primary-color), var(--secondary-color), var(--accent-color));
+      z-index: 1;
+    }
+
+    .content-section:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.08);
+    }
+
+    .content-section h2 {
+      color: var(--primary-color);
+      font-weight: 700;
+      margin-bottom: 2rem;
+      position: relative;
+      padding-bottom: 1rem;
+      font-size: 2.4rem;
+      display: inline-block;
+    }
+
+    .content-section h2::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 6px;
+      background: var(--accent-color);
+      border-radius: 10px;
+    }
+
+    .feature-icon {
+      font-size: 3.5rem;
+      color: var(--primary-color);
+      margin-bottom: 1.5rem;
+      transition: all 0.3s ease;
+      background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      transform: rotate(-5deg);
+    }
+
+    .feature-card {
+      padding: 2.5rem;
+      border-radius: 25px;
+      transition: all 0.4s ease;
+      background: var(--white);
+      border: 2px dashed var(--primary-color);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .feature-card::before {
+      content: '';
+      position: absolute;
+      top: -40px;
+      right: -40px;
+      width: 80px;
+      height: 80px;
+      background: var(--accent-color);
+      border-radius: 50%;
+      z-index: 0;
+      opacity: 0.1;
+      transition: all 0.3s ease;
+    }
+
+    .feature-card:hover {
+      transform: translateY(-10px) rotate(2deg);
+      box-shadow: 0 15px 30px rgba(255, 107, 107, 0.15);
+    }
+
+    .feature-card:hover::before {
+      transform: scale(4);
+      opacity: 0.05;
+    }
+
+    .feature-card:hover .feature-icon {
+      transform: scale(1.2) rotate(5deg);
+    }
+
+    .knowledge-item {
+      padding: 2.5rem;
+      background: rgba(78, 205, 196, 0.05);
+      border-radius: 25px;
+      margin-bottom: 1.5rem;
+      border: 2px solid rgba(78, 205, 196, 0.3);
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .knowledge-item:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 25px rgba(78, 205, 196, 0.1);
+    }
+
+    .knowledge-item img {
+      border-radius: 20px;
+      transition: all 0.3s ease;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .knowledge-item:hover img {
+      transform: scale(1.03);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    }
+
+    .knowledge-item h4 {
+      color: var(--secondary-color);
+      font-weight: 700;
+      margin: 1.5rem 0 1rem;
+      font-size: 1.5rem;
+      position: relative;
+      display: inline-block;
+    }
+
+    .knowledge-item h4::after {
+      content: '';
+      position: absolute;
+      bottom: -5px;
+      left: 0;
+      width: 100%;
+      height: 3px;
+      background: var(--accent-color);
+      border-radius: 3px;
+    }
+
+    .adopt-form {
+      background: transparent;
+      border-radius: 10px;
+      padding: 3.5rem;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+      position: relative;
+      overflow: hidden;
+      border: none;
+      z-index: 1;
+      margin-bottom: 30px;
+      display: flex;
+      flex-wrap: wrap;
+    }
+
+    .adopt-form::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+      border-radius: 10px;
+      z-index: -2;
+    }
+
+    .adopt-form::before {
+      display: none;
+    }
+
+    .adopt-form-content {
+      flex: 1;
+      padding: 2rem 2.5rem;
+      position: relative;
+      z-index: 2;
+      background: rgba(255, 255, 255, 0.67);
+      backdrop-filter: blur(5px);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      margin-right: 0px;
+      margin-left: -4rem;
+      border-radius: 0 20px 20px 0;
+    }
+
+    .adopt-form-image {
+      flex: 0 0 280px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      z-index: 2;
+    }
+
+    .adopt-form-image img {
+      max-width: 100%;
+      height: auto;
+      transform: scale(2);
+    }
+
+    .score-display p {
+      margin: 0;
+      font-size: 1.3rem;
+      color: var(--text-color);
+    }
+
+    .score-display span {
+      color: var(--primary-color);
+      font-weight: 700;
+      font-size: 1.5rem;
+    }
+
+    #adoptButton {
+      background: linear-gradient(45deg, #FF4500, #FF8C00);
+      border: none;
+      border-radius: 10px;
+      padding: 12px 30px;
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: white;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 5px 15px rgba(255, 69, 0, 0.3);
+      position: relative;
+      overflow: hidden;
+      font-family: 'Bubblegum Sans', cursive;
+    }
+
+    #adoptButton:hover {
+      transform: translateY(-5px) scale(1.05);
+      box-shadow: 0 10px 20px rgba(255, 69, 0, 0.4);
+      background: linear-gradient(45deg, #FF4500, #ffdf0c);
+    }
+
+    #adoptButton:active {
+      transform: translateY(0) scale(0.98);
+    }
+
+    #adoptButton::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+      transition: all 0.5s ease;
+    }
+
+    #adoptButton:hover::before {
+      left: 100%;
+    }
+
+    /* 漫画风格装饰元素 */
+    .comic-decoration {
+      position: absolute;
+      font-family: 'Chewy', cursive;
+      color: var(--accent-color);
+      font-size: 1.4rem;
+      padding: 10px 20px;
+      background: white;
+      border-radius: 20px;
+      box-shadow: 3px 3px 0 rgba(0,0,0,0.2);
+      transform: rotate(-5deg);
+      z-index: 10;
+    }
+
+    .comic-star {
+      position: absolute;
+      color: #FFD700; /* 更饱和的金黄色 */
+      font-size: 2rem;
+      animation: spin 4s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    @media (max-width: 768px) {
+      .header::before {
+        width: 100%;
+        opacity: 0.3;
+        mask-image: none;
+        -webkit-mask-image: none;
+      }
+      
+      .header .text-content {
+        width: 90%;
+        margin: 0 auto;
+        background: rgba(255, 255, 255, 0.3);
+      }
+
+      .content-section, 
+      .feature-card, 
+      .knowledge-item, 
+      .adopt-form {
+        padding: 2rem;
+      }
+
+      .header {
+        clip-path: polygon(0 0, 100% 0, 100% 90%, 0 100%);
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="bg-decoration">
+    <div class="bg-pattern"></div>
+    <div class="bg-gradient"></div>
+  </div>
+  
+  <!-- 漫画风格装饰元素 -->
+  <div class="comic-decoration" style="top: 120px; right: 30px;">Wow!</div>
+  <i class="fas fa-star comic-star" style="top: 200px; left: 50px;"></i>
+  <i class="fas fa-star comic-star" style="top: 150px; right: 150px;"></i>
+
+  <div class="header">
+    <div class="container">
+      <div class="text-content">
+        <h1 class="handwriting" style="font-size: 46px;">Want to adopt a virtual red panda?</h1>
+        <p class="handwriting" style="font-size: 28px;">Check it out on this page!</p>
+        <div class="bubble-speech handwriting">
+          <i class="fas fa-paw"></i> &nbsp;Learn all about red pandas and begin your adoption adventure
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+    <!-- 漫画风格装饰元素 -->
+    
+    <!-- 前言部分 -->
+    <div class="content-section">
+      <h2 class="handwriting">Introduction</h2>
+      <p style="font-size: 1.2rem; line-height: 2;">Among China's diverse wildlife, the red panda stands out with its unique appearance and gentle nature, becoming one of the most representative animals of "China's Animal Guardians." With its adorable fur and intelligent eyes, the red panda not only captures countless hearts but also symbolizes the diversity of our ecosystem. Through this adoption program, we hope to raise awareness about wildlife conservation and promote ecological balance.</p>
+      <i class="fas fa-star comic-star" style="bottom: 20px; right: 30px; font-size: 1.5rem;"></i>
+    </div>
+
+    <!-- 为什么选择小熊猫 -->
+    <div class="content-section">
+      <h2 class="handwriting">Why Choose Red Panda?</h2>
+
+    <div class="comic-decoration" style="top: -5px;  transform: rotate(3deg);">Cool Facts!</div>
+      <div class="row">
+        <div class="col-md-4 mb-4">
+          <div class="feature-card text-center">
+            <i class="fas fa-star feature-icon"></i>
+            <h4 class="handwriting">Unique and Rare</h4>
+            <p>The red panda primarily inhabits the Himalayan Mountains and adjacent forests. As a globally recognized endangered species, it relies on unique forest ecosystems, making habitat preservation crucial for its survival.</p>
+          </div>
+        </div>
+        <div class="col-md-4 mb-4">
+          <div class="feature-card text-center">
+            <i class="fas fa-globe-asia feature-icon"></i>
+            <h4 class="handwriting">Cultural and Ecological Symbol</h4>
+            <p>In Chinese culture, while the giant panda represents peace and friendship, the red panda complements this symbolism with its lively and adorable image, becoming an ambassador for ecological conservation.</p>
+          </div>
+        </div>
+        <div class="col-md-4 mb-4">
+          <div class="feature-card text-center">
+            <i class="fas fa-hands-helping feature-icon"></i>
+            <h4 class="handwriting">Charity Meets Conservation</h4>
+            <p>Through this adoption program, participants receive exclusive certificates and medals while learning about red pandas' habits, habitats, and conservation challenges.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 有趣的知识介绍 -->
+    <div class="content-section">
+      <div class="comic-decoration" style="top: -15px; right: 50px; transform: rotate(-5deg);">Amazing!</div>
+      <h2 class="handwriting">Fun Facts</h2>
+      <div class="row">
+        <div class="col-md-4 mb-4">
+          <div class="knowledge-item">
+            <img src="/static/images/red_panda/2.jpeg" alt="Physical Characteristics">
+            <h4 class="handwriting">Physical Characteristics</h4>
+            <p>Red pandas measure 50-64 cm in length with tails reaching 28-59 cm. Their thick reddish-brown fur and distinctive white facial markings make them the "little fire foxes" of the forest.</p>
+          </div>
+        </div>
+        <div class="col-md-4 mb-4">
+          <div class="knowledge-item">
+            <img src="/static/images/red_panda/1.jpeg" alt="Behavioral Traits">
+            <h4 class="handwriting">Behavioral Traits</h4>
+            <p>Primarily nocturnal, they feed on bamboo but also consume fruits, insects, and small animals. Their agility and intelligence make them particularly alert when foraging and avoiding predators.</p>
+          </div>
+        </div>
+        <div class="col-md-4 mb-4">
+          <div class="knowledge-item">
+            <img src="/static/images/red_panda/4.jpg" alt="Ecological Importance">
+            <h4 class="handwriting">Ecological Importance</h4>
+            <p>Red pandas play a vital role in maintaining forest balance, contributing to seed dispersal in bamboo forests and serving as a crucial link in the ecological chain.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="adopt-form">
+      <div class="adopt-form-content">
+        <div class="comic-decoration" style="top: -10px; left: 3%; transform: rotate(-4deg);">Let's Go!</div>
+        <h1 class="text-center mb-4 handwriting">Adopt Your Red Panda</h1>
+        <p class="text-center" style="font-size: 1.2rem;">Start your journey of adopting a virtual red panda and<br>experience the joy of caring for and interacting with it!</p>
+        <div class="text-center mt-4">
+          <button class="btn" onclick="window.location.href='/my_panda?newly_adopted=true'" id="adoptButton">Adopt a Red Panda</button>
+        </div>
+      </div>
+      <div class="adopt-form-image">
+        <img src="/static/images/little_panda/red_panda.svg" alt="Red Panda">
+      </div>
+    </div>
+  </div>
+  <script>
+    // 添加一些简单的动画效果
+    document.addEventListener('DOMContentLoaded', function() {
+      // 创建星星元素的函数
+      function createStars() {
+        const starsContainer = document.createElement('div');
+        starsContainer.style.position = 'fixed';
+        starsContainer.style.top = '0';
+        starsContainer.style.left = '0';
+        starsContainer.style.width = '100%';
+        starsContainer.style.height = '100%';
+        starsContainer.style.pointerEvents = 'none';
+        starsContainer.style.zIndex = '9';
+        document.body.appendChild(starsContainer);
+        
+        for (let i = 0; i < 15; i++) {
+          const star = document.createElement('i');
+          star.classList.add('fas', 'fa-star', 'comic-star');
+          star.style.position = 'absolute';
+          star.style.color = 'var(--accent-color)';
+          star.style.fontSize = Math.random() * 1 + 0.5 + 'rem';
+          star.style.top = Math.random() * 100 + 'vh';
+          star.style.left = Math.random() * 100 + 'vw';
+          star.style.opacity = '0';
+          starsContainer.appendChild(star);
+          
+          // 随机动画
+          setTimeout(() => {
+            star.style.opacity = '0.4';
+            star.style.animation = `spin ${Math.random() * 3 + 2}s linear infinite`;
+          }, Math.random() * 2000);
+        }
+      }
+      
+      // 添加卡片入场动画
+      const sections = document.querySelectorAll('.content-section, .feature-card, .knowledge-item');
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.style.opacity = '1';
+            entry.target.style.transform = 'translateY(0)';
+          }
+        });
+      }, { threshold: 0.1 });
+      
+      sections.forEach(section => {
+        section.style.opacity = '0';
+        section.style.transform = 'translateY(20px)';
+        section.style.transition = 'all 0.6s ease-out';
+        observer.observe(section);
+      });
+      
+      // 调用创建星星函数
+      createStars();
+    });
+  </script>
+</body>
+</html>

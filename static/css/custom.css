@@ -1,0 +1,155 @@
+/* ======================== 保留原先的弹窗样式 ======================== */
+.modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+}
+.modal.show {
+  display: flex;
+}
+
+/* ======================== 下面是新增/修改的样式 ======================== */
+
+/* 整体背景 & 字体 */
+body {
+  min-height: 100vh; /* 若想固定最小高度可保留 */
+  background-color: #f4f4f4; /* 浅灰背景，突出白色内容卡片 */
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; /* 也可用默认Tailwind字体 */
+}
+
+/* 顶部导航条的边框线 */
+nav.bg-white.shadow-sm {
+  border-bottom: 1px solid #e5e7eb;
+}
+
+/* 主要内容区域，让卡片在灰色背景上居中并留出上下间距 */
+main {
+  margin-top: 2rem;
+  margin-bottom: 2rem;
+}
+
+/* 帖子卡片 */
+.bg-white.rounded-lg.shadow.p-6.max-w-3xl.mx-auto {
+  border-radius: 8px; /* 圆角 */
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1); /* 卡片阴影 */
+  background-color: #fff; /* 白色卡片 */
+  padding: 24px; /* 内边距，可根据需要调整 */
+}
+
+/* 帖子标题 */
+.bg-white.rounded-lg.shadow.p-6.max-w-3xl.mx-auto h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 0.75rem;
+}
+
+/* 帖子正文文字 */
+.bg-white.rounded-lg.shadow.p-6.max-w-3xl.mx-auto p.text-gray-700 {
+  line-height: 1.6;
+  margin-bottom: 1rem;
+  color: #444; /* 让文字更明显 */
+}
+
+/* 帖子内的图片 */
+.bg-white.rounded-lg.shadow.p-6.max-w-3xl.mx-auto img {
+  border-radius: 8px;
+  margin-bottom: 1rem;
+}
+
+/* 点赞、评论等按钮 */
+.bg-white.rounded-lg.shadow.p-6.max-w-3xl.mx-auto .flex.items-center.space-x-6.mb-6 button {
+  transition: color 0.2s ease;
+  color: #666;
+}
+.bg-white.rounded-lg.shadow.p-6.max-w-3xl.mx-auto .flex.items-center.space-x-6.mb-6 button:hover {
+  color: #2E7D32; /* Hover时与主色呼应 */
+}
+
+/* 分割线（评论区上方） */
+.border-t.pt-4 {
+  border-top: 1px solid #e5e7eb;
+  padding-top: 1rem;
+}
+
+/* 评论区标题 */
+.border-t.pt-4 h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: #333;
+}
+
+/* 单条评论容器：浅灰底+圆角 */
+.space-y-4 .flex.space-x-3 {
+  background-color: #fafafa;
+  border-radius: 6px;
+  padding: 0.75rem;
+}
+
+/* 评论头像圆形 */
+.space-y-4 .flex.space-x-3 img {
+  border-radius: 9999px;
+}
+
+/* 评论文字 */
+.space-y-4 .flex.space-x-3 p.text-gray-700 {
+  line-height: 1.4;
+  margin-top: 0.5rem;
+  color: #444;
+}
+
+/* 评论按钮：点赞/回复 */
+.space-y-4 .flex.space-x-3 button {
+  transition: color 0.2s ease;
+  color: #666;
+}
+.space-y-4 .flex.space-x-3 button:hover {
+  color: #2E7D32;
+}
+
+/* 评论输入区整体 */
+.mt-6.flex.space-x-3 {
+  margin-top: 1.5rem;
+}
+
+/* 评论输入框 */
+.mt-6.flex.space-x-3 textarea {
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  padding: 0.5rem;
+  width: 100%;
+  resize: vertical;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.mt-6.flex.space-x-3 textarea:focus {
+  outline: none;
+  border-color: #2E7D32;
+  box-shadow: 0 0 0 2px rgba(46, 125, 50, 0.2);
+}
+
+/* 评论提交按钮 */
+.mt-6.flex.space-x-3 button {
+  background-color: #2E7D32;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 0.5rem 1rem;
+  transition: background-color 0.2s ease;
+  font-weight: 500;
+}
+.mt-6.flex.space-x-3 button:hover {
+  background-color: #256229;
+}
+
+/* 用户名与角色等 */
+.font-medium {
+  font-weight: 600 !important;
+}
+.text-sm.text-gray-500 {
+  color: #999 !important;
+}

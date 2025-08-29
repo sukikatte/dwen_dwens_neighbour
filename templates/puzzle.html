@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Puzzle - Dwen Dwen's Neighbour</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* 全局样式 */
+        body {
+            background: linear-gradient(135deg, #f6f8f9 0%, #e9ecef 100%);
+            min-height: 100vh;
+            font-family: 'Poppins', sans-serif;
+            padding: 0;
+            margin: 0;
+            overflow-x: hidden;
+        }
+
+        /* 游戏容器 */
+        .game-wrapper {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 30px 20px;
+            position: relative;
+        }
+        
+        /* 游戏标题和用户信息布局 */
+        .header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+        
+        /* 游戏标题 */
+        .game-title {
+            text-align: left;
+            margin-bottom: 0;
+            position: relative;
+            flex: 1;
+            display: flex;
+            align-items: center;
+        }
+        
+        .game-title h1 {
+            font-family: 'Pacifico', cursive;
+            font-size: 2.5rem;
+            color: #333;
+            margin-bottom: 0;
+            margin-right: 15px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .game-title p {
+            font-size: 1rem;
+            color: #666;
+            max-width: 400px;
+            margin: 0;
+            padding-left: 15px;
+            border-left: 2px solid #eee;
+        }
+        
+        /* 用户信息区 */
+        .user-info {
+            display: flex;
+            align-items: center;
+            background: white;
+            padding: 10px 20px;
+            border-radius: 50px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            margin-left: 20px;
+        }
+        
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-right: 10px;
+            border: 2px solid #fff;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .user-name {
+            font-weight: 600;
+            color: #333;
+            margin-right: 10px;
+            font-size: 0.9rem;
+        }
+        
+        .user-score {
+            background: linear-gradient(135deg, #ed70ae, #51ffd3);
+            color: white;
+            padding: 3px 12px;
+            border-radius: 20px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            font-size: 0.9rem;
+        }
+        
+        /* 开始游戏按钮 */
+        .start-btn {
+            background: linear-gradient(135deg, #ed70ae, #51ffd3);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            box-shadow: 0 10px 20px rgba(255, 105, 180, 0.3);
+            transition: all 0.3s ease;
+            display: block;
+            margin: 30px auto;
+            cursor: pointer;
+        }
+        
+        .start-btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 25px rgba(255, 105, 180, 0.4);
+        }
+
+        .start-btn i {
+            margin-right: 10px;
+        }
+
+        /* 游戏区域 */
+        .game-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+            padding: 30px;
+            margin-top: 20px;
+            display: none;
+            position: relative;
+            overflow: hidden;
+            width: 100%;
+            max-width: 1000px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .game-instruction {
+            font-size: 1.5rem;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 20px;
+            color: #333;
+            position: relative;
+            padding-bottom: 10px;
+        }
+
+        .game-instruction::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80%;
+            height: 3px;
+            background: linear-gradient(90deg, #ed70ae, #51ffd3);
+            border-radius: 3px;
+        }
+        
+        .game-tip {
+            font-size: 1rem;
+            color: #666;
+            text-align: center;
+            margin-bottom: 30px;
+            font-style: italic;
+        }
+
+        /* 拼图容器 */
+        .puzzle-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: 1fr 1fr;
+            gap: 0;
+            width: 400px;
+            height: 400px;
+            margin: 20px auto;
+            border: 4px solid #ced4da;
+            border-radius: 10px;
+            overflow: hidden;
+            background: #fff;
+            position: relative;
+        }
+
+        /* 拼图块样式 */
+        .puzzle-piece {
+            background-size: 200% 200%;
+            background-repeat: no-repeat;
+            background-position: center;
+            border: none;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+            width: 100%;
+            height: 100%;
+            position: relative;
+            overflow: hidden;
+        }
+        .puzzle-piece:hover {
+            transform: scale(1.02);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            z-index: 10;
+        }
+
+        /* 按钮样式 */
+        .button-container {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 30px;
+        }
+        
+        .control-btn {
+            padding: 10px 25px;
+            border-radius: 50px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        .check-btn {
+            background: linear-gradient(135deg, #ed70ae, #51ffd3);
+            color: white;
+            box-shadow: 0 5px 15px rgba(255, 105, 180, 0.3);
+        }
+
+        .check-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(255, 105, 180, 0.4);
+        }
+
+        .next-btn {
+            background: linear-gradient(135deg, #ed70ae, #51ffd3);
+            color: white;
+            box-shadow: 0 5px 15px rgba(255, 105, 180, 0.3);
+        }
+
+        .next-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(255, 105, 180, 0.4);
+        }
+
+        .end-btn {
+            background: white;
+            color: #333;
+            border: 2px solid #eee;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+
+        .end-btn:hover {
+            background: #f8f9fa;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+        }
+
+        /* 结果消息 */
+        .result-message {
+            text-align: center;
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin: 20px 0;
+            min-height: 40px;
+            transition: all 0.3s ease;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .result-message.correct {
+            color: #4CAF50;
+            animation: fadeInUp 0.5s ease;
+        }
+
+        .result-message.incorrect {
+            color: #F44336;
+            animation: fadeInUp 0.5s ease;
+        }
+
+        /* 动画效果 */
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+            20%, 40%, 60%, 80% { transform: translateX(5px); }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+         /* 得分动画 */
+        .score-animation {
+            position: absolute;
+            font-size: 2rem;
+            font-weight: 700;
+            color: #4CAF50;
+            pointer-events: none;
+            animation: floatUp 1s ease-out forwards;
+            z-index: 10;
+
+        }
+        @keyframes floatUp {
+            0% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+        }
+
+        /* 背景装饰 */
+        .bg-decoration {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .bg-circle {
+            position: absolute;
+            border-radius: 50%;
+            opacity: 0.1;
+        }
+
+        .bg-circle:nth-child(1) {
+            width: 300px;
+            height: 300px;
+            background: linear-gradient(135deg, #ed70ae, #51ffd3);
+            top: -100px;
+            right: -100px;
+        }
+
+        .bg-circle:nth-child(2) {
+            width: 200px;
+            height: 200px;
+            background: linear-gradient(135deg, #ec94c0, #7deed3);
+            bottom: -50px;
+            left: -50px;
+        }
+
+        .bg-circle:nth-child(3) {
+            width: 150px;
+            height: 150px;
+            background: linear-gradient(135deg, #ed70ae, #51ffd3);
+            top: 50%;
+            right: 10%;
+        }
+
+        /* 响应式调整 */
+        @media (max-width: 768px) {
+            .header-container {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .user-info {
+                margin-left: 0;
+                margin-top: 15px;
+            }
+            
+            .game-title h1 {
+                font-size: 2rem;
+            }
+            
+            .puzzle-container {
+                width: 300px;
+                height: 300px;
+            }
+        }
+        
+        /* 返回按钮样式 */
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            padding: 8px 15px;
+            background: white;
+            border-radius: 50px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            color: #333;
+            font-weight: 500;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            margin-right: 15px;
+            height: fit-content;
+        }
+        
+        .back-btn:hover {
+            transform: translateX(-5px);
+            box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+            color: #ed70ae;
+        }
+        
+        .back-btn i {
+            margin-right: 8px;
+            font-size: 1rem;
+        }
+        
+        /* 顶部按钮容器 */
+        .top-buttons {
+            display: flex;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <!-- 背景装饰 -->
+    <div class="bg-decoration">
+        <div class="bg-circle"></div>
+        <div class="bg-circle"></div>
+        <div class="bg-circle"></div>
+    </div>
+
+    <!-- 游戏主体 -->
+    <div class="game-wrapper">
+        <!-- 游戏标题和用户信息 -->
+        <div class="header-container">
+            <div class="game-title">
+                <!-- 返回按钮 -->
+                <a href="/qna" class="back-btn">
+                    <i class="fas fa-arrow-left"></i>
+                    <span>Return</span>
+                </a>
+                <h1>Puzzle</h1>
+                <p>Complete the puzzle by arranging the pieces!</p>
+            </div>
+            
+            <div class="user-info">
+                <img class="user-avatar" src="{{ user_info['avatar'] }}" alt="User Avatar">
+                <span class="user-name">{{ user_info['display_name'] }}</span>
+                <div class="user-score">
+                    <i class="fas fa-star"></i>
+                    <span id="user-score">{{ user_info['score'] }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 开始游戏按钮 -->
+        <button class="start-btn" id="start-game-btn">
+            <i class="fas fa-play"></i> Start Game
+        </button>
+
+        <!-- 游戏区域 -->
+        <div class="game-container" id="game-container">
+            <div class="game-instruction" id="game-instruction">Drag and drop the pieces to complete the puzzle!</div>
+            <div class="game-tip">Arrange the pieces to form a complete image of the animal.</div>
+            
+            <!-- 拼图容器 -->
+            <div id="puzzle-container" class="puzzle-container">
+                <!-- 拼图块将动态添加到这里 -->
+            </div>
+            
+            <!-- 游戏反馈 -->
+            <div class="result-message" id="result-message"></div>
+            
+            <!-- 按钮 -->
+            <div class="button-container">
+                <button id="check-puzzle-btn" class="control-btn check-btn">Check Puzzle</button>
+                <button id="try-next-btn" class="control-btn next-btn hidden">Try Next</button>
+                <button id="end-game" class="control-btn end-btn">End Game</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- jQuery, Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <script>
+        $(document).ready(function () {
+            let puzzlePieces = [];
+            let correctPositions = [];
+            let currentAnimal;
+
+            // 开始游戏事件
+            $('#start-game-btn').click(function () {
+                $(this).fadeOut(300, function() {
+                    $('#game-container').fadeIn(500);
+                    fetchPuzzle(); // 加载第一个拼图
+                });
+            });
+
+            // 获取随机动物数据
+            function fetchPuzzle() {
+                $.get('/get_random_animal', function (data) {
+                    if (data.status === 'success' && data.animals.length > 0) {
+                        currentAnimal = data.animals[Math.floor(Math.random() * data.animals.length)];
+                        createPuzzlePieces(currentAnimal.photo);
+                    }
+                });
+            }
+
+            function createPuzzlePieces(imageUrl) {
+                puzzlePieces = [];
+                correctPositions = [];
+                
+                // 清空拼图容器
+                $('#puzzle-container').empty();
+
+                // 初始化拼图块
+                for (let row = 0; row < 2; row++) {
+                    for (let col = 0; col < 2; col++) {
+                        let pieceId = 'piece-' + row + '-' + col;
+                        let piece = {
+                            id: pieceId,
+                            imageUrl: imageUrl,
+                            row: row,
+                            col: col
+                        };
+                        puzzlePieces.push(piece);
+                        correctPositions.push(pieceId);
+
+                        let backgroundPositionX = col * 100;
+                        let backgroundPositionY = row * 100;
+
+                        // 创建拼图块元素
+                        let pieceElement = $('<div></div>')
+                            .addClass('puzzle-piece')
+                            .attr('id', pieceId)
+                            .css('background-image', 'url(' + imageUrl + ')')
+                            .css('background-size', '200% 200%')
+                            .css('background-position', backgroundPositionX + '% ' + backgroundPositionY + '%')
+                            .attr('draggable', 'true')
+                            .on('dragstart', onDragStart)
+                            .on('dragover', onDragOver)
+                            .on('drop', onDrop);
+
+                        $('#puzzle-container').append(pieceElement);
+                    }
+                }
+
+                // 打乱拼图块的位置
+                shufflePuzzlePieces();
+
+                // 显示 "Check Puzzle" 按钮
+                $('#check-puzzle-btn').show();
+                $('#try-next-btn').hide();
+            }
+
+            function shufflePuzzlePieces() {
+                for (let i = puzzlePieces.length - 1; i > 0; i--) {
+                    let j = Math.floor(Math.random() * (i + 1));
+                    // 交换位置
+                    let temp = puzzlePieces[i];
+                    puzzlePieces[i] = puzzlePieces[j];
+                    puzzlePieces[j] = temp;
+                }
+
+                // 根据打乱后的顺序重新排列拼图块
+                for (let i = 0; i < puzzlePieces.length; i++) {
+                    let piece = puzzlePieces[i];
+                    let pieceElement = $('#' + piece.id);
+
+                    // 设置拼图块的新顺序
+                    pieceElement.css('order', i);
+                }
+            }
+
+            // Drag Start Event
+            function onDragStart(event) {
+                event.originalEvent.dataTransfer.setData('text/plain', event.target.id);
+            }
+
+            // Drag Over Event
+            function onDragOver(event) {
+                event.preventDefault();
+            }
+
+           // Drop Event
+            function onDrop(event) {
+                event.preventDefault();
+                let draggedId = event.originalEvent.dataTransfer.getData('text/plain');
+                let draggedElement = document.getElementById(draggedId);
+                let droppedElement = event.target;
+
+                // Swap positions between dragged and dropped pieces
+                let draggedIndex = puzzlePieces.findIndex(piece => piece.id === draggedId);
+                let droppedIndex = puzzlePieces.findIndex(piece => piece.id === droppedElement.id);
+
+                // Swap positions in the puzzlePieces array
+                let temp = puzzlePieces[draggedIndex];
+                puzzlePieces[draggedIndex] = puzzlePieces[droppedIndex];
+                puzzlePieces[droppedIndex] = temp;
+
+                // Swap the order of elements in UI
+                $(draggedElement).css('order', droppedIndex);
+                $(droppedElement).css('order', draggedIndex);
+            }
+
+            // Check Puzzle
+            $('#check-puzzle-btn').click(function () {
+                let correct = true;
+
+                // Check if the order of pieces matches the correct order
+                for (let i = 0; i < puzzlePieces.length; i++) {
+                    if (puzzlePieces[i].id !== correctPositions[i]) {
+                        correct = false;
+                        break;
+                    }
+                }
+
+                if (correct) {
+                    // Change the message to include the animal's name
+                    $('#result-message').text(`Bingo! This is the ${currentAnimal.en} ${currentAnimal.cn}`).addClass('correct').removeClass('incorrect');
+                    updateScore(10);
+                    $('#check-puzzle-btn').hide();
+                    $('#try-next-btn').show();
+
+                    // 创建得分动画
+                    createScoreAnimation($(this));
+                } else {
+                    $('#result-message').text("Try again!").addClass('incorrect').removeClass('correct');
+                }
+            });
+
+            // 创建得分动画
+            function createScoreAnimation($button) {
+                const $scoreAnim = $('<div class="score-animation">+1</div>');
+                const $resultMessage = $('#result-message');
+                
+                $scoreAnim.css({
+                    left: '50%',
+                    top: '50%',
+                    transform: 'translate(-50%, -50%)'
+                });
+                
+                $resultMessage.append($scoreAnim);
+                
+                // 动画结束后移除元素
+                setTimeout(function() {
+                    $scoreAnim.remove();
+                }, 1000);
+            }
+
+            // Try Next Puzzle
+            $('#try-next-btn').click(function () {
+                $('#result-message').text('').removeClass('correct incorrect');
+                $('#check-puzzle-btn').show();
+                $('#try-next-btn').hide();
+                $('#puzzle-container').empty();
+                fetchPuzzle();
+            });
+
+            // Update score on the backend
+            function updateScore(points) {
+                $.post('/add_score', { points: points }, function (data) {
+                    if (data.status === 'success') {
+                        $('#user-score').text(data.score);
+                    }
+                });
+            }
+
+            // End the game
+            $('#end-game').click(function () {
+                window.location.href = '/qna';  // Redirect to QNA page
+            });
+        });
+    </script>
+</body>
+</html>

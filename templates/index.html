@@ -1,0 +1,1703 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dwen Dwen's Neighbour</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+body {
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+    background: linear-gradient(135deg, #25ae85 0%,#25ae85 100%);
+}
+.slider-container {
+height: 80vh;
+width: 80vw;
+margin: 40px auto 0;
+position: relative;
+overflow: hidden;
+border-radius: 20px;
+box-shadow: 0 0 20px rgba(0,0,0,0.1);
+}
+.fullscreen-slide {
+height: 100%;
+width: 100%;
+display: flex;
+align-items: center;
+justify-content: center;
+position: relative;
+transition: transform 0.5s ease;
+overflow: hidden;
+}
+.nav-button {
+position: absolute;
+top: 50%;
+transform: translateY(-50%);
+background: rgba(255, 255, 255, 0.8);
+border: none;
+width: 50px;
+height: 50px;
+border-radius: 50%;
+cursor: pointer;
+display: flex;
+align-items: center;
+justify-content: center;
+font-size: 24px;
+transition: all 0.3s ease;
+z-index: 10;
+}
+.nav-button:hover {
+background: rgba(255, 255, 255, 1);
+transform: translateY(-50%) scale(1.1);
+}
+.prev-button {
+left: 20px;
+}
+.next-button {
+right: 20px;
+}
+.fixed-header {
+position: fixed;
+top: 0;
+left: 0;
+right: 0;
+background: white;
+padding: 10px 0;
+box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+z-index: 1000;
+height: 60px;
+display: flex;
+align-items: center;
+}
+.header-content {
+max-width: 1440px;
+margin: 0 auto;
+padding: 0 20px;
+display: flex;
+align-items: center;
+justify-content: space-between;
+height: 100%;
+width: 100%;
+}
+.logo-container {
+display: flex;
+align-items: center;
+gap: 10px;
+margin-left: 10px;
+}
+.dot-navigation {
+position: absolute;
+bottom: 20px;
+left: 50%;
+transform: translateX(-50%);
+display: flex;
+gap: 10px;
+z-index: 10;
+}
+.dot {
+width: 12px;
+height: 12px;
+border-radius: 50%;
+background: rgba(255, 255, 255, 0.5);
+cursor: pointer;
+transition: all 0.3s ease;
+}
+.dot.active {
+background: white;
+transform: scale(1.2);
+}
+.timeline-container{
+    margin-top: 0;
+    background-color: rgba(255, 255, 255, 0.9);
+    padding: 30px 0;
+    position: relative;
+    overflow: hidden;
+}
+
+.timeline-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(255, 255, 255, 0.4);
+    z-index: 0;
+}
+
+.timeline-bg-decoration {
+    position: absolute;
+    background-repeat: no-repeat;
+    background-size: contain;
+    opacity: 0.12;
+    z-index: 0;
+    pointer-events: none;
+}
+
+/* 树叶图标 */
+.bg-leaf-1 {
+    width: 80px;
+    height: 80px;
+    top: 5%;
+    left: 10%;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Cpath fill='%2325ae85' d='M272 96c-78.6 0-145.1 51.5-167.7 122.5c33.6-17 71.5-26.5 111.7-26.5h88c8.8 0 16 7.2 16 16s-7.2 16-16 16H288 216s0 0 0 0c-16.6 0-32.7 1.9-48.3 5.4c-25.9 5.9-49.9 16.4-71.4 30.7c0 0 0 0 0 0C38.3 298.8 0 364.9 0 440v16c0 13.3 10.7 24 24 24s24-10.7 24-24V440c0-48.7 20.7-92.5 53.8-123.2C121.6 392.3 190.3 448 272 448l1 0c132.1-.7 239-130.9 239-291.4c0-42.6-7.5-83.1-21.1-119.6c-2.6-6.9-12.7-6.6-16.2-.1C455.9 72.1 418.7 96 376 96L272 96z'/%3E%3C/svg%3E");
+    transform: rotate(15deg);
+}
+
+.bg-leaf-2 {
+    width: 70px;
+    height: 70px;
+    top: 15%;
+    right: 15%;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Cpath fill='%2325ae85' d='M272 96c-78.6 0-145.1 51.5-167.7 122.5c33.6-17 71.5-26.5 111.7-26.5h88c8.8 0 16 7.2 16 16s-7.2 16-16 16H288 216s0 0 0 0c-16.6 0-32.7 1.9-48.3 5.4c-25.9 5.9-49.9 16.4-71.4 30.7c0 0 0 0 0 0C38.3 298.8 0 364.9 0 440v16c0 13.3 10.7 24 24 24s24-10.7 24-24V440c0-48.7 20.7-92.5 53.8-123.2C121.6 392.3 190.3 448 272 448l1 0c132.1-.7 239-130.9 239-291.4c0-42.6-7.5-83.1-21.1-119.6c-2.6-6.9-12.7-6.6-16.2-.1C455.9 72.1 418.7 96 376 96L272 96z'/%3E%3C/svg%3E");
+    transform: rotate(-20deg);
+}
+
+.bg-leaf-3 {
+    width: 60px;
+    height: 60px;
+    bottom: 20%;
+    left: 20%;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Cpath fill='%2325ae85' d='M272 96c-78.6 0-145.1 51.5-167.7 122.5c33.6-17 71.5-26.5 111.7-26.5h88c8.8 0 16 7.2 16 16s-7.2 16-16 16H288 216s0 0 0 0c-16.6 0-32.7 1.9-48.3 5.4c-25.9 5.9-49.9 16.4-71.4 30.7c0 0 0 0 0 0C38.3 298.8 0 364.9 0 440v16c0 13.3 10.7 24 24 24s24-10.7 24-24V440c0-48.7 20.7-92.5 53.8-123.2C121.6 392.3 190.3 448 272 448l1 0c132.1-.7 239-130.9 239-291.4c0-42.6-7.5-83.1-21.1-119.6c-2.6-6.9-12.7-6.6-16.2-.1C455.9 72.1 418.7 96 376 96L272 96z'/%3E%3C/svg%3E");
+    transform: rotate(30deg);
+}
+
+/* 动物足迹图标 */
+.bg-paw-1 {
+    width: 50px;
+    height: 50px;
+    top: 25%;
+    left: 30%;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Cpath fill='%23176542' d='M256 224c-79.41 0-192 122.76-192 200.25 0 34.9 26.81 55.75 71.74 55.75 48.84 0 81.09-25.08 120.26-25.08 39.51 0 71.85 25.08 120.26 25.08 44.93 0 71.74-20.85 71.74-55.75C448 346.76 335.41 224 256 224zm-147.28-12.61c-10.4-34.65-42.44-57.09-71.56-50.13-29.12 6.96-44.29 40.69-33.89 75.34 10.4 34.65 42.44 57.09 71.56 50.13 29.12-6.96 44.29-40.69 33.89-75.34zm84.72-20.78c30.94-8.14 46.42-49.94 34.58-93.36s-46.52-72.01-77.46-63.87-46.42 49.94-34.58 93.36c11.84 43.42 46.52 72.02 77.46 63.87zm281.39-29.34c-29.12-6.96-61.15 15.48-71.56 50.13-10.4 34.65 4.77 68.38 33.89 75.34 29.12 6.96 61.15-15.48 71.56-50.13 10.4-34.65-4.77-68.38-33.89-75.34zm-156.27 29.34c30.94 8.14 65.62-20.45 77.46-63.87 11.84-43.42-3.64-85.21-34.58-93.36s-65.62 20.45-77.46 63.87c-11.84 43.42 3.64 85.22 34.58 93.36z'/%3E%3C/svg%3E");
+}
+
+.bg-paw-2 {
+    width: 45px;
+    height: 45px;
+    top: 35%;
+    right: 25%;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Cpath fill='%23176542' d='M256 224c-79.41 0-192 122.76-192 200.25 0 34.9 26.81 55.75 71.74 55.75 48.84 0 81.09-25.08 120.26-25.08 39.51 0 71.85 25.08 120.26 25.08 44.93 0 71.74-20.85 71.74-55.75C448 346.76 335.41 224 256 224zm-147.28-12.61c-10.4-34.65-42.44-57.09-71.56-50.13-29.12 6.96-44.29 40.69-33.89 75.34 10.4 34.65 42.44 57.09 71.56 50.13 29.12-6.96 44.29-40.69 33.89-75.34zm84.72-20.78c30.94-8.14 46.42-49.94 34.58-93.36s-46.52-72.01-77.46-63.87-46.42 49.94-34.58 93.36c11.84 43.42 46.52 72.02 77.46 63.87zm281.39-29.34c-29.12-6.96-61.15 15.48-71.56 50.13-10.4 34.65 4.77 68.38 33.89 75.34 29.12 6.96 61.15-15.48 71.56-50.13 10.4-34.65-4.77-68.38-33.89-75.34zm-156.27 29.34c30.94 8.14 65.62-20.45 77.46-63.87 11.84-43.42-3.64-85.21-34.58-93.36s-65.62 20.45-77.46 63.87c-11.84 43.42 3.64 85.22 34.58 93.36z'/%3E%3C/svg%3E");
+    transform: rotate(45deg);
+}
+
+.bg-paw-3 {
+    width: 40px;
+    height: 40px;
+    bottom: 30%;
+    right: 35%;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Cpath fill='%23176542' d='M256 224c-79.41 0-192 122.76-192 200.25 0 34.9 26.81 55.75 71.74 55.75 48.84 0 81.09-25.08 120.26-25.08 39.51 0 71.85 25.08 120.26 25.08 44.93 0 71.74-20.85 71.74-55.75C448 346.76 335.41 224 256 224zm-147.28-12.61c-10.4-34.65-42.44-57.09-71.56-50.13-29.12 6.96-44.29 40.69-33.89 75.34 10.4 34.65 42.44 57.09 71.56 50.13 29.12-6.96 44.29-40.69 33.89-75.34zm84.72-20.78c30.94-8.14 46.42-49.94 34.58-93.36s-46.52-72.01-77.46-63.87-46.42 49.94-34.58 93.36c11.84 43.42 46.52 72.02 77.46 63.87zm281.39-29.34c-29.12-6.96-61.15 15.48-71.56 50.13-10.4 34.65 4.77 68.38 33.89 75.34 29.12 6.96 61.15-15.48 71.56-50.13 10.4-34.65-4.77-68.38-33.89-75.34zm-156.27 29.34c30.94 8.14 65.62-20.45 77.46-63.87 11.84-43.42-3.64-85.21-34.58-93.36s-65.62 20.45-77.46 63.87c-11.84 43.42 3.64 85.22 34.58 93.36z'/%3E%3C/svg%3E");
+    transform: rotate(-30deg);
+}
+
+/* 花朵图标 */
+.bg-flower-1 {
+    width: 70px;
+    height: 70px;
+    top: 45%;
+    left: 15%;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Cpath fill='%23d4426f' d='M512 256c0 141.4-114.6 256-256 256S0 397.4 0 256S114.6 0 256 0S512 114.6 512 256zM129.2 256.2c-7.5-7.5-19.7-7.5-27.2 0s-7.5 19.7 0 27.2c23.8 23.8 48.4 27.5 83.9 27.5c10.6 0 19.2-8.6 19.2-19.2s-8.6-19.2-19.2-19.2c-25.2 0-34.2-1-56.7-16.2zM382.8 383.4c7.5 7.5 19.7 7.5 27.2 0s7.5-19.7 0-27.2c-23.8-23.8-48.4-27.5-83.9-27.5c-10.6 0-19.2 8.6-19.2 19.2s8.6 19.2 19.2 19.2c25.2 0 34.2 1 56.7 16.2zm0-254.8c-7.5-7.5-19.7-7.5-27.2 0s-7.5 19.7 0 27.2c23.8 23.8 48.4 27.5 83.9 27.5c10.6 0 19.2-8.6 19.2-19.2s-8.6-19.2-19.2-19.2c-25.2 0-34.2-1-56.7-16.2zM256 512c-50.6 0-97.5-15.7-135.9-42.4c37.6-15.3 61.3-50.7 61.3-91.3c0-10.7-2.1-20.9-6-30.2C185.5 343 195.7 336 208 336c33.3 0 63.7-12.5 86.6-33.1c23.1 20.7 53.6 33.1 87 33.1c12.3 0 22.5 7 32.6 12.1c-3.8 9.3-6 19.6-6 30.2c0 40.7 23.8 76.2 61.6 91.5C431.5 496.4 384.7 512 334.2 512L256 512zM129.2 129c7.5-7.5 7.5-19.7 0-27.2s-19.7-7.5-27.2 0C78.2 125.7 74.5 150.3 74.5 185.7c0 10.6 8.6 19.2 19.2 19.2s19.2-8.6 19.2-19.2c0-25.2 1-34.2 16.2-56.7zM256 0c50.6 0 97.5 15.7 135.9 42.4c-37.6 15.3-61.3 50.7-61.3 91.3c0 10.7 2.1 20.9 6 30.2C326.5 169 316.3 176 304 176c-33.3 0-63.7 12.5-86.6 33.1C194.3 188.5 163.8 176 130.3 176c-12.3 0-22.5-7-32.6-12.1c3.8-9.3 6-19.6 6-30.2c0-40.7-23.8-76.2-61.6-91.5C80.5 15.6 127.3 0 177.8 0L256 0z'/%3E%3C/svg%3E");
+    transform: rotate(15deg);
+}
+
+/* 蝴蝶图标 */
+.bg-butterfly-1 {
+    width: 80px;
+    height: 80px;
+    top: 55%;
+    right: 20%;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 640 512'%3E%3Cpath fill='%236f7dd4' d='M352 124.5l-51.9-13c-6.5-1.6-11.3-7.1-12-13.8s2.8-13.1 8.7-16.1l40.8-20.4L294.4 28.8c-5.5-4.1-7.8-11.3-5.6-17.9S297.1 0 304 0H416h32c30.9 0 56 25.1 56 56s-25.1 56-56 56H416 352zM32 56C32 25.1 57.1 0 88 0h32H232c6.9 0 13 4.4 15.2 10.9s-.1 13.8-5.6 17.9l-43.2 32.4 40.8 20.4c5.9 3 9.4 9.4 8.7 16.1s-5.5 12.2-12 13.8L184 124.5 120 160H88c-30.9 0-56-25.1-56-56zM0 403.2C0 392.6 8.6 384 19.2 384H32v64H19.2C8.6 448 0 439.4 0 428.8V403.2zm620.8-19.2H608v64h12.8c10.6 0 19.2-8.6 19.2-19.2V403.2c0-10.6-8.6-19.2-19.2-19.2zM192 448H128V384h64v64zm64-208a144 144 0 1 1 288 0 144 144 0 1 1 -288 0zm144 160c-88.4 0-160-71.6-160-160s71.6-160 160-160s160 71.6 160 160s-71.6 160-160 160zM129.2 256.2c-7.5-7.5-19.7-7.5-27.2 0s-7.5 19.7 0 27.2c23.8 23.8 48.4 27.5 83.9 27.5c10.6 0 19.2-8.6 19.2-19.2s-8.6-19.2-19.2-19.2c-25.2 0-34.2-1-56.7-16.2zM382.8 383.4c7.5 7.5 19.7 7.5 27.2 0s7.5-19.7 0-27.2c-23.8-23.8-48.4-27.5-83.9-27.5c-10.6 0-19.2 8.6-19.2 19.2s8.6 19.2 19.2 19.2c25.2 0 34.2 1 56.7 16.2zm0-254.8c-7.5-7.5-19.7-7.5-27.2 0s-7.5 19.7 0 27.2c23.8 23.8 48.4 27.5 83.9 27.5c10.6 0 19.2-8.6 19.2-19.2s-8.6-19.2-19.2-19.2c-25.2 0-34.2-1-56.7-16.2zM256 512c-50.6 0-97.5-15.7-135.9-42.4c37.6-15.3 61.3-50.7 61.3-91.3c0-10.7-2.1-20.9-6-30.2C185.5 343 195.7 336 208 336c33.3 0 63.7-12.5 86.6-33.1c23.1 20.7 53.6 33.1 87 33.1c12.3 0 22.5 7 32.6 12.1c-3.8 9.3-6 19.6-6 30.2c0 40.7 23.8 76.2 61.6 91.5C431.5 496.4 384.7 512 334.2 512L256 512zM129.2 129c7.5-7.5 7.5-19.7 0-27.2s-19.7-7.5-27.2 0C78.2 125.7 74.5 150.3 74.5 185.7c0 10.6 8.6 19.2 19.2 19.2s19.2-8.6 19.2-19.2c0-25.2 1-34.2 16.2-56.7zM256 0c50.6 0 97.5 15.7 135.9 42.4c-37.6 15.3-61.3 50.7-61.3 91.3c0 10.7 2.1 20.9 6 30.2C326.5 169 316.3 176 304 176c-33.3 0-63.7 12.5-86.6 33.1C194.3 188.5 163.8 176 130.3 176c-12.3 0-22.5-7-32.6-12.1c3.8-9.3 6-19.6 6-30.2c0-40.7-23.8-76.2-61.6-91.5C80.5 15.6 127.3 0 177.8 0L256 0z'/%3E%3C/svg%3E");
+    animation: float 12s ease-in-out infinite;
+}
+
+/* 鸟类图标 */
+.bg-bird-1 {
+    width: 90px;
+    height: 90px;
+    top: 65%;
+    left: 25%;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Cpath fill='%23d49a42' d='M160.8 96.5c14 17 31 30.9 49.5 42.2c25.9 15.8 53.7 25.9 77.7 31.6V138.8C265.8 108.5 250 81.6 230.8 60c-5.9-6.6-14.2-10.7-23.3-11.1C154.6 45.9 113 86.7 111 140.5c-7.1-15.7-18.9-27.1-34.5-34.4c-32.4-15.3-83.3 .4-93.3 47.9c-3.2 15.6 2.2 32.3 15.2 43.5c32.5 28 121.4 40.7 188.9 41.6v31c-67.4 .9-156.4 13.7-188.9 41.6c-13 11.1-18.4 27.9-15.2 43.5c10 47.5 60.9 63.2 93.3 47.9c15.6-7.4 27.4-18.7 34.5-34.4c1.9 53.8 43.5 94.6 96.4 91.6c9.1-.4 17.4-4.5 23.3-11.1c19.3-21.6 35.1-48.6 47.3-78.8v-32.5c-24 5.7-51.8 15.8-77.7 31.6c-18.5 11.3-35.5 25.2-49.5 42.2c-2.5 3-4.8 6.1-7.1 9.2C176.9 352.4 160 326.1 160 296c0-30.1 16.9-56.4 32.8-73.8c2.3 3.1 4.7 6.2 7.1 9.2c14 17 31 30.9 49.5 42.2c25.9 15.8 53.7 25.9 77.7 31.6V273c-24-5.7-51.8-15.8-77.7-31.6c-18.5-11.3-35.5-25.2-49.5-42.2c-2.5-3-4.8-6.1-7.1-9.2C176.9 172.4 160 146.1 160 116c0-30.1 16.9-56.4 32.8-73.8c-2.3 3.1-4.7 6.2-7.1 9.2zM352 256c0 27.6 11.2 52.5 29.3 70.5c3.5-13.8 5.5-29.7 5.7-48.5h32c-.3 27.7-5.3 49.1-12 65.2c5.6 3 11.5 5.4 17.7 7.2c20.3 5.7 42.8 5.3 69.3-6.3c-13 27.1-32.5 51.6-56.1 68.5c-3.2 2.3-4.5 6.4-3.2 10.2c1.3 3.7 4.8 6.1 8.8 6.1c4.1 0 55.8-1.3 86.6-36.9c18.3-21.1 28.7-55.1 28.7-90c0-92.5-70.6-155-180-155V256z'/%3E%3C/svg%3E");
+    animation: float 8s ease-in-out infinite;
+}
+
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+transform: translateY(-10px);
+}
+}
+
+.timeline-container::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100%25' height='100%25' viewBox='0 0 1200 800'%3E%3Cdefs%3E%3Cstyle%3E.cls-1,.cls-2,.cls-3{fill:none;stroke-linecap:round;stroke-linejoin:round;}.cls-1{stroke:%231d8a6b;stroke-width:4;opacity:0.25;}.cls-2{stroke:%23176542;stroke-width:3;opacity:0.2;}.cls-3{stroke:%2325ae85;stroke-width:2;opacity:0.15;}%3C/style%3E%3C/defs%3E%3Cpath class='cls-1' d='M0,400 Q300,100 600,400 T1200,400'/%3E%3Cpath class='cls-1' d='M0,450 Q300,150 600,450 T1200,450'/%3E%3Cpath class='cls-2' d='M0,350 Q300,50 600,350 T1200,350'/%3E%3Cpath class='cls-2' d='M0,500 Q300,200 600,500 T1200,500'/%3E%3Cpath class='cls-3' d='M0,300 Q300,0 600,300 T1200,300'/%3E%3Cpath class='cls-3' d='M0,550 Q300,250 600,550 T1200,550'/%3E%3C/svg%3E");
+    opacity: 0.7;
+    z-index: 0;
+    animation: wave 30s infinite linear;
+}
+
+@keyframes wave {
+    0% {
+        background-position: 0 0;
+    }
+    100% {
+        background-position: 1200px 0;
+    }
+}
+
+.timeline {
+    position: relative;
+    padding: 50px 0;
+    max-width: 1600px;
+    margin: 0 auto;
+    z-index: 1;
+}
+.timeline::before {
+content: '';
+position: absolute;
+width: 2px;
+background: #2B7A0B;
+top: 0;
+bottom: 0;
+left: 50%;
+margin-left: -1px;
+}
+.timeline-item {
+padding: 20px 40px;
+position: relative;
+width: 50%;
+box-sizing: border-box;
+opacity: 0;
+transform: translateY(20px);
+transition: all 0.5s ease;
+}
+.timeline-item:nth-child(odd) {
+left: 0;
+text-align: right;
+}
+.timeline-item:nth-child(even) {
+left: 50%;
+}
+.timeline-item.active {
+opacity: 1;
+transform: translateY(0);
+}
+.timeline-content {
+padding: 20px;
+background: white;
+border-radius: 8px;
+box-shadow: 0 0 10px rgba(0,0,0,0.1);
+position: relative;
+width: 90%;
+margin: 0 auto;
+}
+.timeline-content::before {
+    content: '';
+    position: absolute;
+    width: 30px;
+    height: 30px;
+    background: #2B7A0B;
+    top: 50%;
+    transform: translateY(-50%);
+    border-radius: 0; /* 移除圆形 */
+    clip-path: path('M15,0 C17,4 20,5 25,5 C20,10 20,15 15,20 C10,15 10,10 5,5 C10,5 13,4 15,0');
+}
+.timeline-item:nth-child(odd) .timeline-content {
+margin-right: 0;
+margin-left: auto;
+}
+.timeline-item:nth-child(odd) .timeline-content::before {
+    left: auto;
+    right: -40px;
+}
+.timeline-item:nth-child(even) .timeline-content {
+margin-left: 0;
+margin-right: auto;
+}
+.timeline-item:nth-child(even) .timeline-content::before {
+    left: -40px;
+}
+.organization-intro {
+    max-width: 1200px;
+    margin: 60px auto;
+    padding: 40px 20px;
+    text-align: center;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.5s ease;
+    scroll-margin-top: 80px;
+}
+.organization-intro.active {
+    opacity: 1;
+    transform: translateY(0);
+}
+.organization-intro p {
+    color: #1a5336;
+    line-height: 1.7;
+}
+.organization-intro .highlight-text {
+    color: #115740;
+}
+.organization-intro .description-text {
+    max-width: 100%;
+    margin: 0 auto;
+    font-size: 1.2rem;
+}
+.organization-vision {
+max-width: 1200px;
+margin: 0 auto;
+padding: 40px 20px;
+text-align: center;
+opacity: 0;
+transform: translateY(20px);
+transition: all 0.5s ease;
+    position: relative;
+z-index: 1;
+}
+.organization-vision.active {
+opacity: 1;
+transform: translateY(0);
+}
+    /* Override the paw icon color */
+    .fixed-header i.fas.fa-paw {
+      color: #2E8B57 !important;
+    }
+
+    /* 滚动指示器样式 */
+    .scroll-indicator {
+        position: absolute;
+        margin-bottom: -10px;
+        bottom: 10px;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        color: #2fdfb5;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        z-index: 20;
+        padding: 10px 20px;
+        border-radius: 20px;
+    }
+
+    .scroll-indicator span {
+        margin-bottom: 5px;
+        font-size: 1rem;
+        font-weight: 500;
+        color: #ffffff;
+    }
+
+    .scroll-indicator i {
+        font-size: 1.5rem;
+        animation: bounce 2s infinite;
+    }
+
+    @keyframes bounce {
+        0%, 20%, 50%, 80%, 100% {
+            transform: translateY(0);
+        }
+        40% {
+            transform: translateY(-10px);
+        }
+        60% {
+            transform: translateY(-5px);
+        }
+    }
+
+
+
+    /* 动画效果 */
+    .slide-content {
+        position: relative;
+        z-index: 2;
+        opacity: 0;
+        transform: translateY(30px);
+        transition: all 0.8s ease;
+        color: white;
+        text-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+        background: rgba(255, 255, 255, 0.15);
+        padding: 30px;
+        border-radius: 12px;
+        backdrop-filter: blur(5px);
+        max-width: 80%;
+    }
+
+    .slide-content.active {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    .slide-icon {
+        font-size: 4rem;
+        margin-bottom: 1.5rem;
+        opacity: 0;
+        transform: scale(0.5);
+        transition: all 0.8s ease 0.3s;
+    }
+
+    .slide-icon.active {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    .slide-title {
+        opacity: 0;
+        transform: translateX(-30px);
+        transition: all 0.8s ease 0.6s;
+    }
+
+    .slide-title.active {
+        opacity: 1;
+        transform: translateX(0);
+    }
+
+    .slide-description {
+        opacity: 0;
+        transform: translateX(30px);
+        transition: all 0.8s ease 0.9s;
+    }
+
+    .slide-description.active {
+        opacity: 1;
+        transform: translateX(0);
+    }
+
+  .bg-green-transparent {
+    background-color: rgb(255, 255, 255);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    position: relative;
+    z-index: 2;
+}
+
+    /* 文字渐变效果 */
+    .typing-text {
+        position: relative;
+        display: inline-block;
+        font-family: 'Pacifico', cursive;
+        color: transparent;
+        margin: 0;
+        overflow: visible;
+        line-height: 1.5;
+    }
+
+    .typing-text::after {
+        content: "Dwen Dwen's Neighbor - A Website for Chinese Wildlife Protectors";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        width: 100%;
+        height: 100%;
+
+        opacity: 0.2;
+        overflow: visible;
+        white-space: nowrap;
+    }
+
+    .typing-text::before {
+        content: "Dwen Dwen's Neighbor - A Website for Chinese Wildlife Protectors";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 0;
+        height: 130%;
+        color: #333;
+        overflow: hidden;
+        white-space: nowrap;
+        animation: typing 3s steps(50, end) forwards;
+    }
+
+    @keyframes typing {
+        0% {
+            width: 0;
+        }
+        100% {
+            width: 100%;
+        }
+    }
+
+    /* 按钮样式优化 */
+.login-button {
+        position: relative;
+        border: none;
+        background: #198f4d;
+        color: white;
+        padding: 8px 18px 8px 24px;
+        border-radius: 8px;
+        font-weight: 500;
+        letter-spacing: 0.5px;
+        box-shadow: 0 2px 10px rgba(46, 139, 87, 0.2);
+transition: all 0.3s ease;
+        overflow: hidden;
+        margin-right: 30px;
+        height: 36px;
+        display: flex;
+        align-items: center;
+        font-size: 15px;
+    }
+
+    .login-button::after {
+        content: "";
+        position: absolute;
+        height: 100%;
+        width: 0;
+        top: 0;
+        left: 0;
+        background: rgba(255, 255, 255, 0.1);
+        transition: width 0.3s ease;
+    }
+
+.login-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(46, 139, 87, 0.4);
+        background: linear-gradient(to right, #25ae85, #ffcc00);
+    }
+
+    .login-button:hover::after {
+        width: 100%;
+    }
+
+    .login-button i {
+        margin-left: 8px;
+        transition: transform 0.3s ease;
+        position: relative;
+        z-index: 2;
+    }
+
+    .login-button span {
+        position: relative;
+        z-index: 2;
+    }
+
+    .login-button:hover i {
+        transform: translateX(5px);
+    }
+
+    /* 添加页脚样式 */
+    .footer {
+        background-color: #1e5135;
+        color: #e0e0e0;
+        padding: 40px 0 20px;
+        margin-top: 0;
+    }
+    .footer-content {
+        max-width: 1200px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: 2fr 2fr 1fr;
+        gap: 40px;
+        padding: 0 20px;
+    }
+    .footer-section h3 {
+        color: white;
+        font-size: 1.2rem;
+        margin-bottom: 15px;
+        position: relative;
+    }
+    .footer-section h3::after {
+        content: '';
+        display: block;
+        width: 50px;
+        height: 2px;
+        background: #4CAF50;
+        margin-top: 8px;
+    }
+    .footer-bottom {
+        text-align: center;
+        padding-top: 20px;
+        margin-top: 20px;
+        border-top: 1px solid rgba(255,255,255,0.1);
+    }
+    .social-links {
+        display: flex;
+        gap: 15px;
+        margin-top: 15px;
+    }
+    .social-links a {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 36px;
+        height: 36px;
+        background: rgba(255,255,255,0.1);
+        border-radius: 50%;
+        color: white;
+        transition: all 0.3s ease;
+    }
+    .social-links a:hover {
+        background: #4CAF50;
+        transform: translateY(-3px);
+    }
+    .contact-info p {
+        display: flex;
+        align-items: center;
+        margin-bottom: 10px;
+    }
+    .contact-info i {
+        margin-right: 10px;
+        color: #4CAF50;
+    }
+
+    .footer-section.links ul {
+        padding-left: 0;
+        text-align: left;
+    }
+
+    .footer-section.links li {
+        text-align: left;
+    }
+
+    /* 添加模态弹窗样式 */
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.7);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s ease;
+    }
+
+    .modal-overlay.active {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    .modal-content {
+        background-color: white;
+        border-radius: 12px;
+        width: 90%;
+        max-width: 400px;
+        padding: 30px;
+        text-align: center;
+        position: relative;
+        transform: translateY(-20px);
+        transition: all 0.3s ease;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    }
+
+    .modal-overlay.active .modal-content {
+        transform: translateY(0);
+    }
+
+    .modal-header {
+        margin-bottom: 20px;
+        border-bottom: 2px solid #f0f0f0;
+        padding-bottom: 15px;
+    }
+
+    .modal-header h3 {
+        color: #2B7A0B;
+        font-size: 1.5rem;
+        margin: 0;
+    }
+
+    .modal-body {
+        margin-bottom: 20px;
+        color: #333;
+    }
+
+    .modal-body img {
+        max-width: 200px;
+        margin: 10px auto;
+        display: block;
+        border: 1px solid #eaeaea;
+        border-radius: 6px;
+    }
+
+    .modal-body p {
+        margin: 15px 0;
+        font-size: 1.1rem;
+    }
+
+    .modal-body .account-id {
+        background-color: #f7f7f7;
+        padding: 10px;
+        border-radius: 6px;
+        font-family: monospace;
+        font-size: 1.1rem;
+        margin: 10px 0;
+        font-weight: bold;
+    }
+
+    .modal-close {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        background: transparent;
+        border: none;
+        font-size: 1.5rem;
+        cursor: pointer;
+        color: #999;
+        transition: color 0.2s ease;
+    }
+
+    .modal-close:hover {
+        color: #2B7A0B;
+    }
+
+    .btn-close {
+        background-color: #2B7A0B;
+        color: white;
+        border: none;
+        padding: 10px 25px;
+        border-radius: 30px;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .btn-close:hover {
+        background-color: #1d5408;
+        transform: translateY(-2px);
+    }
+
+    /* 为隐私政策和使用条款添加额外的弹窗样式 */
+    .policy-modal .modal-content {
+        max-width: 700px;
+        text-align: left;
+        max-height: 80vh;
+        overflow-y: auto;
+    }
+
+    .policy-modal .modal-body {
+        font-size: 0.95rem;
+        line-height: 1.6;
+    }
+
+    .policy-modal .section-title {
+        color: #2B7A0B;
+        margin-top: 20px;
+        margin-bottom: 10px;
+        font-weight: 600;
+    }
+
+    .policy-modal ul {
+        padding-left: 20px;
+        margin-bottom: 15px;
+    }
+
+    .policy-modal li {
+        margin-bottom: 8px;
+    }
+
+    .agree-checkbox {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 20px 0;
+        font-weight: 500;
+    }
+
+    .agree-checkbox input {
+        margin-right: 10px;
+        width: 18px;
+        height: 18px;
+        cursor: pointer;
+    }
+
+    .btn-agree {
+        background-color: #2B7A0B;
+        color: white;
+        border: none;
+        padding: 10px 25px;
+        border-radius: 30px;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        opacity: 0.5;
+    }
+
+    .btn-agree.active {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    .btn-agree.active:hover {
+        background-color: #1d5408;
+        transform: translateY(-2px);
+    }
+
+    /* 背景媒体样式 */
+    .slide-media {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        z-index: 0;
+    }
+
+    /* 叠加层，提高文字可读性 */
+    .slide-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.4);
+        z-index: 1;
+    }
+
+    /* 添加特殊字体样式用于突出重点内容 */
+    .highlight-text {
+        font-family: 'Georgia', serif;
+        font-weight: 700;
+        color: #176542;
+        letter-spacing: 0.5px;
+    }
+
+    .emphasis-text {
+        font-family: 'Montserrat', sans-serif;
+        font-weight: 600;
+        letter-spacing: 0.7px;
+    }
+
+    .stat-number {
+        font-family: 'Roboto Mono', monospace;
+        font-weight: 700;
+        letter-spacing: -0.5px;
+    }
+
+    .mission-text {
+        font-family: 'Playfair Display', serif;
+        font-style: italic;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+    }
+
+    /* 添加手写字体和动画效果 */
+    @import url('https://fonts.googleapis.com/css2?family=Caveat:wght@400;600&family=Dancing+Script:wght@400;600&display=swap');
+
+    .timeline-content p:not(.font-semibold):not(.text-sm),
+    .timeline-content ul li {
+        font-family: 'Caveat', cursive;
+        font-size: 1.3rem;
+        line-height: 1.5;
+        opacity: 0;
+        transform: translateY(10px);
+        transition: all 0s;
+    }
+
+    .timeline-item.active .timeline-content p:not(.font-semibold):not(.text-sm),
+    .timeline-item.active .timeline-content ul li {
+        opacity: 1;
+        transform: translateY(0);
+        transition: all 0.8s ease;
+    }
+
+    /* 为手写文字添加分段动画效果 */
+    .timeline-item.active .timeline-content p:not(.font-semibold):not(.text-sm):nth-child(2) {
+        transition-delay: 0.1s;
+    }
+
+    .timeline-item.active .timeline-content p:not(.font-semibold):not(.text-sm):nth-child(3) {
+        transition-delay: 0.2s;
+    }
+
+    .timeline-item.active .timeline-content ul li:nth-child(1) {
+        transition-delay: 0.3s;
+    }
+
+    .timeline-item.active .timeline-content ul li:nth-child(2) {
+        transition-delay: 0.4s;
+    }
+
+    .timeline-item.active .timeline-content ul li:nth-child(3) {
+        transition-delay: 0.5s;
+    }
+
+    /* 手写动画效果 */
+    .handwriting {
+        position: relative;
+        background: linear-gradient(to right, #198f4d 50%, transparent 50%);
+        background-size: 200% 100%;
+        background-position: 100% 0;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        animation: none;
+    }
+
+    .timeline-item.active .handwriting {
+        animation: writing 2s forwards;
+        animation-delay: 0.3s;
+    }
+
+    @keyframes writing {
+        to {
+            background-position: 0 0;
+        }
+    }
+
+    /* 时间线照片样式 */
+    .timeline-photos {
+        position: absolute;
+        width: 120px; /* 照片容器的宽度 */
+        height: 140px; /* 照片容器的高度 */
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        z-index: 2;
+    }
+
+    .timeline-photos img {
+        width: 100%;
+        height: 60px;
+        object-fit: cover;
+        border-radius: 6px;
+        border: 2px solid #fff;
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        transform: rotate(-3deg);
+        transition: transform 0.3s ease;
+        opacity: 0;
+        transform: translateX(20px) rotate(-3deg);
+    }
+
+    .timeline-photos img:nth-child(2) {
+        transform: translateX(-20px) rotate(3deg);
+    }
+
+    .timeline-item.active .timeline-photos img {
+        opacity: 1;
+        transform: translateX(0) rotate(-3deg);
+        transition: all 0.5s ease 0.2s;
+    }
+
+    .timeline-item.active .timeline-photos img:nth-child(2) {
+        transform: translateX(0) rotate(3deg);
+        transition: all 0.5s ease 0.4s;
+    }
+
+    .timeline-item:nth-child(odd) .timeline-photos {
+        right: -150px; /* 右侧时间线项的照片位置 */
+    }
+
+    .timeline-item:nth-child(even) .timeline-photos {
+        left: -150px; /* 左侧时间线项的照片位置 */
+}
+</style>
+</head>
+<body class="bg-gray-50">
+<header class="fixed-header">
+    <div class="header-content">
+        <div class="logo-container">
+            <i class="fas fa-paw text-primary text-2xl"></i>
+            <span class="typing-text text-[22px]">
+                Dwen Dwen's Neighbor - A Website for Chinese Wildlife Protectors
+            </span>
+</div>
+        <button onclick="window.location.href='/login'" class="login-button">
+            <span>Enter Our Website &nbsp;</span>
+            <i class="fas fa-arrow-right"></i>
+        </button>
+    </div>
+</header>
+
+<main class="pt-12">
+    <div class="pt-2 max-w-[1440px] mx-auto px-4">
+    <div class="slider-container">
+        <button class="nav-button prev-button" onclick="prevSlide()">
+            <i class="fas fa-chevron-left"></i>
+        </button>
+        <button class="nav-button next-button" onclick="nextSlide()">
+            <i class="fas fa-chevron-right"></i>
+        </button>
+        <div class="slider-wrapper flex" style="width: 500%; height: 100%;">
+            <div class="fullscreen-slide">
+                <video class="slide-media" autoplay muted loop playsinline>
+                    <source src="static/videos/v1.mp4" type="video/mp4">
+                </video>
+                <div class="slide-overlay"></div>
+                <div class="slide-content text-center">
+                    <i class="fas fa-book slide-icon"></i>
+                    <h2 class="slide-title text-4xl font-bold mb-4">Animal Encyclopedia</h2>
+                    <p class="slide-description text-xl">Exploring the Diverse Animal World in China</p>
+    </div>
+</div>
+            <div class="fullscreen-slide">
+                <video class="slide-media" autoplay muted loop playsinline>
+                    <source src="static/videos/v2.mp4" type="video/mp4">
+                </video>
+                <div class="slide-overlay"></div>
+                <div class="slide-content text-center">
+                    <i class="fas fa-gamepad slide-icon"></i>
+                    <h2 class="slide-title text-4xl font-bold mb-4">Fun Games</h2>
+                    <p class="slide-description text-xl">Learn Animals' Knowledge Through Gameplay</p>
+</div>
+</div>
+            <div class="fullscreen-slide">
+               <video class="slide-media" autoplay muted loop playsinline>
+                    <source src="static/videos/v3.mp4" type="video/mp4">
+                </video>
+                <div class="slide-overlay"></div>
+                <div class="slide-content text-center">
+                    <i class="fas fa-paw slide-icon"></i>
+                    <h2 class="slide-title text-4xl font-bold mb-4">My Red Panda</h2>
+                    <p class="slide-description text-xl">Interactive Experience about Adopting Virtual Red Panda</p>
+</div>
+</div>
+            <div class="fullscreen-slide">
+                 <video class="slide-media" autoplay muted loop playsinline>
+                    <source src="static/videos/v4.mp4" type="video/mp4">
+                </video>
+                <div class="slide-overlay"></div>
+                <div class="slide-content text-center">
+                    <i class="fas fa-users slide-icon"></i>
+                    <h2 class="slide-title text-4xl font-bold mb-4">Guardians Community</h2>
+                    <p class="slide-description text-xl">Join the Family of Chinese Animal Guardians</p>
+</div>
+</div>
+            <div class="fullscreen-slide">
+                <video class="slide-media" autoplay muted loop playsinline>
+                    <source src="static/videos/v5.mp4" type="video/mp4">
+                </video>
+                <div class="slide-overlay"></div>
+                <div class="slide-content text-center">
+                    <i class="fas fa-hand-holding-heart slide-icon"></i>
+                    <h2 class="slide-title text-4xl font-bold mb-4">Donation</h2>
+                    <p class="slide-description text-xl">Contribute to Animal Protection Efforts</p>
+</div>
+</div>
+</div>
+        <div class="dot-navigation">
+            <div class="dot" onclick="goToSlide(0)"></div>
+            <div class="dot" onclick="goToSlide(1)"></div>
+            <div class="dot" onclick="goToSlide(2)"></div>
+            <div class="dot" onclick="goToSlide(3)"></div>
+            <div class="dot" onclick="goToSlide(4)"></div>
+</div>
+</div>
+    <div class="scroll-indicator" onclick="scrollToSearch()">
+        <span>Learn More About Our Organization</span>
+        <i class="fas fa-chevron-down"></i>
+</div>
+</div>
+
+
+    <div class="organization-intro">
+        <h2 class="text-4xl font-bold mb-8 highlight-text">Chinese Animal Guardians</h2>
+        <p class="text-xl mb-4">Established in May 2015</p>
+        <p class="text-xl mb-4 description-text">Chinese Animal Guardians is a non-profit organization dedicated to protecting China's native wildlife.
+            <br>
+            We have consistently focused on the protection of endangered species and animal welfare,
+            <br>
+            raising public awareness of animal protection through education, advocacy, and practical action.</p>
+
+</div>
+
+
+
+    <div class="timeline-container bg-white py-20">
+        <h2 class="text-4xl font-bold text-center mb-16 highlight-text">Our Journey</h2>
+        <div class="timeline-bg-decoration bg-leaf-1"></div>
+        <div class="timeline-bg-decoration bg-leaf-2"></div>
+        <div class="timeline-bg-decoration bg-leaf-3"></div>
+        <div class="timeline-bg-decoration bg-paw-1"></div>
+        <div class="timeline-bg-decoration bg-paw-2"></div>
+        <div class="timeline-bg-decoration bg-paw-3"></div>
+        <div class="timeline-bg-decoration bg-flower-1"></div>
+        <div class="timeline-bg-decoration bg-butterfly-1"></div>
+        <div class="timeline-bg-decoration bg-bird-1"></div>
+        
+        <div class="timeline">
+            <div class="timeline-item">
+                <div class="timeline-photos">
+                    <img src="https://placehold.co/120x60/25ae85/ffffff?text=Panda" alt="Panda Photo">
+                    <img src="https://placehold.co/120x60/198f4d/ffffff?text=Reserve" alt="Nature Reserve">
+</div>
+                <div class="timeline-content">
+                    <h3 class="text-xl font-bold mb-2 emphasis-text">Endangered Species Protection Plan</h3>
+                    <p class="text-gray-600">2016-2018</p>
+                    <p class="mb-4 handwriting">A two-year protection program was launched for China's unique endangered animals (such as giant pandas and South China tigers). Through establishing wildlife reserves, carrying out habitat restoration work, and strengthening publicity of laws and regulations, the survival rate of these species has been effectively increased.</p>
+                    <ul class="list-disc pl-4 text-gray-700">
+                        <li>Established 5 national wildlife reserves</li>
+                        <li>Restored habitat area exceeding 1000 square kilometers</li>
+                        <li>Giant panda population increased by <span class="stat-number">15%</span></li>
+                    </ul>
+</div>
+</div>
+            <div class="timeline-item">
+                <div class="timeline-photos">
+                    <img src="https://placehold.co/120x60/25ae85/ffffff?text=Lecture" alt="Education Lecture">
+                    <img src="https://placehold.co/120x60/198f4d/ffffff?text=Students" alt="Student Participants">
+</div>
+                <div class="timeline-content">
+                    <h3 class="text-xl font-bold mb-2 emphasis-text">Animal Protection Educational Tour</h3>
+                    <p class="text-gray-600">2017-Present</p>
+                    <p class="mb-4 handwriting">Wildlife protection lectures are conducted nationwide, covering primary and secondary schools and communities, with over 200 lectures held and more than 50,000 direct participants. Through interactive activities and knowledge dissemination, public awareness and participation in animal protection have been enhanced.</p>
+                    <div class="grid grid-cols-2 gap-4 mt-4">
+                        <div class="bg-green-50 p-3 rounded-lg">
+                            <p class="font-semibold">Coverage</p>
+                            <p class="text-sm">30 provinces and regions across China</p>
+</div>
+                        <div class="bg-green-50 p-3 rounded-lg">
+                            <p class="font-semibold">Participants</p>
+                            <p class="text-sm">Over <span class="stat-number">50,000</span> people</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="timeline-item">
+                <div class="timeline-photos">
+                    <img src="https://placehold.co/120x60/25ae85/ffffff?text=Rescue" alt="Animal Rescue">
+                    <img src="https://placehold.co/120x60/198f4d/ffffff?text=Care" alt="Animal Care">
+                </div>
+                <div class="timeline-content">
+                    <h3 class="text-xl font-bold mb-2 emphasis-text">Stray Animal Rescue Initiative</h3>
+                    <p class="text-gray-600">2018-Present</p>
+                    <p class="mb-4 handwriting">Multiple stray animal rescue activities are organized annually, providing medical assistance and adoption services. To date, over 3,000 stray animals have been successfully rescued and helped to find new homes.</p>
+                    <div class="flex justify-between mt-4">
+                        <div class="text-center">
+                            <p class="text-2xl font-bold text-green-600 stat-number">3,000+</p>
+                            <p class="text-sm">Animals Rescued</p>
+                        </div>
+                        <div class="text-center">
+                            <p class="text-2xl font-bold text-green-600 stat-number">85%</p>
+                            <p class="text-sm">Adoption Rate</p>
+                        </div>
+                        <div class="text-center">
+                            <p class="text-2xl font-bold text-green-600 stat-number">12</p>
+                            <p class="text-sm">Rescue Centers</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="timeline-item">
+                <div class="timeline-photos">
+                    <img src="https://placehold.co/120x60/25ae85/ffffff?text=Wetland" alt="Wetland Restoration">
+                    <img src="https://placehold.co/120x60/198f4d/ffffff?text=Forest" alt="Forest Protection">
+                </div>
+                <div class="timeline-content">
+                    <h3 class="text-xl font-bold mb-2 emphasis-text">Ecological Environment Protection Project</h3>
+                    <p class="text-gray-600">2020-Present</p>
+                    <p class="mb-4 handwriting">Ecological environment protection projects are being carried out in multiple provinces, focusing on wetland and forest protection and restoration. Through afforestation and wetland restoration, ecosystem diversity has been increased, promoting the recovery of animal habitats.</p>
+                    <div class="mt-4">
+                        <div class="flex items-center mb-2">
+                            <div class="w-3 h-3 bg-green-600 rounded-full mr-2"></div>
+                            <p>Completed wetland restoration area: <span class="stat-number">500</span> hectares</p>
+                        </div>
+                        <div class="flex items-center mb-2">
+                            <div class="w-3 h-3 bg-green-600 rounded-full mr-2"></div>
+                            <p>Trees planted: <span class="stat-number">100,000</span></p>
+                        </div>
+                        <div class="flex items-center">
+                            <div class="w-3 h-3 bg-green-600 rounded-full mr-2"></div>
+                            <p>Biodiversity increase: <span class="stat-number">30%</span></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    <div class="organization-vision">
+        <div class="bg-green-transparent p-8 rounded-lg">
+             <h2 class="text-4xl font-bold mb-8 highlight-text">Our Vision</h2>
+            <p class="text-xl font-semibold mb-6">Chinese Animal Guardians aims to promote the development of animal protection through continuous efforts and public participation, ultimately achieving the beautiful vision of harmonious coexistence between humans and nature.</p>
+            <div class="flex flex-col items-center space-y-4">
+                <div class="flex items-center">
+                    <i class="fas fa-leaf text-green-600 text-2xl mr-4"></i>
+                    <p class="text-lg emphasis-text">Protect Biodiversity</p>
+                    &nbsp;
+                    &nbsp;
+                    &nbsp;
+                    &nbsp;
+                    <i class="fas fa-handshake text-green-600 text-2xl mr-4"></i>
+                    <p class="text-lg emphasis-text">Promote Harmony Between Humans and Nature</p>
+                    &nbsp;
+                    &nbsp;
+                    &nbsp;
+                    &nbsp;
+                    <i class="fas fa-heart text-green-600 text-2xl mr-4"></i>
+                    <p class="text-lg emphasis-text">Raise Public Awareness</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+ </main>
+
+<footer class="footer">
+    <div class="footer-content">
+        <div class="footer-section about">
+            <h3>About Us</h3>
+            <p class="mb-3">A non-profit organization dedicated to protecting China's native wildlife and their habitats</p>
+            <div class="social-links">
+                <a href="#"><i class="fab fa-weixin"></i></a>
+                <a href="#"><i class="fab fa-weibo"></i></a>
+                <a href="#"><i class="fab fa-qq"></i></a>
+                <a href="#"><i class="fab fa-bilibili"></i></a>
+            </div>
+        </div>
+        
+        <div class="footer-section contact">
+            <h3>Contact Us</h3>
+            <div class="contact-info">
+                <p><i class="fas fa-map-marker-alt"></i> Dublin International College, 7th Floor, Building 4, Beijing University of Technology</p>
+                <p><i class="fas fa-phone"></i> +86 185 185 99155</p>
+                <p><i class="fas fa-envelope"></i> zitong.wang@ucdconnect.ie</p>
+                <p><i class="fas fa-clock"></i> Monday-Friday: 9:00 - 17:00</p>
+            </div>
+        </div>
+        
+        <div class="footer-section links">
+            <h3>Quick Links</h3>
+            <ul class="space-y-2" style="padding-left: 0; text-align: left;">
+                <li><a href="#" id="privacy-policy" class="text-gray-300 hover:text-white transition">Privacy Policy</a></li>
+                <li><a href="#" id="terms-of-use" class="text-gray-300 hover:text-white transition">Terms of Use</a></li>
+                <li><a href="/login" class="text-gray-300 hover:text-white transition">Join Us</a></li>
+                <li><a href="/login" class="text-gray-300 hover:text-white transition">Donate</a></li>
+            </ul>
+        </div>
+    </div>
+    
+    <div class="footer-bottom">
+        <p>&copy; 2025-2026 Chinese Animal Guardians &nbsp; |  &nbsp; COMP3030J Software Engineering Project 2 - 2024-2025: Group 5 &nbsp; |  &nbsp; Design & Development: QAQ Software Engineering Technology Co., Ltd.</p>
+</div>
+</footer>
+
+<div class="modal-overlay" id="socialModal">
+    <div class="modal-content">
+        <button class="modal-close" onclick="closeModal()">&times;</button>
+        <div class="modal-header">
+            <h3 id="modalTitle">Platform Contact Information</h3>
+</div>
+        <div class="modal-body" id="modalBody">
+            <!-- Content will be dynamically generated through JavaScript -->
+        </div>
+        <button class="btn-close" onclick="closeModal()">Close</button>
+    </div>
+</div>
+
+<div class="modal-overlay policy-modal" id="policyModal">
+    <div class="modal-content">
+        <button class="modal-close" onclick="closePolicyModal()">&times;</button>
+        <div class="modal-header">
+            <h3 id="policyModalTitle">Privacy Policy</h3>
+        </div>
+        <div class="modal-body" id="policyModalBody">
+            <!-- Content will be dynamically generated through JavaScript -->
+        </div>
+        <div class="agree-checkbox">
+            <input type="checkbox" id="agreeCheckbox" onchange="toggleAgreeButton()">
+            <label for="agreeCheckbox">I have read and agree to the terms above</label>
+        </div>
+        <button class="btn-agree" id="agreeButton" onclick="closePolicyModal()" disabled>Confirm Agreement</button>
+    </div>
+</div>
+
+<script>
+    let currentSlide = 0;
+    const slides = document.querySelectorAll('.fullscreen-slide');
+    const sliderWrapper = document.querySelector('.slider-wrapper');
+    const dots = document.querySelectorAll('.dot');
+    const timelineItems = document.querySelectorAll('.timeline-item');
+    const organizationIntro = document.querySelector('.organization-intro');
+    const organizationVision = document.querySelector('.organization-vision');
+    let autoSlideTimer; // 新增：自动切换计时器变量
+
+    function updateSlider() {
+        sliderWrapper.style.transform = `translateX(-${currentSlide * 20}%)`;
+        dots.forEach((dot, index) => {
+            dot.classList.toggle('active', index === currentSlide);
+        });
+
+        // 重置所有slide的动画状态
+        document.querySelectorAll('.slide-content, .slide-icon, .slide-title, .slide-description').forEach(element => {
+            element.classList.remove('active');
+        });
+
+        // 激活当前slide的动画
+        const currentSlideContent = document.querySelectorAll('.slide-content')[currentSlide];
+        if (currentSlideContent) {
+            currentSlideContent.classList.add('active');
+            currentSlideContent.querySelector('.slide-icon').classList.add('active');
+            currentSlideContent.querySelector('.slide-title').classList.add('active');
+            currentSlideContent.querySelector('.slide-description').classList.add('active');
+        }
+        
+        // 重新播放当前幻灯片的视频
+        resetCurrentVideo();
+    }
+    
+    // 新增：重新播放当前幻灯片视频
+    function resetCurrentVideo() {
+        // 获取当前幻灯片中的视频（如果有）
+        const currentVideo = slides[currentSlide].querySelector('video');
+        if (currentVideo) {
+            // 重置视频到开始位置并播放
+            currentVideo.currentTime = 0;
+            currentVideo.play();
+        }
+    }
+
+    function nextSlide() {
+        currentSlide = (currentSlide + 1) % slides.length;
+        updateSlider();
+        resetAutoSlideTimer(); // 重置自动切换计时器
+    }
+
+    function prevSlide() {
+        currentSlide = (currentSlide - 1 + slides.length) % slides.length;
+        updateSlider();
+        resetAutoSlideTimer(); // 重置自动切换计时器
+    }
+
+    function goToSlide(index) {
+        currentSlide = index;
+        updateSlider();
+        resetAutoSlideTimer(); // 重置自动切换计时器
+    }
+    
+    // 新增：重置自动切换计时器
+    function resetAutoSlideTimer() {
+        clearInterval(autoSlideTimer);
+        autoSlideTimer = setInterval(nextSlide, 5500);
+    }
+    
+    // 初始化自动切换计时器
+    resetAutoSlideTimer();
+    
+    // 检查元素是否在视口中
+    function isInViewport(element) {
+        const rect = element.getBoundingClientRect();
+        return (
+            rect.top <= (window.innerHeight || document.documentElement.clientHeight) &&
+            rect.bottom >= 0
+        );
+    }
+
+    // 检查所有需要动画的元素
+    function checkElements() {
+        timelineItems.forEach(item => {
+            if (isInViewport(item)) {
+                item.classList.add('active');
+            }
+        });
+
+        if (isInViewport(organizationIntro)) {
+            organizationIntro.classList.add('active');
+        }
+
+        if (isInViewport(organizationVision)) {
+            organizationVision.classList.add('active');
+        }
+    }
+
+    window.addEventListener('scroll', checkElements);
+    window.addEventListener('load', checkElements);
+
+
+    function scrollToSearch() {
+        const searchContainer = document.querySelector('.organization-intro');
+        // 添加偏移量，确保内容不被导航栏遮挡
+        const headerOffset = 70; // 导航栏高度加一点额外空间
+        const elementPosition = searchContainer.getBoundingClientRect().top;
+        const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+        
+        window.scrollTo({
+            top: offsetPosition,
+            behavior: 'smooth'
+        });
+    }
+
+    // 初始化第一个slide的动画
+    document.addEventListener('DOMContentLoaded', () => {
+        // 确保当前幻灯片是第一个
+        currentSlide = 0;
+        
+        // 手动调用updateSlider函数以更新幻灯片状态
+        updateSlider();
+        
+        // 延迟一小段时间后再次确认激活首个幻灯片的动画元素（解决可能的时序问题）
+        setTimeout(() => {
+            const firstSlideContent = document.querySelectorAll('.slide-content')[0];
+            if (firstSlideContent) {
+                firstSlideContent.classList.add('active');
+                firstSlideContent.querySelector('.slide-icon').classList.add('active');
+                firstSlideContent.querySelector('.slide-title').classList.add('active');
+                firstSlideContent.querySelector('.slide-description').classList.add('active');
+            }
+        }, 1000);
+    });
+
+    // 社交媒体弹窗功能
+    const socialData = {
+        'weixin': {
+            title: 'WeChat Official Account',
+            content: `
+                <img src="static/images/wechat.jpg" alt="WeChat QR Code">
+                <p>Scan the QR code above or search for our official account</p>
+                <div class="account-id">Chinese Animal Guardians</div>
+                <p>Follow us for more information about animal protection</p>
+            `
+        },
+        'weibo': {
+            title: 'Weibo Official Account',
+            content: `
+                <p>Follow our Weibo for latest updates</p>
+                <div class="account-id">@uni海胆炒饭</div>
+                <p>Followers: 97,328 | Updates: Daily</p>
+            `
+        },
+        'qq': {
+            title: 'QQ Group',
+            content: `
+                <p>Join our QQ discussion group</p>
+                <div class="account-id">Group Number: 453062736</div>
+                <p>Connect with fellow animal lovers</p>
+            `
+        },
+        'bilibili': {
+            title: 'Bilibili Official Account',
+            content: `
+                <p>Follow our Bilibili official account</p>
+                <div class="account-id">Chinese Animal Guardians</div>
+                <p>UID: 262369066 | Followers: 73,654</p>
+                <p>Regular educational videos about animal protection</p>
+            `
+        }
+    };
+
+    // 获取所有社交媒体链接
+    document.addEventListener('DOMContentLoaded', function() {
+        const socialLinks = document.querySelectorAll('.social-links a');
+        
+        socialLinks.forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                // 确定点击的是哪个社交媒体图标
+                const icon = this.querySelector('i');
+                let platform = '';
+                
+                if (icon.classList.contains('fa-weixin')) platform = 'weixin';
+                else if (icon.classList.contains('fa-weibo')) platform = 'weibo';
+                else if (icon.classList.contains('fa-qq')) platform = 'qq';
+                else if (icon.classList.contains('fa-bilibili')) platform = 'bilibili';
+                
+                // 打开对应的弹窗
+                openModal(platform);
+            });
+        });
+    });
+
+    function openModal(platform) {
+        if (socialData[platform]) {
+            document.getElementById('modalTitle').textContent = socialData[platform].title;
+            document.getElementById('modalBody').innerHTML = socialData[platform].content;
+            document.getElementById('socialModal').classList.add('active');
+            // 禁止背景滚动
+            document.body.style.overflow = 'hidden';
+        }
+    }
+
+    function closeModal() {
+        document.getElementById('socialModal').classList.remove('active');
+        // 恢复背景滚动
+        document.body.style.overflow = 'auto';
+    }
+
+    // 点击模态框外部关闭
+    document.getElementById('socialModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeModal();
+        }
+    });
+
+    // 隐私政策与使用条款数据
+    const policyData = {
+        'privacy': {
+            title: 'Privacy Policy',
+            content: `
+                <p>Welcome to the Chinese Animal Guardians website. We value your privacy and are committed to protecting your personal information. This Privacy Policy explains how we collect, use, disclose, and protect your information.</p>
+                
+                <h4 class="section-title">Information Collection</h4>
+                <p>We may collect the following types of information:</p>
+                <ul>
+                    <li><strong>Personal Identification Information</strong>: Including name, email address, phone number, mailing address, etc., provided when you register an account, subscribe to newsletters, participate in activities, or contact us.</li>
+                    <li><strong>Non-Personal Identification Information</strong>: Including browser type, device information, access time, referring URLs, etc.</li>
+                    <li><strong>User-Generated Content</strong>: Content you post, upload, or submit on our platform.</li>
+                </ul>
+                
+                <h4 class="section-title">Information Use</h4>
+                <p>We use the collected information to:</p>
+                <ul>
+                    <li>Provide, maintain, and improve our services</li>
+                    <li>Process and complete your requests or transactions</li>
+                    <li>Send animal protection-related communications, updates, and marketing information</li>
+                    <li>Respond to your questions or comments</li>
+                    <li>Protect our rights, property, or safety</li>
+                    <li>Comply with applicable laws and regulations</li>
+                </ul>
+                
+                <h4 class="section-title">Information Sharing</h4>
+                <p>We do not sell, trade, or transfer your personal information to external third parties except:</p>
+                <ul>
+                    <li>When we have your explicit consent</li>
+                    <li>With our partners to provide specific services</li>
+                    <li>To comply with legal requirements, enforce our policies, or protect others' rights and safety</li>
+                </ul>
+                
+                <h4 class="section-title">Cookie Usage</h4>
+                <p>We use cookies and similar technologies to enhance your browsing experience, analyze website traffic, and personalize content. You can control cookie usage through your browser settings.</p>
+                
+                <h4 class="section-title">Data Security</h4>
+                <p>We implement reasonable security measures to protect your personal information from unauthorized access, disclosure, alteration, and destruction.</p>
+                
+                <h4 class="section-title">Children's Privacy</h4>
+                <p>Our services are not directed at children under 13. We do not knowingly collect personal information from children under 13.</p>
+                
+                <h4 class="section-title">Policy Updates</h4>
+                <p>We may update this Privacy Policy from time to time. Updated policies will be posted on this page and, when necessary, we will notify you via email.</p>
+                
+                <h4 class="section-title">Contact Us</h4>
+                <p>If you have any questions about our Privacy Policy, please contact us:</p>
+                <p>Email: zitong.wang@ucdconnect.ie</p>
+                <p>Address: Dublin International College, 7th Floor, Building 4, Beijing University of Technology</p>
+            `
+        },
+        'terms': {
+            title: 'Terms of Use',
+            content: `
+                <p>Welcome to the Chinese Animal Guardians website. Please read these terms and conditions carefully. By using this website, you agree to be bound by these terms.</p>
+                
+                <h4 class="section-title">License to Use</h4>
+                <p>Chinese Animal Guardians grants you a limited license to access and use this website for personal, non-commercial purposes. This license does not include:</p>
+                <ul>
+                    <li>Modifying or copying our materials</li>
+                    <li>Using materials for any commercial purpose or public display</li>
+                    <li>Attempting to decompile or reverse engineer our software</li>
+                    <li>Removing any copyright or other proprietary notations</li>
+                    <li>Transferring materials to others or "mirroring" materials on other servers</li>
+                </ul>
+                <p>This license will automatically terminate if you violate any of these terms.</p>
+                
+                <h4 class="section-title">User Behavior</h4>
+                <p>When using this website, you agree to:</p>
+                <ul>
+                    <li>Provide accurate, current, and complete information</li>
+                    <li>Not infringe on others' rights, including privacy and intellectual property rights</li>
+                    <li>Not post illegal, threatening, abusive, defamatory, obscene, or otherwise objectionable content</li>
+                    <li>Not spread software viruses or other code that may harm others' computers</li>
+                    <li>Not interfere with the site's security features or misuse other users' personal information</li>
+                </ul>
+                
+                <h4 class="section-title">User Content</h4>
+                <p>When you submit, post, or display content (including comments, pictures, etc.), you grant us a non-exclusive, royalty-free, transferable license to use, copy, modify, publicly display, and distribute such content.</p>
+                
+                <h4 class="section-title">Disclaimer</h4>
+                <p>Website content is provided "as is" without any warranties, express or implied. We do not guarantee the accuracy, completeness, or reliability of the website.</p>
+                
+                <h4 class="section-title">Limitation of Liability</h4>
+                <p>In no event shall Chinese Animal Guardians, its officers, directors, and employees be liable for any damages (including but not limited to data loss, loss of profits, etc.) arising from the use or inability to use this website.</p>
+                
+                <h4 class="section-title">Links</h4>
+                <p>We have not reviewed all third-party websites linked to this site and are not responsible for their content. The inclusion of links does not imply our endorsement.</p>
+                
+                <h4 class="section-title">Governing Law</h4>
+                <p>These terms are governed by the laws of the People's Republic of China, and any disputes should be resolved through friendly negotiation.</p>
+                
+                <h4 class="section-title">Terms Modification</h4>
+                <p>We may modify these terms at any time. Continued use of the website indicates your acceptance of the modified terms.</p>
+                
+                <h4 class="section-title">Contact Us</h4>
+                <p>If you have any questions about these terms, please contact us:</p>
+                <p>Email: zitong.wang@ucdconnect.ie</p>
+                <p>Address: Dublin International College, 7th Floor, Building 4, Beijing University of Technology</p>
+            `
+        }
+    };
+
+    // 处理快速链接点击事件
+    document.addEventListener('DOMContentLoaded', function() {
+        // 隐私政策链接
+        document.getElementById('privacy-policy').addEventListener('click', function(e) {
+            e.preventDefault();
+            openPolicyModal('privacy');
+        });
+        
+        // 使用条款链接
+        document.getElementById('terms-of-use').addEventListener('click', function(e) {
+            e.preventDefault();
+            openPolicyModal('terms');
+        });
+    });
+
+    // 打开政策弹窗
+    function openPolicyModal(type) {
+        if (policyData[type]) {
+            document.getElementById('policyModalTitle').textContent = policyData[type].title;
+            document.getElementById('policyModalBody').innerHTML = policyData[type].content;
+            document.getElementById('policyModal').classList.add('active');
+            
+            // 重置复选框和按钮状态
+            document.getElementById('agreeCheckbox').checked = false;
+            document.getElementById('agreeButton').disabled = true;
+            document.getElementById('agreeButton').classList.remove('active');
+            
+            // 重置滚动位置到顶部
+            document.getElementById('policyModalBody').scrollTop = 0;
+            document.querySelector('.policy-modal .modal-content').scrollTop = 0;
+            
+            // 禁止背景滚动
+            document.body.style.overflow = 'hidden';
+        }
+    }
+
+    // 关闭政策弹窗
+    function closePolicyModal() {
+        document.getElementById('policyModal').classList.remove('active');
+        // 恢复背景滚动
+        document.body.style.overflow = 'auto';
+    }
+
+    // 切换同意按钮状态
+    function toggleAgreeButton() {
+        const checkbox = document.getElementById('agreeCheckbox');
+        const button = document.getElementById('agreeButton');
+        
+        if (checkbox.checked) {
+            button.disabled = false;
+            button.classList.add('active');
+        } else {
+            button.disabled = true;
+            button.classList.remove('active');
+        }
+    }
+
+    // 点击弹窗外部关闭
+    document.getElementById('policyModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closePolicyModal();
+        }
+});
+</script>
+</body>
+</html>
+
+
+
+
+
+
+
+

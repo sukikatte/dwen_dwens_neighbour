@@ -1,0 +1,480 @@
+{% extends "base.html" %}
+
+{% block title %}Room Page - Dwen Dwen's Neighbour{% endblock %}
+
+{% block head %}
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+  <style>
+    /* 游戏风格CSS */
+    body {
+      background-color: #F4F9FF;
+      background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%239BD4FF' fill-opacity='0.2'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+      font-family: 'Poppins', 'Arial Rounded MT Bold', sans-serif;
+    }
+
+    .game-container {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 30px;
+      background-color: rgba(255, 255, 255, 0.9);
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      border: 3px solid #6BBBFF;
+        margin-bottom: 60px;
+    }
+
+    .game-title {
+      color: #2196F3;
+      font-weight: bold;
+      text-align: center;
+      margin-bottom: 30px;
+      font-size: 2.5rem;
+      text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.1);
+      position: relative;
+    }
+
+    .game-title:after {
+      content: '';
+      position: absolute;
+      bottom: -10px;
+      left: 50%;
+      width: 100px;
+      height: 4px;
+      background: linear-gradient(90deg, #2196F3, #6EC6FF);
+      transform: translateX(-50%);
+      border-radius: 4px;
+    }
+
+    .create-btn {
+      background: linear-gradient(45deg, #FF9800, #FFBF69);
+      border: none;
+      border-radius: 12px;
+      padding: 12px 24px;
+      font-size: 1.1rem;
+      font-weight: bold;
+      color: white;
+      box-shadow: 0 4px 10px rgba(255, 152, 0, 0.3);
+      transition: all 0.3s ease;
+      display: block;
+      margin: 0 auto 30px;
+    }
+
+    .create-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 15px rgba(255, 152, 0, 0.4);
+      background: linear-gradient(45deg, #FF9800, #FFC107);
+    }
+
+    .create-btn:active {
+      transform: translateY(0);
+      box-shadow: 0 2px 5px rgba(255, 152, 0, 0.4);
+    }
+
+    .create-btn i {
+      margin-right: 8px;
+    }
+
+    .room-list-title {
+      color: #2196F3;
+      font-size: 1.8rem;
+      margin-bottom: 20px;
+      position: relative;
+      padding-left: 15px;
+    }
+
+    .room-list-title:before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 5px;
+      height: 25px;
+      background: #2196F3;
+      border-radius: 3px;
+    }
+
+    .room-card {
+      background: white;
+      border-radius: 15px;
+      padding: 15px;
+      margin-bottom: 15px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+      border: 2px solid #E3F2FD;
+      transition: all 0.3s ease;
+    }
+
+    .room-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+      border-color: #BBDEFB;
+    }
+
+    .room-name {
+      font-weight: bold;
+      font-size: 1.2rem;
+      color: #333;
+    }
+
+    .room-type {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 30px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      margin-left: 10px;
+    }
+
+    .room-public {
+      background-color: #E8F5E9;
+      color: #43A047;
+    }
+
+    .room-private {
+      background-color: #FFEBEE;
+      color: #E53935;
+    }
+
+    .avatar-list {
+      display: flex;
+      flex-wrap: wrap;
+      margin-top: 10px;
+      align-items: center;
+    }
+
+    .avatar-item {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      margin-right: 10px;
+      border: 2px solid white;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      transition: all 0.3s ease;
+      object-fit: cover;
+    }
+
+    .avatar-item:hover {
+      transform: scale(1.1);
+      z-index: 2;
+    }
+
+    .join-btn {
+      background: linear-gradient(45deg, #2196F3, #64B5F6);
+      border: none;
+      border-radius: 10px;
+      padding: 8px 20px;
+      color: white;
+      font-weight: 600;
+      box-shadow: 0 3px 8px rgba(33, 150, 243, 0.3);
+      transition: all 0.3s ease;
+    }
+
+    .join-btn:hover {
+      background: linear-gradient(45deg, #1E88E5, #42A5F5);
+      transform: translateY(-2px);
+      box-shadow: 0 5px 12px rgba(33, 150, 243, 0.4);
+    }
+
+    .join-btn:active {
+      transform: translateY(0);
+    }
+
+    .modal-content {
+      border-radius: 15px;
+      border: none;
+    }
+
+    .modal-header {
+      background: linear-gradient(45deg, #2196F3, #64B5F6);
+      color: white;
+      border-radius: 15px 15px 0 0;
+    }
+
+    .modal-title {
+      font-weight: bold;
+    }
+
+    .form-control {
+      border-radius: 10px;
+      border: 2px solid #E3F2FD;
+      padding: 12px 15px;
+    }
+
+    .form-control:focus {
+      border-color: #BBDEFB;
+      box-shadow: 0 0 0 0.2rem rgba(33, 150, 243, 0.25);
+    }
+
+    /* 玩家列表样式 */
+    .player-list {
+      list-style: none;
+      padding: 0;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 15px;
+    }
+
+    .player-item {
+      display: flex;
+      align-items: center;
+      background: #F5F5F5;
+      padding: 8px 15px;
+      border-radius: 30px;
+      transition: all 0.2s ease;
+    }
+
+    .player-item:hover {
+      background: #E3F2FD;
+    }
+
+    .player-avatar {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      margin-right: 10px;
+      border: 2px solid white;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    .player-name {
+      margin-right: 10px;
+    }
+
+    .badge-ready {
+      background: #4CAF50;
+    }
+
+    .badge-waiting {
+      background: #9E9E9E;
+    }
+
+    @media (max-width: 768px) {
+      .room-card {
+        flex-direction: column;
+      }
+
+      .avatar-list {
+        margin-bottom: 10px;
+      }
+    }
+  </style>
+{% endblock %}
+
+{% block content %}
+    <div class="container game-container mt-5">
+        <h1 class="game-title">Quizzes Game Room</h1>
+        <!-- Create Room Button -->
+        <button class="btn create-btn" id="createRoomBtn">
+            <i class="fas fa-plus-circle"></i>Create Room
+        </button>
+
+        <!-- Room Creation Modal -->
+        <div class="modal" tabindex="-1" id="createRoomModal">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Create a New Room</h5>
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="createRoomForm">
+                            <div class="form-group">
+                                <label for="roomName">Room Name</label>
+                                <input type="text" class="form-control" id="roomName" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="roomPassword">Room Password (Leave blank for public room)</label>
+                                <input type="password" class="form-control" id="roomPassword">
+                            </div>
+                            <div class="form-group">
+                                <label for="isPublic">Is Public</label>
+                                <input type="checkbox" id="isPublic">
+                            </div>
+                            <button type="submit" class="btn btn-primary">Create Room</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- List of Rooms -->
+        <div id="roomList" class="mt-4">
+            <h3 class="room-list-title">Available Rooms</h3>
+            <div id="roomListItems" class="list-group"></div>
+        </div>
+
+    </div>
+
+    <!-- jQuery, Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+{% endblock %}
+
+{% block scripts %}
+    <script>
+        // Open Create Room Modal
+        document.getElementById('createRoomBtn').addEventListener('click', function() {
+            $('#createRoomModal').modal('show');
+        });
+
+        // Handle Room Creation
+        document.getElementById('createRoomForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const roomName = document.getElementById('roomName').value;
+            const roomPassword = document.getElementById('roomPassword').value;
+            const isPublic = document.getElementById('isPublic').checked;
+
+            fetch('/create_room', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    room_name: roomName,
+                    room_password: roomPassword,
+                    is_public: isPublic
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    window.location.href = data.redirect_url;
+                    alert('Room created successfully');
+                    $('#createRoomModal').modal('hide');
+                } else {
+                    alert('Error creating room');
+                }
+            });
+        });
+
+ function fetchRooms() {
+            fetch('/get_rooms')
+            .then(response => response.json())
+            .then(data => {
+                const roomList = document.getElementById('roomListItems');
+                roomList.innerHTML = '';
+
+                data.rooms.forEach(room => {
+                    if (!room.room_id) {
+                        console.error("Error: room_id is undefined for a room.");
+                        return;
+                    }
+
+                    console.log("Fetched Room ID:", room.room_id); // 检查是否正确获取 room_id
+
+                    let playersHtml = Object.values(room.players).map(player => `
+                        <img src="${player.avatar}" class="avatar-item" alt="Player Avatar">
+                    `).join('');
+
+                    roomList.innerHTML += `
+                        <div class="room-card d-flex justify-content-between align-items-center">
+                            <div>
+                                <span class="room-name">${room.room_name}</span>
+                                <span class="room-type ${room.is_public ? 'room-public' : 'room-private'}">
+                                    ${room.is_public ? 'Public' : 'Private'}
+                                </span>
+                                <div class="avatar-list">${playersHtml}</div>
+                            </div>
+                            <button class="btn join-btn join-room-btn" data-room-id="${room.room_id}">
+                                <i class="fas fa-sign-in-alt mr-1"></i>Join
+                            </button>
+                        </div>
+                    `;
+                });
+
+                // 绑定 Join 按钮事件
+                document.querySelectorAll('.join-room-btn').forEach(button => {
+                    button.addEventListener('click', function() {
+                        const roomId = this.getAttribute('data-room-id');
+                        if (roomId) {
+                            joinRoom(roomId);
+                        } else {
+                            console.error("Error: No room_id found when clicking join button.");
+                        }
+                    });
+                });
+            });
+        }
+
+        function joinRoom(roomId) {
+
+            fetch(`/get_room/${roomId}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.status !== "success") {
+                    alert("Room not found.");
+                    return;
+                }
+
+                if (!data.room_data.is_public) {
+                    enterPasswordAndJoin(roomId);
+                } else {
+                    attemptJoin(roomId, '');
+                }
+            });
+        }
+
+        function enterPasswordAndJoin(roomId) {
+            let password = prompt("Enter room password:");
+            if (password === null) return;
+            attemptJoin(roomId, password);
+        }
+
+        function attemptJoin(roomId, password) {
+            fetch('/join_room', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ room_id: roomId, entered_password: password })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    window.location.href = data.redirect_url;
+                } else {
+                    alert(data.message);
+                    if (data.message === "Incorrect password") {
+                        enterPasswordAndJoin(roomId);
+                    }
+                }
+            });
+        }
+
+        setInterval(fetchRooms, 3000);
+
+        function fetchRoomDetails(roomId) {
+        fetch(`/get_room/${roomId}`).then(response => response.json()).then(data => {
+            if (data.status === "success") {
+                const playerList = document.getElementById('playerList');
+
+                let updatedHTML = '';
+                Object.values(data.room_data.players).forEach(player => {
+                    updatedHTML += `
+                        <li class="player-item">
+                            <img src="${player.avatar}" class="player-avatar">
+                            <span class="player-name">${player.username}</span>
+                            ${player.ready ?
+                                '<span class="badge badge-success badge-ready">Ready</span>' :
+                                '<span class="badge badge-secondary badge-waiting">Waiting</span>'
+                            }
+                        </li>
+                    `;
+                });
+
+                if (playerList.innerHTML !== updatedHTML) {
+                    playerList.innerHTML = updatedHTML;
+                }
+            }
+        });
+    }
+
+    fetchRooms();
+
+    setInterval(() => fetchRoomDetails('{{ room_id }}'), 3000);
+
+    </script>
+{% endblock %}

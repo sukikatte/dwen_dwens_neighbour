@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Knowledge - Dwen Dwen's Neighbour</title>
+
+  <!-- Google Fonts: Pacifico -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet"/>
+
+    <!-- Font Awesome 图标 -->
+  <link
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    rel="stylesheet"
+  />
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#2E8B57',
+            secondary: '#4CAF50',
+            en: '#1E90FF',  /* Endangered */
+            cr: '#DC143C',  /* Critically Endangered */
+            vu: '#FFD700',  /* Vulnerable */
+            nt: '#8A2BE2',  /* Near Threatened */
+            lc: '#228B22'   /* Least Concern */
+          },
+          borderRadius: {
+            'xl': '16px'
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    .nav-link {
+      position: relative;
+    }
+    .nav-link::after {
+      content: '';
+      position: absolute;
+      width: 0;
+      height: 2px;
+      bottom: -4px;
+      left: 50%;
+      background-color: #2E8B57;
+      transition: all 0.3s ease;
+      transform: translateX(-50%);
+    }
+    .nav-link:hover::after {
+      width: 100%;
+    }
+    .nav-link.active {
+      color: #2E8B57;
+    }
+    .nav-link.active::after {
+      width: 100%;
+    }
+  </style>
+</head>
+<body class="bg-gray-100">
+  <nav class="bg-white shadow-sm">
+    <div class="max-w-[1440px] mx-auto px-6 h-[60px] flex items-center justify-between">
+      <!-- 左侧：LOGO与标题 -->
+      <div class="flex items-center space-x-2">
+        <i class="fas fa-paw text-primary text-2xl flex justify-center items-center w-8 h-8"></i>
+        <span class="font-['Pacifico'] text-[20px] text-gray-800">
+          Dwen Dwen's Neighbor
+        </span>
+      </div>
+
+      <!-- 右侧：导航菜单 (大屏显示) -->
+      <div class="hidden md:flex items-center space-x-7">
+        <!-- 这里按你需求改路由、中文名或英文名都行 -->
+        <a href="/knowledge"
+           class="nav-link text-[16px] text-gray-800 hover:text-primary whitespace-nowrap">
+          Endangered Species
+        </a>
+        <a href="/sounds"
+           class="nav-link active text-[16px] text-gray-800 hover:text-primary whitespace-nowrap">
+           🎵🎧
+        </a>
+        <a href="/qna"
+           class="nav-link text-[16px] text-gray-800 hover:text-primary whitespace-nowrap">
+          Quizzes
+        </a>
+        <a href="/collection"
+           class="nav-link text-[16px] text-gray-800 hover:text-primary whitespace-nowrap">
+          Collection
+        </a>
+        <a href="/profile"
+           class="nav-link text-[16px] text-gray-800 hover:text-primary whitespace-nowrap">
+          Profile
+        </a>
+        <a href="/chat"
+           class="nav-link text-[16px] text-gray-800 hover:text-primary whitespace-nowrap">
+          Chat
+        </a>
+        <a href="/community"
+           class="nav-link text-[16px] text-gray-800 hover:text-primary whitespace-nowrap">
+          Community
+        </a>
+      </div>
+
+      <!-- 移动端折叠按钮 (小屏显示) -->
+      <button class="md:hidden flex items-center justify-center w-10 h-10 text-gray-800">
+        <i class="fas fa-bars text-xl"></i>
+      </button>
+    </div>
+  </nav>
+
+
+  <div class="max-w-[1440px] mx-auto p-6">
+
+    <!-- 搜索栏 -->
+    <div class="mb-4 flex items-center space-x-4">
+      <input type="text" id="searchInput" class="p-2 border border-gray-300 rounded-lg w-80" placeholder="搜索动物 (中/英文)">
+      <button onclick="fetchAnimals()" class="px-4 py-2 bg-green-600 text-white rounded-lg">搜索</button>
+    </div>
+
+    <!-- 分类按钮 -->
+    <div class="mb-4 flex space-x-2">
+      <button onclick="filterByType('ALL')" class="px-4 py-2 bg-gray-500 text-white rounded-lg">View All</button>
+      <button onclick="filterByType('EN')" class="px-4 py-2 bg-en text-white rounded-lg">Endangered (EN)</button>
+      <button onclick="filterByType('CR')" class="px-4 py-2 bg-cr text-white rounded-lg">Critically Endangered (CR)</button>
+      <button onclick="filterByType('VU')" class="px-4 py-2 bg-vu text-white rounded-lg">Vulnerable (VU)</button>
+      <button onclick="filterByType('NT')" class="px-4 py-2 bg-nt text-white rounded-lg">Near Threatened (NT)</button>
+      <button onclick="filterByType('LC')" class="px-4 py-2 bg-lc text-white rounded-lg">Least Concern (LC)</button>
+    </div>
+
+    <!-- 动物卡片展示区 -->
+    <div id="animalList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      <!-- 动物卡片将被 JavaScript 动态填充 -->
+    </div>
+
+  </div>
+<script src="https://code.responsivevoice.org/responsivevoice.js"></script>
+
+<script>
+  let selectedType = '';
+
+  function fetchAnimals() {
+    const query = document.getElementById("searchInput").value.trim();
+    console.log("搜索内容:", query);
+    console.log("筛选类型:", selectedType);
+
+    fetch(`/get_animal?search=${encodeURIComponent(query)}&type=${encodeURIComponent(selectedType)}`)
+            .then(response => response.json())
+            .then(data => {
+              console.log("API 返回的数据:", data);
+
+              if (data.status === "success") {
+                const animalList = document.getElementById("animalList");
+                animalList.innerHTML = "";
+
+                data.animals.forEach(animal => {
+                  console.log("处理动物:", animal);
+
+                  const cnName = animal.cn ? animal.cn : "未知"; // 确保 cn 不为空
+                  const categoryColor = getCategoryColor(animal.type);
+
+                  const card = document.createElement("div");
+                  card.className = "bg-white shadow-md rounded-xl overflow-hidden animal-card border-4 border-gray-300 p-4 relative";
+
+                  card.innerHTML = `
+            <img src="${animal.photo}" class="w-full h-56 object-cover rounded-lg" alt="${animal.name}">
+            <div class="mt-4">
+            <h3 class="text-xl font-bold cursor-pointer" onclick="playWord('${animal.name}', 'en')">${animal.name}</h3>
+            <p class="text-lg text-gray-700 mt-1 cursor-pointer" onclick="playWord('${cnName}', 'zh')">${cnName} </p>
+            <p class="text-gray-600 mt-2">地区: ${animal.area}</p>
+            <a href="/fetch-details/${animal.id}" class="block mt-3 text-blue-500 hover:underline">点击前往百科</a>
+            <button onclick="playSound('${animal.soundUrl}')" class="mt-2 px-4 py-2 bg-blue-600 text-white rounded-lg">
+            点击查看动物叫声
+            </button>
+            </div>
+            <div class="absolute bottom-4 right-4 w-8 h-8 rounded-full" style="background-color: ${categoryColor};"></div>
+            `;
+                  animalList.appendChild(card);
+                });
+              }
+            })
+            .catch(error => console.error("Error fetching animals:", error));
+  }
+
+  function playSound(url) {
+    if (!url || url === "undefined") {
+      console.error("音频 URL 为空或未定义");
+      return;
+    }
+
+    const fullUrl = window.location.origin + url;  // 确保 URL 是完整路径
+    console.log("播放音频 URL:", fullUrl);
+
+    const audio = new Audio(fullUrl);
+    audio.play().then(() => {
+      console.log("音频播放成功");
+    }).catch(error => {
+      console.error("音频播放失败:", error);
+    });
+  }
+
+  function filterByType(type) {
+    selectedType = type === 'ALL' ? '' : type;
+    fetchAnimals();
+  }
+
+  function getCategoryColor(type) {
+    switch (type) {
+      case 'EN':
+        return '#1E90FF'; // Endangered (🔵)
+      case 'CR':
+        return '#DC143C'; // Critically Endangered (🟥)
+      case 'VU':
+        return '#FFD700'; // Vulnerable (🟡)
+      case 'NT':
+        return '#8A2BE2'; // Near Threatened (🟣)
+      case 'LC':
+        return '#228B22'; // Least Concern (🟢)
+      default:
+        return '#A9A9A9'; // Default (🟠)
+    }
+  }
+
+  document.addEventListener("DOMContentLoaded", fetchAnimals);
+
+function playWord(word, lang) {
+  if (!word) return;
+
+  let voice = lang === "zh" ? "Chinese Female" : "UK English Female";
+
+  if (!responsiveVoice.voiceSupport()) {
+    console.error("语音合成不受支持");
+    return;
+  }
+
+  responsiveVoice.speak(word, voice, {
+    rate: 1,
+    pitch: 1
+  });
+}
+  </script>
+
+</body>
+</html>

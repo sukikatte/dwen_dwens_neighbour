@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ title }}</title>
+    <link rel="stylesheet" href="https://en.wikipedia.org/w/load.php?lang=en&modules=site.styles&only=styles&skin=vector">
+    <script src="https://en.wikipedia.org/w/load.php?lang=en&modules=startup&only=scripts&skin=vector"></script>
+    <style>/* 基本页面设置 */
+/* 基本页面设置 */
+body {
+    background: linear-gradient(135deg, #e0f7e9, #a8e6cf); /* 绿色渐变背景 */
+    color: #333;
+    font-family: 'Times New Roman', serif;
+    margin: 0;
+    padding: 0 20px;  /* 增加左右内边距 */
+}
+
+/* 内容容器，居中且带有阴影效果 */
+.container {
+    max-width: 960px;
+    margin: 40px auto;
+    background: #fff;
+    padding: 40px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+}
+
+/* 标题样式 */
+h1 {
+    font-size: 2.5em;
+    color: #06570a; /* 绿色调，呼应自然与环保 */
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+/* 段落样式，增强可读性 */
+p {
+    font-size: 1.1em;
+    line-height: 1.8;
+    margin-bottom: 20px;
+}
+
+/* 图片样式，响应式并增加圆角 */
+img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 20px auto;
+    border-radius: 8px;
+}
+
+/* 列表样式 */
+ul, ol {
+    margin: 20px;
+    padding-left: 40px;
+    line-height: 1.8;
+}
+
+/* 引用样式 */
+blockquote {
+    border-left: 5px solid #2e7d32;
+    padding-left: 15px;
+    margin: 20px 0;
+    font-style: italic;
+    background: #f1f8e9;
+}
+
+/* 链接样式 */
+a {
+    color: #1565c0;
+    text-decoration: none;
+    border-bottom: 1px solid #1565c0;
+}
+
+a:hover {
+    color: #0d47a1;
+    border-bottom-color: #0d47a1;
+}
+
+</style>
+
+</head>
+<body>
+    <h1>{{ title }}</h1>
+    {{ content | safe }}
+</body>
+</html>

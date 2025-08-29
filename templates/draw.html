@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Draw Cards - Dwen Dwen's Neighbour</title>
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    /* 全局样式 */
+    body {
+      background: linear-gradient(135deg, #f6f8f9 0%, #e9ecef 100%);
+      min-height: 100vh;
+      font-family: 'Poppins', sans-serif;
+      padding: 0;
+      margin: 0;
+      overflow-x: hidden;
+    }
+
+    /* 游戏容器 */
+    .game-wrapper {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 20px;
+      position: relative;
+    }
+
+    /* 游戏标题和用户信息布局 */
+    .header-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+      flex-wrap: wrap;
+    }
+
+    /* 游戏标题 */
+    .game-title {
+      text-align: left;
+      margin-bottom: 0;
+      position: relative;
+      flex: 1;
+      display: flex;
+      align-items: center;
+    }
+
+    .game-title h1 {
+      font-family: 'Pacifico', cursive;
+      font-size: 2.5rem;
+      color: #333;
+      margin-bottom: 0;
+      margin-right: 15px;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .game-title p {
+      font-size: 1rem;
+      color: #666;
+      max-width: 400px;
+      margin: 0;
+      padding-left: 15px;
+      border-left: 2px solid #eee;
+    }
+
+    /* 用户信息区 */
+    .user-info {
+      display: flex;
+      align-items: center;
+      background: white;
+      padding: 10px 20px;
+      border-radius: 50px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+      margin-left: 20px;
+    }
+
+    .user-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin-right: 10px;
+      border: 2px solid #fff;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    .user-name {
+      font-weight: 600;
+      color: #333;
+      margin-right: 10px;
+      font-size: 0.9rem;
+    }
+
+    .user-score {
+      background: linear-gradient(135deg, #ffd700, #ff8c00);
+      color: white;
+      padding: 3px 12px;
+      border-radius: 20px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      font-size: 0.9rem;
+    }
+
+    /* 开始游戏按钮 */
+    .start-btn {
+      background: linear-gradient(135deg, #ffd700, #ff8c00);
+      color: white;
+      border: none;
+      padding: 12px 30px;
+      border-radius: 50px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      box-shadow: 0 10px 20px rgba(255, 215, 0, 0.3);
+      transition: all 0.3s ease;
+      display: block;
+      margin: 30px auto;
+      cursor: pointer;
+    }
+
+    .start-btn:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 25px rgba(255, 215, 0, 0.4);
+    }
+
+    .start-btn i {
+      margin-right: 10px;
+    }
+
+    /* 游戏区域 */
+    .game-container {
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+      padding: 20px;
+      margin-top: 15px;
+      display: none;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .game-instruction {
+      font-size: 1.5rem;
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: 20px;
+      color: #333;
+      position: relative;
+      padding-bottom: 10px;
+    }
+
+    .game-instruction::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 80%;
+      height: 3px;
+      background: linear-gradient(90deg, #ffd700, #ff8c00);
+      border-radius: 3px;
+    }
+
+    .game-tip {
+      font-size: 1rem;
+      color: #666;
+      text-align: center;
+      margin-bottom: 30px;
+      font-style: italic;
+    }
+
+    /* 倒计时显示 */
+    .countdown-container {
+      text-align: center;
+      margin-bottom: 20px;
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: #ff8c00;
+    }
+
+    .countdown {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #ff8c00;
+      animation: pulse 1s infinite;
+    }
+
+    /* 卡牌网格 */
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin: 0 auto;
+      max-width: 600px;
+    }
+
+    /* 卡牌样式 */
+    .card {
+      position: relative;
+      width: 100%;
+      padding-top: 100%;
+      cursor: pointer;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      background: linear-gradient(135deg, #ffd700, #ff8c00);
+      transition: transform 0.6s;
+    }
+
+    .card img {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 10px;
+    }
+
+    .hidden {
+      visibility: hidden;
+    }
+
+    /* 信息面板 */
+    .info-panel {
+      margin-top: 20px;
+      font-size: 1.2rem;
+      text-align: center;
+      color: #666;
+    }
+
+    /* 按钮面板 */
+    .button-container {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      margin-top: 30px;
+    }
+
+    .control-btn {
+      padding: 10px 25px;
+      border-radius: 50px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      border: none;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+
+    .restart-btn {
+      background: linear-gradient(135deg, #ffd700, #ff8c00);
+      color: white;
+      box-shadow: 0 5px 15px rgba(255, 215, 0, 0.3);
+    }
+
+    .restart-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(255, 215, 0, 0.4);
+    }
+
+    .end-btn {
+      background: white;
+      color: #333;
+      border: 2px solid #eee;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    }
+
+    .end-btn:hover {
+      background: #f8f9fa;
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+    }
+
+    /* 结果消息 */
+    .result-message {
+      text-align: center;
+      font-size: 1.3rem;
+      font-weight: 600;
+      margin: 20px 0;
+      min-height: 40px;
+      transition: all 0.3s ease;
+    }
+
+    .result-message.correct {
+      color: #4CAF50;
+      animation: fadeInUp 0.5s ease;
+    }
+
+    .result-message.incorrect {
+      color: #F44336;
+      animation: fadeInUp 0.5s ease;
+    }
+
+    /* 动画效果 */
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+      20%, 40%, 60%, 80% { transform: translateX(5px); }
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    @keyframes shuffle {
+      0% { transform: translate(0, 0) rotate(0deg); }
+      25% { transform: translate(10px, -10px) rotate(5deg); }
+      50% { transform: translate(-5px, 5px) rotate(-5deg); }
+      75% { transform: translate(-10px, -5px) rotate(3deg); }
+      100% { transform: translate(0, 0) rotate(0deg); }
+    }
+
+    /* 得分动画 */
+    .score-animation {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 3rem;
+      font-weight: 700;
+      color: #4CAF50;
+      pointer-events: none;
+      animation: floatUp 1s ease-out forwards;
+      z-index: 1000;
+    }
+
+    @keyframes floatUp {
+      0% {
+        opacity: 1;
+        transform: translate(-50%, -50%);
+      }
+      100% {
+        opacity: 0;
+        transform: translate(-50%, -100%);
+      }
+    }
+
+    /* 背景装饰 */
+    .bg-decoration {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      overflow: hidden;
+    }
+
+    .bg-circle {
+      position: absolute;
+      border-radius: 50%;
+      opacity: 0.1;
+    }
+
+    .bg-circle:nth-child(1) {
+      width: 300px;
+      height: 300px;
+      background: linear-gradient(135deg, #ffd700, #ff8c00);
+      top: -100px;
+      right: -100px;
+    }
+
+    .bg-circle:nth-child(2) {
+      width: 200px;
+      height: 200px;
+      background: linear-gradient(135deg, #ffeb3b, #ff9800);
+      bottom: -50px;
+      left: -50px;
+    }
+
+    .bg-circle:nth-child(3) {
+      width: 150px;
+      height: 150px;
+      background: linear-gradient(135deg, #ffd700, #ff8c00);
+      top: 50%;
+      right: 10%;
+    }
+
+    /* 响应式调整 */
+    @media (max-width: 768px) {
+      .header-container {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .user-info {
+        margin-left: 0;
+        margin-top: 15px;
+      }
+
+      .game-title h1 {
+        font-size: 2rem;
+      }
+
+      .card-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+    
+    /* 返回按钮样式 */
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      padding: 8px 15px;
+      background: white;
+      border-radius: 50px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      color: #333;
+      font-weight: 500;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      margin-right: 15px;
+      height: fit-content;
+    }
+
+    .back-btn:hover {
+      transform: translateX(-5px);
+      box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+      color: #ff8c00;
+    }
+
+    .back-btn i {
+      margin-right: 8px;
+      font-size: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <!-- 背景装饰 -->
+  <div class="bg-decoration">
+    <div class="bg-circle"></div>
+    <div class="bg-circle"></div>
+    <div class="bg-circle"></div>
+  </div>
+
+  <!-- 游戏主体 -->
+  <div class="game-wrapper">
+    <!-- 游戏标题和用户信息 -->
+    <div class="header-container">
+      <div class="game-title">
+        <!-- 返回按钮 -->
+        <a href="/qna" class="back-btn">
+          <i class="fas fa-arrow-left"></i>
+          <span>Return</span>
+        </a>
+        <h1>Concentration</h1>
+        <p>Match the animal cards to earn points!</p>
+      </div>
+
+      <div class="user-info">
+        <img class="user-avatar" src="{{ user_info['avatar'] }}" alt="User Avatar">
+        <span class="user-name">{{ user_info['display_name'] }}</span>
+        <div class="user-score">
+          <i class="fas fa-star"></i>
+          <span id="user-score">{{ user_info['score'] }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 开始游戏按钮 -->
+    <button class="start-btn" id="start-game-btn">
+      <i class="fas fa-play"></i> Start Game
+    </button>
+
+    <!-- 游戏区域 -->
+    <div class="game-container" id="game-container">
+      <div class="game-instruction" id="game-instruction">Match the animal cards to earn points!</div>
+      <div class="game-tip">You will have 10 seconds to memorize the cards before they flip.</div>
+
+      <!-- 倒计时显示 -->
+      <div class="countdown-container" id="countdown-container" style="display: none;">
+        <span>Time to memorize: </span>
+        <span class="countdown" id="countdown">10</span>
+        <span> seconds</span>
+      </div>
+
+      <!-- 信息面板 -->
+      <div class="info-panel">
+        Flips: <span id="flip-count">0</span>
+      </div>
+
+      <!-- 卡牌网格 -->
+      <div class="card-grid mt-3" id="card-grid">
+        <!-- 动态生成卡牌 -->
+      </div>
+
+      <!-- 游戏反馈 -->
+      <div class="result-message" id="result-message"></div>
+
+      <!-- 按钮 -->
+      <div class="button-container">
+        <button id="restart-game" class="control-btn restart-btn">New Game</button>
+        <button id="end-game" class="control-btn end-btn">End Game</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- jQuery, Bootstrap JS -->
+  <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+  <script>
+    let cards = [];       // 存放8张卡牌信息（包括 animal 对象）
+    let firstCard = null; // 第一次点击的卡牌
+    let secondCard = null;// 第二次点击的卡牌
+    let flipCount = 0;    // 翻牌次数计数器
+    let lockBoard = false;// 防止连续点击
+    let matchesFound = 0; // 匹配成功的组数
+    let countdownInterval; // 倒计时定时器
+
+    // 随机打乱数组
+    function shuffle(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+      return array;
+    }
+
+    // 从后端获取动物数据并随机选取4个动物
+    function loadCards() {
+      $.ajax({
+        url: '/get_animals',
+        type: 'GET',
+        success: function(response) {
+          if(response.status === "success" && response.animals.length > 0) {
+            // 随机选取4个动物（确保数量足够）
+            let animals = response.animals;
+            animals = shuffle(animals);
+            let selected = animals.slice(0, 4);
+
+            // 每个动物生成2张卡牌
+            cards = [];
+            selected.forEach(animal => {
+              cards.push({
+                id: animal.id,
+                img: animal.photo,
+                name: animal.name
+              });
+              cards.push({
+                id: animal.id,
+                img: animal.photo,
+                name: animal.name
+              });
+            });
+            // 打乱卡牌顺序
+            cards = shuffle(cards);
+            renderCards(true);
+
+            // 开始倒计时
+            startCountdown();
+          }
+        },
+        error: function(err) {
+          console.error("Error loading animals", err);
+        }
+      });
+    }
+
+    // 渲染卡牌至页面
+    // showImage 为 true 时显示动物图片（用于游戏初始预览）
+    function renderCards(showImage = false) {
+      const grid = $("#card-grid");
+      grid.empty();
+      cards.forEach((card, index) => {
+        // 默认显示图片或隐藏图片，根据参数
+        const cardElement = $(`
+          <div class="card" data-index="${index}">
+            <img src="${card.img}" class="${showImage ? '' : 'hidden'}" alt="${card.name}">
+          </div>
+        `);
+        grid.append(cardElement);
+      });
+    }
+
+    // 开始倒计时
+    function startCountdown() {
+      let timeLeft = 10;
+      $("#countdown-container").show();
+      $("#countdown").text(timeLeft);
+      
+      countdownInterval = setInterval(() => {
+        timeLeft--;
+        $("#countdown").text(timeLeft);
+        
+        if (timeLeft <= 0) {
+          clearInterval(countdownInterval);
+          $("#countdown-container").hide();
+          // 翻转所有卡牌
+          flipAllCards();
+        }
+      }, 1000);
+    }
+
+    // 翻转所有卡牌
+    function flipAllCards() {
+      $(".card").each(function() {
+        const card = $(this);
+        if (!card.data('matched')) {
+          card.find('img').addClass('hidden');
+        }
+      });
+    }
+
+    // 翻牌逻辑：给卡牌增加翻转效果，并显示图片
+    function flipCard(cardElement) {
+      cardElement.find('img').removeClass('hidden');
+      return cardElement;
+    }
+
+    // 点击卡牌事件处理
+    $("#card-grid").on('click', '.card', function() {
+      // 如果在记牌时间内，不允许翻牌
+      if ($("#countdown-container").is(":visible")) return;
+      
+      if (lockBoard) return;
+      const clickedCard = $(this);
+      // 如果已经匹配，则不响应点击
+      if (clickedCard.data('matched')) return;
+      // 若当前卡牌未翻开，则执行翻转
+      if (clickedCard.find('img').hasClass('hidden')) {
+        flipCard(clickedCard);
+        flipCount++;
+        $("#flip-count").text(flipCount);
+      }
+
+      if (!firstCard) {
+        firstCard = clickedCard;
+      } else if (firstCard && !secondCard && clickedCard[0] !== firstCard[0]) {
+        secondCard = clickedCard;
+        lockBoard = true;
+        // 比较两张卡牌是否匹配
+        const firstIndex = firstCard.data('index');
+        const secondIndex = secondCard.data('index');
+        if (cards[firstIndex].id === cards[secondIndex].id) {
+          // 匹配成功，保持翻开状态
+          firstCard.data('matched', true);
+          secondCard.data('matched', true);
+          matchesFound++;
+          
+          // 显示匹配成功消息
+          $("#result-message").text("Match Found!").addClass('correct').removeClass('incorrect');
+          
+          // 创建得分动画
+          createScoreAnimation();
+          
+          // 调用后端接口为用户加分
+          $.ajax({
+            url: '/add_score',
+            type: 'POST',
+            success: function(res) {
+              if(res.status === "success") {
+                // 更新用户分数显示
+                $("#user-score").text(res.score);
+              }
+            }
+          });
+          
+          resetTurn();
+          // 检查游戏是否结束
+          if (matchesFound === 4) {
+            setTimeout(() => {
+              $("#result-message").text("Congratulations! Game Complete!").addClass('correct');
+            }, 500);
+          }
+        } else {
+          // 不匹配，等待1秒后翻回蓝牌背
+          $("#result-message").text("No match, try again!").addClass('incorrect').removeClass('correct');
+          setTimeout(() => {
+            firstCard.find('img').addClass('hidden');
+            secondCard.find('img').addClass('hidden');
+            resetTurn();
+          }, 1000);
+        }
+      }
+    });
+
+    // 创建得分动画
+    function createScoreAnimation() {
+      const $scoreAnim = $('<div class="score-animation">+1</div>');
+      $('body').append($scoreAnim);
+      
+      // 动画结束后移除元素
+      setTimeout(function() {
+        $scoreAnim.remove();
+      }, 1000);
+    }
+
+    // 重置点击状态
+    function resetTurn() {
+      [firstCard, secondCard] = [null, null];
+      lockBoard = false;
+    }
+
+    // 游戏初始化
+    function startGame() {
+      flipCount = 0;
+      matchesFound = 0;
+      $("#flip-count").text(flipCount);
+      $("#result-message").text("");
+      // 初始加载时显示动物图片（预览效果）
+      loadCards();
+      $("#game-container").show();
+    }
+
+    // 开始游戏按钮点击事件
+    $("#start-game-btn").click(function() {
+      $(this).fadeOut(300, function() {
+        startGame();
+      });
+    });
+
+    // 重新开始游戏
+    $("#restart-game").click(function() {
+      firstCard = null;
+      secondCard = null;
+      lockBoard = false;
+      flipCount = 0;
+      matchesFound = 0;
+      $("#flip-count").text(flipCount);
+      $("#result-message").text("");
+      loadCards();
+    });
+
+    // 结束游戏
+    $("#end-game").click(function() {
+      location.href = "/qna";
+    });
+  </script>
+</body>
+</html>
