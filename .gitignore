@@ -137,3 +137,21 @@ dmypy.json
 .Trashes
 ehthumbs.db
 Thumbs.db
+
+# Firebase and Google Cloud credentials
+*.json
+firebase-adminsdk-*.json
+*firebase-adminsdk*.json
+service-account*.json
+credentials.json
+
+# Environment variables
+.env
+.env.local
+.env.production
+.env.staging
+
+# API keys and secrets
+config/secrets.py
+secrets.py
+api_keys.py
