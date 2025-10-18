@@ -436,14 +436,11 @@
 {% block scripts %}
 
   <script type="text/javascript">
-    // 基于准备好的dom，初始化echarts图表
     var myChart = echarts.init(document.getElementById('chart'));
 
-    // 从 Flask 传递过来的省份地图数据 URL
     var provinces = {{ provinces | tojson }};
     var chinaMapUrl = "{{ china_map_url }}";
 
-    // 加载中国地图数据
     $.get(chinaMapUrl, function(chinaJson) {
       echarts.registerMap('china', chinaJson);
 
